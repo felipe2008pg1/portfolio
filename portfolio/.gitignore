@@ -1,9 +1,9 @@
-# Ambiente / segredos
+# Environment
 backend/.env
 *.env
 !.env.example
 
-# Banco de dados
+# Database
 backend/*.db
 backend/*.sqlite3
 
