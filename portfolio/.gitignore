@@ -1,0 +1,27 @@
+# Ambiente / segredos
+backend/.env
+*.env
+!.env.example
+
+# Banco de dados
+backend/*.db
+backend/*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Logs
+*.log
+backend/logs/
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Alembic
+backend/alembic/__pycache__/
