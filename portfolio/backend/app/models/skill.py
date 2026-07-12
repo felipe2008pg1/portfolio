@@ -1,8 +1,6 @@
 from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column
-
 from app.db.base import Base
-
 
 class Skill(Base):
     __tablename__ = "skills"

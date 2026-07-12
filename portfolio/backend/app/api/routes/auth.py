@@ -2,17 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
-
 from app.api.deps import get_db, get_current_admin
 from app.core.config import get_settings
 from app.core.security import create_access_token
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.services.auth_service import authenticate_admin
-
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
 limiter = Limiter(key_func=get_remote_address)
-
 
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit(settings.RATE_LIMIT_LOGIN)
@@ -38,12 +35,10 @@ def login(request: Request, response: Response, payload: LoginRequest, db: Sessi
     )
     return TokenResponse()
 
-
 @router.post("/logout")
 def logout(response: Response):
     response.delete_cookie(key="access_token", path="/")
     return {"message": "logout efetuado"}
-
 
 @router.get("/me")
 def me(username: str = Depends(get_current_admin)):

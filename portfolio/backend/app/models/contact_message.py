@@ -1,10 +1,7 @@
 from datetime import datetime, timezone
-
 from sqlalchemy import String, Text, DateTime, Integer
 from sqlalchemy.orm import Mapped, mapped_column
-
 from app.db.base import Base
-
 
 class ContactMessage(Base):
     __tablename__ = "contact_messages"

@@ -3,7 +3,6 @@ from sqlalchemy import String, Text, DateTime, Integer, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
-
 class Project(Base):
     __tablename__ = "projects"
 
