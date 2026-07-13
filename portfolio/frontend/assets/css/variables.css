@@ -1,0 +1,57 @@
+:root {
+  /* Colors — "record system" palette: blue-grey + teal + amber */
+  --color-ink: #101820;
+  --color-ink-soft: #182430;
+  --color-paper: #EEF1F6;
+  --color-paper-raised: #FFFFFF;
+  --color-teal: #1F6F78;
+  --color-teal-strong: #16535A;
+  --color-amber: #B8722E;
+  --color-amber-strong: #965E24;
+  --color-text: #17202B;
+  --color-text-muted: #5B6472;
+  --color-text-on-ink: #EAEFF3;
+  --color-text-on-ink-muted: #9BA8B5;
+  --color-border: #D7DCE3;
+  --color-border-on-ink: #2B3946;
+  --color-success: #2F7D5C;
+  --color-danger: #B3432E;
+
+  /* typography */
+  --font-display: "Space Grotesk", "IBM Plex Sans", sans-serif;
+  --font-body: "IBM Plex Sans", -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-md: 1.125rem;
+  --fs-lg: 1.375rem;
+  --fs-xl: 1.875rem;
+  --fs-2xl: 2.5rem;
+  --fs-3xl: 3.5rem;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --space-10: 4rem;
+  --space-12: 6rem;
+  --space-16: 8rem;
+
+  /* Layout */
+  --container-max: 1180px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --border-w: 1px;
+
+  --shadow-card: 0 1px 2px rgba(16, 24, 32, 0.06), 0 4px 16px rgba(16, 24, 32, 0.06);
+  --shadow-panel: 0 8px 40px rgba(0, 0, 0, 0.35);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+}
