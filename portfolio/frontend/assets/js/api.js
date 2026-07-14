@@ -1,7 +1,7 @@
 /**
 * Fetch wrapper. It never exposes internal error details to the end user —
 * it only passes along the controlled message that the backend has already sanitized.
- */
+*/
 async function apiRequest(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,

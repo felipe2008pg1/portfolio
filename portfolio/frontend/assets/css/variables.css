@@ -1,5 +1,5 @@
 :root {
-  /* Colors — "record system" palette: blue-grey + teal + amber */
+  /* Colors — "record system" palette: blue-gray graphite + teal + amber */
   --color-ink: #101820;
   --color-ink-soft: #182430;
   --color-paper: #EEF1F6;
@@ -17,7 +17,6 @@
   --color-success: #2F7D5C;
   --color-danger: #B3432E;
 
-  /* typography */
   --font-display: "Space Grotesk", "IBM Plex Sans", sans-serif;
   --font-body: "IBM Plex Sans", -apple-system, sans-serif;
   --font-mono: "IBM Plex Mono", "Courier New", monospace;
@@ -31,7 +30,6 @@
   --fs-2xl: 2.5rem;
   --fs-3xl: 3.5rem;
 
-  /* Spacing */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -43,15 +41,33 @@
   --space-12: 6rem;
   --space-16: 8rem;
 
-  /* Layout */
   --container-max: 1180px;
   --radius-sm: 4px;
   --radius-md: 8px;
   --border-w: 1px;
 
-  --shadow-card: 0 1px 2px rgba(16, 24, 32, 0.06), 0 4px 16px rgba(16, 24, 32, 0.06);
+  --shadow-card: 0 1px 2px rgba(16, 24, 32, 0.06),
+                 0 4px 16px rgba(16, 24, 32, 0.06);
   --shadow-panel: 0 8px 40px rgba(0, 0, 0, 0.35);
+
+  --color-header-bg: rgba(255, 255, 255, 0.88);
 
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
+}
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] {
+  --color-paper: #0D1319;
+  --color-paper-raised: #141C24;
+  --color-text: #EAEFF3;
+  --color-text-muted: #9BA8B5;
+  --color-border: #26323D;
+  --color-teal: #35939D;
+  --color-teal-strong: #4AACB6;
+  --color-amber: #D08A42;
+  --color-amber-strong: #E29C54;
+  --color-header-bg: rgba(13, 19, 25, 0.88);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5),
+                 0 4px 20px rgba(0, 0, 0, 0.4);
 }

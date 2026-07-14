@@ -144,7 +144,7 @@ h1, h2, h3 {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(238, 241, 246, 0.88);
+  background: var(--color-header-bg);
   backdrop-filter: blur(8px);
   border-bottom: var(--border-w) solid var(--color-border);
 }
@@ -678,4 +678,54 @@ h1, h2, h3 {
 
 .footer-links a:hover {
   color: var(--color-teal);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.nav-utility {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.lang-toggle {
+  display: flex;
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  font-family: var(--font-mono);
+}
+
+.lang-toggle button {
+  padding: 6px 10px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.lang-toggle button.is-active {
+  background: var(--color-teal);
+  color: #FFFFFF;
+}
+
+.theme-toggle {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  transition: border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-teal);
 }

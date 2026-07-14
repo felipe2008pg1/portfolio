@@ -28,28 +28,28 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     if (payload.website.length > 0) {
-      showStatus("Mensagem enviada! Você será redirecionado ao WhatsApp.", "success");
+      showStatus(i18n.t("contact.successSent"), "success");
       form.reset();
       return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = "Enviando…";
+    submitBtn.textContent = i18n.t("contact.submitting");
     statusEl.className = "form-status";
 
     try {
       const result = await api.sendContact(payload);
-      showStatus("Mensagem enviada! Abrindo o WhatsApp…", "success");
+      showStatus(i18n.t("contact.successOpening"), "success");
       form.reset();
 
       const whatsappWindow = window.open(result.whatsapp_url, "_blank", "noopener,noreferrer");
       if (!whatsappWindow) {
-        showStatus("Mensagem enviada! Clique para abrir o WhatsApp.", "success");
+        showStatus(i18n.t("contact.successManual"), "success");
         const link = document.createElement("a");
         link.href = result.whatsapp_url;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
-        link.textContent = "Abrir WhatsApp";
+        link.textContent = i18n.t("contact.openWhatsapp");
         link.className = "btn btn-primary";
         link.style.marginTop = "12px";
         statusEl.appendChild(document.createElement("br"));
@@ -57,13 +57,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       if (error.status === 429) {
-        showStatus("Muitas tentativas. Aguarde um pouco antes de enviar novamente.", "error");
+        showStatus(i18n.t("contact.errorRateLimit"), "error");
       } else {
-        showStatus(error.message || "Não foi possível enviar. Tente novamente.", "error");
+        showStatus(error.message || i18n.t("contact.errorGeneric"), "error");
       }
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = "Enviar via WhatsApp";
+      submitBtn.textContent = i18n.t("contact.submit");
     }
   });
 });

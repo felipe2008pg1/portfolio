@@ -18,15 +18,25 @@ from app.models.skill import Skill
 settings = get_settings()
 
 SKILLS_SEED = [
-    ("Backend", "Python", 0),
-    ("Frontend", "JavaScript", 0),
-    ("Frontend", "HTML", 1),
-    ("Frontend", "CSS", 2),
-    ("Database", "SQLite", 0),
-    ("Database", "MySQL", 1),
-    ("Database", "PostgreSQL", 2),
-    ("Automation", "Pandas", 0),
+    ("Languages", "Python", 0),
+    ("Languages", "JavaScript", 1),
+    ("Languages", "HTML", 2),
+    ("Languages", "CSS", 3),
+    ("Databases", "MySQL", 0),
+    ("Databases", "PostgreSQL", 1),
+    ("Databases", "SQLite", 2),
+    ("Data", "Pandas", 0),
+    ("Data", "BeautifulSoup", 1),
+    ("Frameworks", "Flask", 0),
+    ("APIs", "FastAPI", 0),
+    ("Tools", "Git", 0),
+    ("Tools", "GitHub", 1),
+    ("Tools", "VS Code", 2),
+    ("Tools", "Vercel", 3),
+    ("Tools", "Render", 4),
+    ("Tools", "Supabase", 5),
 ]
+
 
 def run() -> None:
     Base.metadata.create_all(bind=engine)
@@ -78,6 +88,7 @@ def run() -> None:
 
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     run()
