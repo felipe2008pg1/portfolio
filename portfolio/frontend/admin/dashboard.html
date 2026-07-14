@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin — Dashboard</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../assets/css/reset.css">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+
+  <script src="../assets/js/theme.js"></script>
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <span class="admin-header-title">felipe<span style="color: var(--color-teal);">.dev</span> / admin</span>
+      <div style="display:flex; align-items:center; gap: var(--space-4);">
+        <div class="lang-toggle" role="group" aria-label="Idioma / Language">
+          <button type="button" data-lang="pt">PT</button>
+          <button type="button" data-lang="en">EN</button>
+        </div>
+        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Alternar tema" aria-pressed="false">
+          <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+        </button>
+        <button class="btn btn-outline btn-sm" id="logoutBtn">Sair</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <div class="admin-alert" id="globalAlert" role="alert"></div>
+
+      <section class="admin-section">
+        <div class="admin-section-head">
+          <h2 class="section-title" style="font-size: var(--fs-lg);">Projetos</h2>
+          <button class="btn btn-primary btn-sm" id="newProjectBtn">+ Novo projeto</button>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr><th>Título</th><th>Stack</th><th>Publicado</th><th>Ações</th></tr>
+          </thead>
+          <tbody id="projectsTableBody">
+            <tr class="admin-empty-row"><td colspan="4">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="admin-section">
+        <div class="admin-section-head">
+          <h2 class="section-title" style="font-size: var(--fs-lg);">Skills</h2>
+          <button class="btn btn-primary btn-sm" id="newSkillBtn">+ Nova skill</button>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr><th>Categoria</th><th>Nome</th><th>Ordem</th><th>Ações</th></tr>
+          </thead>
+          <tbody id="skillsTableBody">
+            <tr class="admin-empty-row"><td colspan="4">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <div class="admin-modal-overlay" id="projectModalOverlay">
+    <div class="admin-modal">
+      <div class="admin-modal-head">
+        <h3 id="projectModalTitle">Novo projeto</h3>
+        <button class="admin-modal-close" data-close-modal="project">&times;</button>
+      </div>
+      <div class="admin-alert" id="projectFormAlert" role="alert"></div>
+      <form id="projectForm" novalidate>
+        <input type="hidden" id="projectId">
+        <div class="form-field">
+          <label for="projectTitle">Título</label>
+          <input type="text" id="projectTitle" required minlength="1" maxlength="120">
+        </div>
+        <div class="form-field">
+          <label for="projectDescription">Descrição</label>
+          <textarea id="projectDescription" required minlength="1" maxlength="2000"></textarea>
+        </div>
+        <div class="form-field">
+          <label for="projectStack">Stack (separada por vírgula)</label>
+          <input type="text" id="projectStack" required minlength="1" maxlength="255" placeholder="Python, FastAPI, SQLite">
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="projectRepoUrl">URL do repositório (opcional)</label>
+            <input type="url" id="projectRepoUrl" maxlength="500" placeholder="https://github.com/...">
+          </div>
+          <div class="form-field">
+            <label for="projectDemoUrl">URL da demo (opcional)</label>
+            <input type="url" id="projectDemoUrl" maxlength="500" placeholder="https://...">
+          </div>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="projectPublished" checked>
+          <label for="projectPublished">Publicado (visível no site)</label>
+        </div>
+        <div class="admin-form-actions">
+          <button type="button" class="btn btn-outline" data-close-modal="project">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="projectSubmitBtn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="admin-modal-overlay" id="skillModalOverlay">
+    <div class="admin-modal">
+      <div class="admin-modal-head">
+        <h3 id="skillModalTitle">Nova skill</h3>
+        <button class="admin-modal-close" data-close-modal="skill">&times;</button>
+      </div>
+      <div class="admin-alert" id="skillFormAlert" role="alert"></div>
+      <form id="skillForm" novalidate>
+        <input type="hidden" id="skillId">
+        <div class="form-field">
+          <label for="skillCategory">Categoria</label>
+          <input type="text" id="skillCategory" required minlength="1" maxlength="64" placeholder="Linguagens">
+        </div>
+        <div class="form-field">
+          <label for="skillName">Nome</label>
+          <input type="text" id="skillName" required minlength="1" maxlength="64" placeholder="Python">
+        </div>
+        <div class="form-field">
+          <label for="skillOrder">Ordem de exibição</label>
+          <input type="number" id="skillOrder" min="0" max="9999" value="0">
+        </div>
+        <div class="admin-form-actions">
+          <button type="button" class="btn btn-outline" data-close-modal="skill">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="skillSubmitBtn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/i18n.js"></script>
+  <script src="assets/js/admin-api.js"></script>
+  <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

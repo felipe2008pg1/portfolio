@@ -75,6 +75,16 @@ const TRANSLATIONS = {
     "footer.contact": "Contato",
 
     "theme.toggleLabel": "Alternar tema",
+
+    "admin.login.title": "Entrar",
+    "admin.login.username": "Usuário",
+    "admin.login.password": "Senha",
+    "admin.login.submit": "Entrar",
+    "admin.login.submitting": "Entrando…",
+    "admin.login.errorFields": "Preencha usuário e senha.",
+    "admin.login.errorRateLimit": "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
+    "admin.login.errorGeneric": "Usuário ou senha inválidos.",
+    "admin.login.errorNetwork": "Não foi possível conectar ao servidor. Verifique se o backend está rodando e o CORS liberado.",
   },
 
   en: {
@@ -153,6 +163,16 @@ const TRANSLATIONS = {
     "footer.contact": "Contact",
 
     "theme.toggleLabel": "Toggle theme",
+
+    "admin.login.title": "Sign in",
+    "admin.login.username": "Username",
+    "admin.login.password": "Password",
+    "admin.login.submit": "Sign in",
+    "admin.login.submitting": "Signing in…",
+    "admin.login.errorFields": "Fill in username and password.",
+    "admin.login.errorRateLimit": "Too many attempts. Wait a few minutes before trying again.",
+    "admin.login.errorGeneric": "Invalid username or password.",
+    "admin.login.errorNetwork": "Couldn't connect to the server. Check the backend is running and CORS is allowed.",
   },
 };
 

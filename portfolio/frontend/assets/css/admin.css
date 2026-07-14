@@ -1,0 +1,73 @@
+.admin-shell { min-height: 100vh; background: var(--color-paper); display: flex; flex-direction: column; }
+
+.admin-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  border-bottom: var(--border-w) solid var(--color-border);
+  background: var(--color-paper-raised);
+}
+.admin-header-title { font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 600; }
+
+.admin-main { flex: 1; padding: var(--space-8) var(--space-6); max-width: 1000px; margin-inline: auto; width: 100%; }
+
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  background: var(--color-ink);
+  padding: var(--space-6);
+}
+
+.login-topbar {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.login-card {
+  width: 100%; max-width: 380px; background: var(--color-ink-soft);
+  border: var(--border-w) solid var(--color-border-on-ink); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel); padding: var(--space-8);
+}
+.login-logo { font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--color-text-on-ink); margin-bottom: var(--space-2); }
+.login-title { font-size: var(--fs-xl); color: #FFFFFF; margin-bottom: var(--space-6); }
+.login-card .form-field label { color: var(--color-text-on-ink-muted); }
+.login-card .form-field input { background: var(--color-ink); border-color: var(--color-border-on-ink); color: var(--color-text-on-ink); }
+.login-card .btn-primary { width: 100%; margin-top: var(--space-2); }
+
+.admin-section { margin-bottom: var(--space-10); }
+.admin-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5); }
+
+.admin-table { width: 100%; border-collapse: collapse; background: var(--color-paper-raised); border: var(--border-w) solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
+.admin-table th, .admin-table td { text-align: left; padding: var(--space-3) var(--space-4); border-bottom: var(--border-w) solid var(--color-border); font-size: var(--fs-sm); }
+.admin-table th { font-family: var(--font-mono); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); background: var(--color-paper); }
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table .col-actions { display: flex; gap: var(--space-2); white-space: nowrap; }
+.admin-empty-row td { text-align: center; color: var(--color-text-muted); font-family: var(--font-mono); font-size: var(--fs-sm); padding: var(--space-6); }
+
+.btn-sm { padding: var(--space-2) var(--space-3); font-size: var(--fs-xs); }
+.btn-danger { border-color: var(--color-danger); color: var(--color-danger); }
+.btn-danger:hover { background: var(--color-danger); color: #FFFFFF; }
+
+.admin-modal-overlay { position: fixed; inset: 0; background: rgba(16, 24, 32, 0.6); display: none; align-items: center; justify-content: center; padding: var(--space-6); z-index: 200; }
+.admin-modal-overlay.is-open { display: flex; }
+.admin-modal { width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; background: var(--color-paper-raised); border: var(--border-w) solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-6); }
+.admin-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5); }
+.admin-modal-close { font-size: var(--fs-lg); color: var(--color-text-muted); line-height: 1; padding: var(--space-1); }
+
+.form-row { display: flex; gap: var(--space-4); }
+.form-row .form-field { flex: 1; }
+.form-check { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-5); }
+.form-check input { width: auto; }
+.admin-form-actions { display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-2); }
+
+.admin-alert { padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-size: var(--fs-sm); margin-bottom: var(--space-5); display: none; }
+.admin-alert.is-visible { display: block; }
+.admin-alert.is-error { background: rgba(179, 67, 46, 0.1); color: var(--color-danger); border: var(--border-w) solid var(--color-danger); }
+.admin-alert.is-success { background: rgba(47, 125, 92, 0.1); color: var(--color-success); border: var(--border-w) solid var(--color-success); }
