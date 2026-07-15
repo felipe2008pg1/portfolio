@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Felipe Gonzalez — Full Stack Developer</title>
-  <meta name="description" content="Felipe Gonzalez, Full Stack Developer. Automation, databases, web systems and APIs with Python, JavaScript, HTML and CSS.">
+  <meta name="description" content="Felipe Gonzalez, Full Stack Developer. Automação, bancos de dados, sistemas web e APIs com Python, JavaScript, HTML e CSS.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,6 @@
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/style.css">
 
-  <!-- Applies the theme before the first paint, avoiding incorrect theme flash -->
   <script src="assets/js/theme.js"></script>
 </head>
 <body>
@@ -25,26 +24,26 @@
 
       <div class="nav-right">
         <ul class="nav-links" id="navLinks">
-          <li><a href="#about" data-nav-link data-i18n="nav.about">About</a></li>
+          <li><a href="#sobre" data-nav-link data-i18n="nav.about">Sobre</a></li>
           <li><a href="#skills" data-nav-link data-i18n="nav.skills">Skills</a></li>
-          <li><a href="#projects" data-nav-link data-i18n="nav.projects">Projects</a></li>
-          <li><a href="#contact" data-nav-link data-i18n="nav.contact">Contact</a></li>
+          <li><a href="#projetos" data-nav-link data-i18n="nav.projects">Projetos</a></li>
+          <li><a href="#contato" data-nav-link data-i18n="nav.contact">Contato</a></li>
         </ul>
 
         <div class="nav-utility">
-          <div class="lang-toggle" role="group" aria-label="Language">
+          <div class="lang-toggle" role="group" aria-label="Idioma / Language">
             <button type="button" data-lang="pt">PT</button>
             <button type="button" data-lang="en">EN</button>
           </div>
 
-          <button type="button" class="theme-toggle" id="themeToggle" data-i18n-aria-label="theme.toggleLabel" aria-label="Toggle theme" aria-pressed="false">
+          <button type="button" class="theme-toggle" id="themeToggle" aria-label="Alternar tema" aria-pressed="false">
             <span class="theme-toggle-icon" aria-hidden="true">☾</span>
           </button>
         </div>
 
-        <a href="#contact" class="btn btn-outline nav-cta" data-i18n="nav.cta">Get in touch</a>
+        <a href="#contato" class="btn btn-outline nav-cta" data-i18n="nav.cta">Falar comigo</a>
 
-        <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+        <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -52,93 +51,96 @@
   </header>
 
   <main id="top">
-
     <!-- HERO -->
     <section class="hero">
       <div class="container hero-inner">
         <div>
           <span class="hero-eyebrow" data-i18n="hero.eyebrow">// full stack developer</span>
-
-          <h1 class="hero-title" data-i18n-html="hero.title.html">
-            Felipe Gonzalez builds <em>complete web systems</em>, from database to interface.
-          </h1>
-
-          <p class="hero-lede" data-i18n="hero.lede">
-            Back-end and front-end development focused on automation, data organization and scalable solutions — with a business perspective shaped by administrative and accounting routines.
-          </p>
-
+          <h1 class="hero-title" data-i18n-html="hero.title.html">Felipe Gonzalez constrói <em>sistemas web completos</em>, do banco de dados à interface.</h1>
+          <p class="hero-lede" data-i18n="hero.lede">Desenvolvimento back-end e front-end com foco em automação, organização de dados e soluções escaláveis — com uma visão de negócio formada em rotinas administrativas e contábeis.</p>
           <div class="hero-actions">
-            <a href="#projects" class="btn btn-primary" data-i18n="hero.btnProjects">View projects</a>
-            <a href="#contact" class="btn btn-ghost" data-i18n="hero.btnContact">Get in touch</a>
+            <a href="#projetos" class="btn btn-primary" data-i18n="hero.btnProjects">Ver projetos</a>
+            <a href="#contato" class="btn btn-ghost" data-i18n="hero.btnContact">Entrar em contato</a>
           </div>
         </div>
 
-        <div class="system-panel" aria-label="Professional summary">
+        <div class="system-panel" aria-label="Resumo profissional">
           <div class="system-panel-head">
             <span class="system-panel-dot" aria-hidden="true"></span>
             <span data-i18n="panel.log">system_status.log</span>
           </div>
-
           <div class="system-panel-rows">
             <div class="system-panel-row">
-              <span class="system-panel-key" data-i18n="panel.key.nome">name</span>
+              <span class="system-panel-key" data-i18n="panel.key.nome">nome</span>
               <span class="system-panel-value">Felipe Gonzalez</span>
             </div>
-
             <div class="system-panel-row">
-              <span class="system-panel-key" data-i18n="panel.key.cargo">role</span>
+              <span class="system-panel-key" data-i18n="panel.key.cargo">cargo</span>
               <span class="system-panel-value" data-i18n="panel.val.cargo">Full Stack Developer</span>
             </div>
-
             <div class="system-panel-row">
               <span class="system-panel-key" data-i18n="panel.key.stack">stack</span>
-              <span class="system-panel-value" data-i18n="panel.val.stack">Python · HTML · JS · CSS</span>
+              <span class="system-panel-value" data-i18n="panel.val.stack">Python · Flask · FastAPI</span>
             </div>
-
             <div class="system-panel-row">
-              <span class="system-panel-key" data-i18n="panel.key.foco">focus</span>
-              <span class="system-panel-value" data-i18n="panel.val.foco">Automation & APIs</span>
+              <span class="system-panel-key" data-i18n="panel.key.foco">foco</span>
+              <span class="system-panel-value" data-i18n="panel.val.foco">Automação & APIs</span>
             </div>
-
             <div class="system-panel-row">
               <span class="system-panel-key" data-i18n="panel.key.status">status</span>
-              <span class="system-panel-value" data-i18n="panel.val.status">Available</span>
+              <span class="system-panel-value" data-i18n="panel.val.status">Disponível</span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ABOUT -->
-    <section class="section" id="about">
+    <!-- SOBRE -->
+    <section class="section" id="sobre">
       <div class="container">
         <div class="section-head reveal">
-          <span class="eyebrow" data-i18n="about.eyebrow">About</span>
-          <h2 class="section-title" data-i18n="about.title">Programming logic with business vision</h2>
+          <span class="eyebrow" data-i18n="about.eyebrow">Sobre</span>
+          <h2 class="section-title" data-i18n="about.title">Lógica de programação com visão de negócio</h2>
         </div>
 
         <div class="about-grid reveal">
-          <p class="about-text" data-i18n="about.text">
-            I am a developer and student focused on building complete web solutions using Python, HTML, CSS and JavaScript.
-            I develop both back-end and front-end applications, combining programming logic, automation and database management
-            to create efficient, organized and scalable systems. My experience with administrative and accounting routines
-            also gives me a business-oriented perspective when designing software solutions.
-          </p>
+          <div>
+            <p class="about-text" data-i18n="about.text">
+              Sou desenvolvedor e estudante focado em construir soluções web completas usando Python, HTML, CSS e JavaScript.
+              Desenvolvo tanto aplicações back-end quanto front-end, combinando lógica de programação, automação e gerenciamento
+              de banco de dados para criar sistemas eficientes, organizados e escaláveis. Minha vivência em rotinas administrativas
+              e contábeis também me dá uma perspectiva orientada a negócio ao projetar soluções de software.
+            </p>
+
+            <div class="social-links">
+              <a href="https://www.linkedin.com/in/felipe-de-la-vega-dev/" target="_blank" rel="noopener noreferrer" class="social-link">
+                <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.62 0 4.29 2.38 4.29 5.48v6.26zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/>
+                </svg>
+                <span>@felipe.dev</span>
+              </a>
+
+              <a href="https://www.instagram.com/dlv.gonzalezz/" target="_blank" rel="noopener noreferrer" class="social-link">
+                <svg class="social-icon" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true">
+                  <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
+                </svg>
+                <span>@dlv.gonzalezz</span>
+              </a>
+            </div>
+          </div>
 
           <div class="about-facts">
             <div class="about-fact">
               <span class="about-fact-label" data-i18n="about.fact1.label">Back-end</span>
-              <span class="about-fact-value" data-i18n="about.fact1.value">REST APIs with Flask and FastAPI, process automation and database integration.</span>
+              <span class="about-fact-value" data-i18n="about.fact1.value">APIs REST com Flask e FastAPI, automação de processos e integração com bancos de dados.</span>
             </div>
-
             <div class="about-fact">
               <span class="about-fact-label" data-i18n="about.fact2.label">Front-end</span>
-              <span class="about-fact-value" data-i18n="about.fact2.value">Organized, responsive and user-centered interfaces.</span>
+              <span class="about-fact-value" data-i18n="about.fact2.value">Interfaces organizadas, responsivas e centradas no usuário.</span>
             </div>
-
             <div class="about-fact">
-              <span class="about-fact-label" data-i18n="about.fact3.label">Differential</span>
-              <span class="about-fact-value" data-i18n="about.fact3.value">Administrative/accounting background applied to system design.</span>
+              <span class="about-fact-label" data-i18n="about.fact3.label">Diferencial</span>
+              <span class="about-fact-value" data-i18n="about.fact3.value">Background administrativo/contábil aplicado ao design de sistemas.</span>
             </div>
           </div>
         </div>
@@ -150,95 +152,88 @@
       <div class="container">
         <div class="section-head reveal">
           <span class="eyebrow" data-i18n="skills.eyebrow">Skills</span>
-          <h2 class="section-title" data-i18n="skills.title">Technical stack</h2>
-          <p class="section-lede" data-i18n="skills.lede">Tools and technologies I use daily, organized by area.</p>
+          <h2 class="section-title" data-i18n="skills.title">Stack técnica</h2>
+          <p class="section-lede" data-i18n="skills.lede">Ferramentas e tecnologias que uso no dia a dia, organizadas por área.</p>
         </div>
 
         <div class="skills-table reveal" id="skillsTable" aria-live="polite">
-          <div class="skills-empty" data-i18n="skills.loading">Loading technical stack…</div>
+          <div class="skills-empty" data-i18n="skills.loading">Carregando stack técnica…</div>
         </div>
       </div>
     </section>
 
-    <!-- PROJECTS -->
-    <section class="section" id="projects">
+    <!-- PROJETOS -->
+    <section class="section" id="projetos">
       <div class="container">
         <div class="section-head reveal">
-          <span class="eyebrow" data-i18n="projects.eyebrow">Projects</span>
-          <h2 class="section-title" data-i18n="projects.title">Recent work</h2>
-          <p class="section-lede" data-i18n="projects.lede">A selection of projects showing how I apply back-end, front-end and automation in practice.</p>
+          <span class="eyebrow" data-i18n="projects.eyebrow">Projetos</span>
+          <h2 class="section-title" data-i18n="projects.title">Trabalhos recentes</h2>
+          <p class="section-lede" data-i18n="projects.lede">Uma seleção de projetos que mostram como aplico back-end, front-end e automação na prática.</p>
         </div>
 
         <div class="projects-grid reveal" id="projectsGrid" aria-live="polite">
-          <div class="projects-empty" data-i18n="projects.loading">Loading projects…</div>
+          <div class="projects-empty" data-i18n="projects.loading">Carregando projetos…</div>
         </div>
       </div>
     </section>
 
-    <!-- CONTACT -->
-    <section class="section" id="contact" style="border-bottom: none;">
+    <!-- CONTATO -->
+    <section class="section" id="contato" style="border-bottom: none;">
       <div class="container">
         <div class="section-head reveal">
-          <span class="eyebrow" data-i18n="contact.eyebrow">Contact</span>
-          <h2 class="section-title" data-i18n="contact.title">Let's talk</h2>
-          <p class="section-lede" data-i18n="contact.lede">Fill out the form and I'll receive your message directly on WhatsApp.</p>
+          <span class="eyebrow" data-i18n="contact.eyebrow">Contato</span>
+          <h2 class="section-title" data-i18n="contact.title">Vamos conversar</h2>
+          <p class="section-lede" data-i18n="contact.lede">Preencha o formulário e eu recebo sua mensagem direto no WhatsApp.</p>
         </div>
 
         <div class="contact-grid reveal">
           <div class="contact-info">
             <div class="contact-info-item">
-              <span>📍</span><span data-i18n="contact.infoRemote">Available for remote work</span>
+              <span>📍</span><span data-i18n="contact.infoRemote">Disponível para trabalho remoto</span>
             </div>
-
             <div class="contact-info-item">
-              <span>💬</span><span data-i18n="contact.infoResponse">WhatsApp response within 1 business day</span>
+              <span>💬</span><span data-i18n="contact.infoResponse">Resposta via WhatsApp em até 1 dia útil</span>
             </div>
           </div>
 
           <form id="contactForm" novalidate>
             <div class="form-field">
-              <label for="name" data-i18n="contact.labelName">Name</label>
+              <label for="name" data-i18n="contact.labelName">Nome</label>
               <input type="text" id="name" name="name" required minlength="2" maxlength="120" autocomplete="name">
             </div>
-
             <div class="form-field">
-              <label for="email" data-i18n="contact.labelEmail">Email</label>
+              <label for="email" data-i18n="contact.labelEmail">E-mail</label>
               <input type="email" id="email" name="email" required maxlength="255" autocomplete="email">
             </div>
-
             <div class="form-field">
-              <label for="subject" data-i18n="contact.labelSubject">Subject</label>
+              <label for="subject" data-i18n="contact.labelSubject">Assunto</label>
               <input type="text" id="subject" name="subject" required minlength="2" maxlength="200">
             </div>
-
             <div class="form-field">
-              <label for="message" data-i18n="contact.labelMessage">Message</label>
+              <label for="message" data-i18n="contact.labelMessage">Mensagem</label>
               <textarea id="message" name="message" required minlength="10" maxlength="2000"></textarea>
             </div>
 
-            <!-- anti-bot honeypot: invisible field, humans do not fill it -->
             <div class="form-honeypot" aria-hidden="true">
-              <label for="website" data-i18n="contact.honeypotLabel">Do not fill</label>
+              <label for="website" data-i18n="contact.honeypotLabel">Não preencher</label>
               <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
             </div>
 
-            <button type="submit" class="btn btn-primary" id="contactSubmit" data-i18n="contact.submit">Send via WhatsApp</button>
+            <button type="submit" class="btn btn-primary" id="contactSubmit" data-i18n="contact.submit">Enviar via WhatsApp</button>
 
             <div class="form-status" id="formStatus" role="status"></div>
           </form>
         </div>
       </div>
     </section>
-
   </main>
 
   <footer class="footer">
     <div class="container footer-inner">
       <span>© <span id="year"></span> Felipe Gonzalez</span>
-
       <div class="footer-links">
-        <a href="#top" data-i18n="footer.top">Top</a>
-        <a href="#contact" data-i18n="footer.contact">Contact</a>
+        <a href="#top" data-i18n="footer.top">Topo</a>
+        <a href="#contato" data-i18n="footer.contact">Contato</a>
       </div>
     </div>
   </footer>
@@ -250,6 +245,5 @@
   <script src="assets/js/render-skills.js"></script>
   <script src="assets/js/render-projects.js"></script>
   <script src="assets/js/contact-form.js"></script>
-
 </body>
 </html>

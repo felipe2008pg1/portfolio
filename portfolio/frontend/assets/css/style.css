@@ -729,3 +729,33 @@ h1, h2, h3 {
 .theme-toggle:hover {
   border-color: var(--color-teal);
 }
+
+.social-links {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.social-link:hover {
+  border-color: var(--color-teal);
+  color: var(--color-teal);
+}
+
+.social-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}

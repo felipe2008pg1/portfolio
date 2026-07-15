@@ -1,15 +1,32 @@
-async function adminRequest(path, options = {}) {
+async function adminRequest(path, options = {}, isRetry = false) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     credentials: "include",
   });
 
+  // Expired access token (401) on a protected route other than login/refresh:
+  // attempts to renew via refresh token once, then retries the original request.
+  if (response.status === 401 && !isRetry && path !== "/api/auth/login" && path !== "/api/auth/refresh") {
+    try {
+      await adminRequest("/api/auth/refresh", { method: "POST" }, true);
+      return adminRequest(path, options, true);
+    } catch (_) {
+      window.location.href = "login.html";
+      throw new Error("Session expired.");
+    }
+  }
+
   let data = null;
   try { data = await response.json(); } catch (_) {}
 
   if (!response.ok) {
-    const message = (data && data.detail) || "Não foi possível completar a solicitação.";
+    let message = (data && data.detail) || "Unable to complete the request.";
+    if (data && Array.isArray(data.errors) && data.errors.length > 0) {
+      const first = data.errors[0];
+      const field = Array.isArray(first.loc) ? first.loc[first.loc.length - 1] : "field";
+      message = `${field}: ${first.msg}`;
+    }
     const error = new Error(message);
     error.status = response.status;
     error.payload = data;

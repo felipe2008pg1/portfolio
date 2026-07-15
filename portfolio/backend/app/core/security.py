@@ -4,6 +4,8 @@ from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
 from jose import JWTError, jwt
 from app.core.config import get_settings
+import hashlib
+import secrets
 
 settings = get_settings()
 
@@ -11,6 +13,7 @@ settings = get_settings()
 # The parameters below exceed the minimum values recommended by OWASP
 # (m=19456 KiB, t=2, p=1), providing stronger resistance against GPU attacks.
 # They can be adjusted according to the server's available resources.
+
 _ph = PasswordHasher(
     time_cost=3,
     memory_cost=19456,
@@ -68,3 +71,13 @@ def decode_access_token(token: str) -> Optional[str]:
 
     except JWTError:
         return None
+
+def generate_refresh_token() -> str:
+    """High-entropy opaque token — not a JWT, carries no data, just a random identifier."""
+    return secrets.token_urlsafe(48)
+
+def hash_refresh_token(token: str) -> str:
+    """SHA-256 is appropriate here (unlike for passwords): the token already has high entropy,
+    so it doesn't require extra computational cost like Argon2—we just need a fast,
+    deterministic hash to perform database lookups without storing the value in plaintext."""
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()

@@ -75,3 +75,6 @@ def authenticate_admin(
     )
 
     return user
+
+def get_admin_by_id(db: Session, admin_id: int) -> AdminUser | None:
+    return db.get(AdminUser, admin_id)
