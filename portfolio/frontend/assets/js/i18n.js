@@ -22,7 +22,7 @@ const TRANSLATIONS = {
     "panel.key.foco": "foco",
     "panel.key.status": "status",
     "panel.val.cargo": "Full Stack Developer",
-    "panel.val.stack": "Python · Flask · FastAPI",
+    "panel.val.stack": "Python · HTML · JS · CSS",
     "panel.val.foco": "Automação & APIs",
     "panel.val.status": "Disponível",
 
@@ -110,7 +110,7 @@ const TRANSLATIONS = {
     "panel.key.foco": "focus",
     "panel.key.status": "status",
     "panel.val.cargo": "Full Stack Developer",
-    "panel.val.stack": "Python · Flask · FastAPI",
+    "panel.val.stack": "Python · HTML · JS · CSS",
     "panel.val.foco": "Automation & APIs",
     "panel.val.status": "Available",
 

@@ -64,16 +64,17 @@ async def http_exception_handler(
     )
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(
-    request: Request,
-    exc: RequestValidationError,
-):
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # Filter only serializable fields — exc.errors() may contain raw Python
+    # objects (e.g., ValueError) within 'ctx' when the error originates from a
+    # custom field_validator, and json.dumps does not know how to serialize them.
+    safe_errors = [
+        {"loc": err.get("loc"), "msg": err.get("msg"), "type": err.get("type")}
+        for err in exc.errors()
+    ]
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "detail": "Invalid data.",
-            "errors": exc.errors(),
-        },
+        content={"detail": "Dados inválidos.", "errors": safe_errors},
     )
 
 @app.exception_handler(Exception)
