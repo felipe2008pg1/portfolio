@@ -11,7 +11,7 @@ class ContactMessage(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     subject: Mapped[str] = mapped_column(String(200), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
-    ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)  # suporta IPv6
+    ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)  # IPv6 supported
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True
     )

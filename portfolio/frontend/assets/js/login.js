@@ -5,13 +5,16 @@ function loginText(key, fallback) {
 document.addEventListener("DOMContentLoaded", async () => {
   if (typeof i18n !== "undefined") i18n.apply();
 
+  /*
   try {
     await adminApi.me();
     window.location.href = "dashboard.html";
     return;
   } catch (_) {
-    console.debug("[admin] sem sessão ativa, seguindo pro login normal");
+    console.debug("[admin] ");
   }
+  */
+  // ------------------------------------
 
   const form = document.getElementById("loginForm");
   const submitBtn = document.getElementById("loginSubmit");
@@ -23,35 +26,46 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    alertEl.className = "admin-alert";
+      event.preventDefault();
+      
+      const turnstileWidget = document.querySelector('.cf-turnstile');
+      const turnstileToken = turnstileWidget ? turnstileWidget.querySelector('input[name="cf-turnstile-response"]')?.value : "";
 
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value;
+      if (!turnstileToken) {
+          showAlert("Wait the security verification or try again.");
+          return;
+      }
 
-    if (!username || !password) {
-      showAlert(loginText("admin.login.errorFields", "Preencha usuário e senha."));
+    if (!turnstileToken) {
+      showAlert("Complete the security verification before signing in.");
       return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = loginText("admin.login.submitting", "Entrando…");
+    submitBtn.textContent = loginText("admin.login.submitting", "Signing in...");
 
     try {
-      await adminApi.login(username, password);
+      const turnstileToken = window.turnstile ? window.turnstile.getResponse() : "";
+      console.log("Token send for backend:", turnstileToken);
+      await adminApi.login(username, password, turnstileToken);
       window.location.href = "dashboard.html";
       return;
     } catch (error) {
-      console.error("[admin] falha no login:", error);
+      console.log("--- ERRO CAPTURED ---");
+      console.error("Error status:", error.status);
+      console.error("Payload completed:", error);
+      
       if (error.status === 429) {
-        showAlert(loginText("admin.login.errorRateLimit", "Muitas tentativas. Aguarde alguns minutos."));
+        showAlert("Attemps much.");
       } else if (error.status === 401) {
-        showAlert(loginText("admin.login.errorGeneric", "Usuário ou senha inválidos."));
+        showAlert("User or password invalid.");
       } else {
-        showAlert(loginText("admin.login.errorNetwork", "Não foi possível conectar ao servidor. Verifique se o backend está rodando e o CORS liberado."));
+        showAlert("Critical error: " + error.message);
       }
+      
       submitBtn.disabled = false;
-      submitBtn.textContent = loginText("admin.login.submit", "Entrar");
+      submitBtn.textContent = "Enter";
+      if (window.turnstile) window.turnstile.reset();
     }
   });
 });

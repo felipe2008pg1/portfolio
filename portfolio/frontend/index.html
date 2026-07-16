@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="assets/css/reset.css">
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/style.css">
-
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script src="assets/js/theme.js"></script>
 </head>
 <body>
@@ -218,6 +218,8 @@
               <label for="website" data-i18n="contact.honeypotLabel">Não preencher</label>
               <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
             </div>
+
+            <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="auto"></div>
 
             <button type="submit" class="btn btn-primary" id="contactSubmit" data-i18n="contact.submit">Enviar via WhatsApp</button>
 

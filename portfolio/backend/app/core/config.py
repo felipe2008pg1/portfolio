@@ -1,20 +1,10 @@
 from functools import lru_cache
 from typing import List
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    """
-    Central application configuration. All values are loaded from the .env file—
-    never hardcoded in the source code. The application fails fast during startup
-    if any required value is missing or considered insecure.
-    """
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     ENVIRONMENT: str = "development"
     DATABASE_URL: str
@@ -29,42 +19,35 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD: str
     RATE_LIMIT_CONTACT: str = "5/hour"
     RATE_LIMIT_LOGIN: str = "5/minute"
+    TURNSTILE_SITE_KEY: str
+    TURNSTILE_SECRET_KEY: str
 
     @field_validator("JWT_SECRET_KEY")
     @classmethod
-    def validate_jwt_secret(cls, value: str) -> str:
-        if not value or value.startswith("CHANGE_ME") or len(value) < 32:
+    def validate_jwt_secret(cls, v: str) -> str:
+        if not v or v.startswith("CHANGE_ME") or len(v) < 32:
             raise ValueError(
                 "Invalid or missing JWT_SECRET_KEY. "
-                'Generate one with: python -c "import secrets; print(secrets.token_urlsafe(64))"'
+                "Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(64))\""
             )
-        return value
+        return v
 
     @field_validator("WHATSAPP_NUMBER")
     @classmethod
-    def validate_whatsapp(cls, value: str) -> str:
-        if not value.isdigit() or not (10 <= len(value) <= 15):
+    def validate_whatsapp(cls, v: str) -> str:
+        if not v.isdigit() or not (10 <= len(v) <= 15):
             raise ValueError(
-                "WHATSAPP_NUMBER must contain only digits "
-                "(country code + area code + phone number)."
+                "WHATSAPP_NUMBER must contain only digits (country code + area code + number)."
             )
-        return value
+        return v
 
     @property
     def cors_origins_list(self) -> List[str]:
-        return [
-            origin.strip()
-            for origin in self.CORS_ALLOWED_ORIGINS.split(",")
-            if origin.strip()
-        ]
+        return [o.strip() for o in self.CORS_ALLOWED_ORIGINS.split(",") if o.strip()]
 
     @property
     def allowed_hosts_list(self) -> List[str]:
-        return [
-            host.strip()
-            for host in self.ALLOWED_HOSTS.split(",")
-            if host.strip()
-        ]
+        return [h.strip() for h in self.ALLOWED_HOSTS.split(",") if h.strip()]
 
     @property
     def is_production(self) -> bool:

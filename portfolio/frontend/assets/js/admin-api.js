@@ -1,43 +1,46 @@
+const API_BASE_URL = "http://127.0.0.1:8000";
+
 async function adminRequest(path, options = {}, isRetry = false) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    credentials: "include",
-  });
+  const url = `${API_BASE_URL}${path}`;
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: { 
+        "Content-Type": "application/json", 
+        ...(options.headers || {}) 
+      },
+      credentials: "omit",
+    });
 
-  // Expired access token (401) on a protected route other than login/refresh:
-  // attempts to renew via refresh token once, then retries the original request.
-  if (response.status === 401 && !isRetry && path !== "/api/auth/login" && path !== "/api/auth/refresh") {
-    try {
-      await adminRequest("/api/auth/refresh", { method: "POST" }, true);
-      return adminRequest(path, options, true);
-    } catch (_) {
-      window.location.href = "login.html";
-      throw new Error("Session expired.");
+    // If the backend returns an error (e.g., 400, 401), the fetch does NOT trigger an error in the catch block. 
+    // It returns the response object. You need to check .ok.
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error(`[admin] Erro no fetch para ${path}:`, response.status, errorData);
+      
+      // Error handling logic (ex: 401)
+      if (response.status === 401 && !isRetry) {
+      }
+      
+      const error = new Error(errorData.detail || "Request failed");
+      error.status = response.status;
+      throw error;
     }
-  }
 
-  let data = null;
-  try { data = await response.json(); } catch (_) {}
-
-  if (!response.ok) {
-    let message = (data && data.detail) || "Unable to complete the request.";
-    if (data && Array.isArray(data.errors) && data.errors.length > 0) {
-      const first = data.errors[0];
-      const field = Array.isArray(first.loc) ? first.loc[first.loc.length - 1] : "field";
-      message = `${field}: ${first.msg}`;
-    }
-    const error = new Error(message);
-    error.status = response.status;
-    error.payload = data;
-    throw error;
+    return await response.json();
+  } catch (err) {
+    console.error(`[admin] Fail in the net for ${url}:`, err);
+    throw err;
   }
-  return data;
 }
 
 const adminApi = {
-  login: (username, password) =>
-    adminRequest("/api/auth/login", { method: "POST", body: JSON.stringify({ username, password }) }),
+  login: (username, password, turnstileToken) =>
+    adminRequest("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password, turnstile_token: turnstileToken }),
+    }),
   logout: () => adminRequest("/api/auth/logout", { method: "POST" }),
   me: () => adminRequest("/api/auth/me"),
 
@@ -57,7 +60,9 @@ async function requireAdminSession() {
     await adminApi.me();
     return true;
   } catch (error) {
-    window.location.href = "login.html";
+    if (!window.location.pathname.endsWith("login.html")) {
+      window.location.href = "login.html";
+    }
     return false;
   }
 }

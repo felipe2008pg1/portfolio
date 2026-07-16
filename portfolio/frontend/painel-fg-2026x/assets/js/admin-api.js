@@ -1,16 +1,25 @@
-﻿async function adminRequest(path, options = {}) {
+﻿async function adminRequest(path, options = {}, isRetry = false) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     credentials: "include",
   });
 
+  if (response.status === 401 && !isRetry && path !== "/api/auth/login" && path !== "/api/auth/refresh") {
+    try {
+      await adminRequest("/api/auth/refresh", { method: "POST" }, true);
+      return adminRequest(path, options, true);
+    } catch (_) {
+      window.location.href = "login.html";
+      throw new Error("Sessão expirada.");
+    }
+  }
+
   let data = null;
   try { data = await response.json(); } catch (_) {}
 
   if (!response.ok) {
-    let message = (data && data.detail) || "The request could not be completed.";
-    // If it is a validation error (422), show the specific field instead of the generic one.
+    let message = (data && data.detail) || "Não foi possível completar a solicitação.";
     if (data && Array.isArray(data.errors) && data.errors.length > 0) {
       const first = data.errors[0];
       const field = Array.isArray(first.loc) ? first.loc[first.loc.length - 1] : "campo";
@@ -25,8 +34,11 @@
 }
 
 const adminApi = {
-  login: (username, password) =>
-    adminRequest("/api/auth/login", { method: "POST", body: JSON.stringify({ username, password }) }),
+  login: (username, password, turnstileToken) =>
+    adminRequest("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password, turnstile_token: turnstileToken }),
+    }),
   logout: () => adminRequest("/api/auth/logout", { method: "POST" }),
   me: () => adminRequest("/api/auth/me"),
 

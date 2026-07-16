@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
       subject: String(formData.get("subject") || "").trim(),
       message: String(formData.get("message") || "").trim(),
       website: String(formData.get("website") || ""),
+      turnstile_token: window.turnstile ? window.turnstile.getResponse() : "",
     };
 
     if (payload.website.length > 0) {
@@ -64,6 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = i18n.t("contact.submit");
+      if (window.turnstile) window.turnstile.reset();
     }
   });
 });

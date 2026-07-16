@@ -14,38 +14,42 @@
   <link rel="stylesheet" href="assets/css/admin.css">
 
   <script src="../assets/js/theme.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
   <div class="login-shell">
-  <div class="login-topbar">
-    <div class="lang-toggle" role="group" aria-label="Idioma / Language">
-      <button type="button" data-lang="pt">PT</button>
-      <button type="button" data-lang="en">EN</button>
+    <div class="login-topbar">
+      <div class="lang-toggle" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="pt">PT</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Alternar tema" aria-pressed="false">
+        <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+      </button>
     </div>
-    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Alternar tema" aria-pressed="false">
-      <span class="theme-toggle-icon" aria-hidden="true">☾</span>
-    </button>
+
+    <div class="login-card">
+      <div class="login-logo">felipe<span style="color: var(--color-teal);">.dev</span> / admin</div>
+      <h1 class="login-title" data-i18n="admin.login.title">Entrar</h1>
+
+      <div class="admin-alert" id="loginAlert" role="alert"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-field">
+          <label for="username" data-i18n="admin.login.username">Usuário</label>
+          <input type="text" id="username" name="username" required maxlength="64" autocomplete="username">
+        </div>
+        <div class="form-field">
+          <label for="password" data-i18n="admin.login.password">Senha</label>
+          <input type="password" id="password" name="password" required maxlength="256" autocomplete="current-password">
+        </div>
+
+        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="auto"></div>
+
+        <button type="submit" class="btn btn-primary" id="loginSubmit" data-i18n="admin.login.submit">Entrar</button>
+      </form>
+    </div>
   </div>
-
-  <div class="login-card">
-    <div class="login-logo">felipe<span style="color: var(--color-teal);">.dev</span> / admin</div>
-    <h1 class="login-title" data-i18n="admin.login.title">Entrar</h1>
-
-    <div class="admin-alert" id="loginAlert" role="alert"></div>
-
-    <form id="loginForm" novalidate>
-      <div class="form-field">
-        <label for="username" data-i18n="admin.login.username">Usuário</label>
-        <input type="text" id="username" name="username" required maxlength="64" autocomplete="username">
-      </div>
-      <div class="form-field">
-        <label for="password" data-i18n="admin.login.password">Senha</label>
-        <input type="password" id="password" name="password" required maxlength="256" autocomplete="current-password">
-      </div>
-      <button type="submit" class="btn btn-primary" id="loginSubmit" data-i18n="admin.login.submit">Entrar</button>
-    </form>
-  </div>
-</div>
 
   <script src="../assets/js/config.js"></script>
   <script src="../assets/js/i18n.js"></script>

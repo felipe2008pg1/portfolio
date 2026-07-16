@@ -17,5 +17,4 @@ def configure_logging(environment: str) -> None:
     # Silences verbose logs from third-party libraries that may include sensitive data.
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
-
 security_logger = logging.getLogger("security")

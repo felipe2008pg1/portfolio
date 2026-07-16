@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db, get_current_admin
 from app.core.config import get_settings
 from app.core.security import create_access_token
+from app.core.turnstile import verify_turnstile_token
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.services import refresh_service
 from app.services.auth_service import authenticate_admin, get_admin_by_id
@@ -23,8 +24,6 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
         max_age=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",
     )
-    # Restricted path: the refresh token is only sent to the backend on auth routes
-    # and is never exposed to other API calls (reduces the attack surface).
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
@@ -37,8 +36,15 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
 
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit(settings.RATE_LIMIT_LOGIN)
-def login(request: Request, response: Response, payload: LoginRequest, db: Session = Depends(get_db)):
+async def login(request: Request, response: Response, payload: LoginRequest, db: Session = Depends(get_db)):
     client_ip = get_remote_address(request)
+
+    # if not await verify_turnstile_token(payload.turnstile_token, client_ip):
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail="Security verification failed.",
+    #     )
+
     user = authenticate_admin(db, payload.username, payload.password, client_ip)
 
     if user is None:
@@ -55,34 +61,39 @@ def login(request: Request, response: Response, payload: LoginRequest, db: Sessi
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(request: Request, response: Response, db: Session = Depends(get_db)):
     old_refresh = request.cookies.get("refresh_token")
+
     if not old_refresh:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Session expired."
+            detail="Session expired.",
         )
 
     result = refresh_service.validate_and_rotate_refresh_token(db, old_refresh)
+
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Session expired."
+            detail="Session expired.",
         )
 
     admin_id, new_refresh_token = result
     admin = get_admin_by_id(db, admin_id)
+
     if admin is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Session expired."
+            detail="Session expired.",
         )
 
     new_access_token = create_access_token(subject=admin.username)
     _set_auth_cookies(response, new_access_token, new_refresh_token)
+
     return TokenResponse()
 
 @router.post("/logout")
 def logout(request: Request, response: Response, db: Session = Depends(get_db)):
     refresh_token = request.cookies.get("refresh_token")
+
     if refresh_token:
         refresh_service.revoke_refresh_token(db, refresh_token)
 

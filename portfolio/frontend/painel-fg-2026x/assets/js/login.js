@@ -5,13 +5,17 @@
 document.addEventListener("DOMContentLoaded", async () => {
   if (typeof i18n !== "undefined") i18n.apply();
 
+  // --- COMENTE ESTE BLOCO TOTALMENTE ---
+  /*
   try {
     await adminApi.me();
     window.location.href = "dashboard.html";
     return;
   } catch (_) {
-    console.debug("[admin] sem sessão ativa, seguindo pro login normal");
+    console.debug("[admin]);
   }
+  */
+  // ------------------------------------
 
   const form = document.getElementById("loginForm");
   const submitBtn = document.getElementById("loginSubmit");
@@ -28,9 +32,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
+    const turnstileToken = window.turnstile ? window.turnstile.getResponse() : "";
 
     if (!username || !password) {
       showAlert(loginText("admin.login.errorFields", "Preencha usuário e senha."));
+      return;
+    }
+
+    if (!turnstileToken) {
+      showAlert("Complete a verificação de segurança antes de entrar.");
       return;
     }
 
@@ -38,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     submitBtn.textContent = loginText("admin.login.submitting", "Entrando…");
 
     try {
-      await adminApi.login(username, password);
+      await adminApi.login(username, password, turnstileToken);
       window.location.href = "dashboard.html";
       return;
     } catch (error) {
@@ -52,6 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       submitBtn.disabled = false;
       submitBtn.textContent = loginText("admin.login.submit", "Entrar");
+      if (window.turnstile) window.turnstile.reset();
     }
   });
 });

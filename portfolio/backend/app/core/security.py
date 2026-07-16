@@ -81,3 +81,12 @@ def hash_refresh_token(token: str) -> str:
     so it doesn't require extra computational cost like Argon2—we just need a fast,
     deterministic hash to perform database lookups without storing the value in plaintext."""
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+def ensure_aware_utc(dt):
+    """SQLite does not preserve the time zone in DateTime—normalize to UTC-aware
+    before any comparison with `datetime.now(timezone.utc)`."""
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt

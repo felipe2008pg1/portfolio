@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.core.config import get_settings
-from app.core.security import generate_refresh_token, hash_refresh_token
+from app.core.security import generate_refresh_token, hash_refresh_token, ensure_aware_utc
 from app.models.refresh_token import RefreshToken
 
 settings = get_settings()
@@ -26,7 +26,13 @@ def validate_and_rotate_refresh_token(db: Session, token: str) -> tuple[int, str
     record = db.scalars(stmt).first()
 
     now = datetime.now(timezone.utc)
-    if record is None or record.revoked_at is not None or record.expires_at < now:
+    if record is None:
+        return None
+
+    expires_at = ensure_aware_utc(record.expires_at)
+    revoked_at = ensure_aware_utc(record.revoked_at)
+
+    if revoked_at is not None or expires_at < now:
         return None
 
     record.revoked_at = now

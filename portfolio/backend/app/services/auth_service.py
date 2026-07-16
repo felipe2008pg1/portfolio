@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.core.logging import security_logger
-from app.core.security import verify_password
+from app.core.security import verify_password, ensure_aware_utc
 from app.models.admin_user import AdminUser
 
 MAX_FAILED_ATTEMPTS = 5
@@ -34,12 +34,8 @@ def authenticate_admin(
         )
         return None
 
-    if user.locked_until and user.locked_until > now:
-        security_logger.warning(
-            "login_blocked_lockout user=%s ip=%s",
-            username,
-            client_ip,
-        )
+    if user.locked_until and ensure_aware_utc(user.locked_until) > now:
+        security_logger.warning("login_blocked_lockout user=%s ip=%s", username, client_ip)
         return None
 
     if not verify_password(password, user.hashed_password):
