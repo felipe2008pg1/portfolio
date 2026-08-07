@@ -9,7 +9,8 @@ class Project(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(120), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    stack: Mapped[str] = mapped_column(String(255), nullable=False)  # ex: "Python, FastAPI, SQLite"
+    description_en: Mapped[str | None] = mapped_column(Text, nullable=True)
+    stack: Mapped[str] = mapped_column(String(255), nullable=False)
     repo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     demo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     image_path: Mapped[str | None] = mapped_column(String(255), nullable=True)

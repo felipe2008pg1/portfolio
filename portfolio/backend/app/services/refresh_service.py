@@ -19,8 +19,6 @@ def issue_refresh_token(db: Session, admin_id: int) -> str:
     return token
 
 def validate_and_rotate_refresh_token(db: Session, token: str) -> tuple[int, str] | None:
-    """Validates the refresh token; if valid, revokes the old one and issues a new one (rotation).
-    Returns (admin_id, new_token) or None if invalid/expired/revoked."""
     token_hash = hash_refresh_token(token)
     stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash)
     record = db.scalars(stmt).first()
