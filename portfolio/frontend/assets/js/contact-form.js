@@ -19,18 +19,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const formData = new FormData(form);
+    const turnstileToken = window.turnstile ? window.turnstile.getResponse() : "";
+
     const payload = {
       name: String(formData.get("name") || "").trim(),
       email: String(formData.get("email") || "").trim(),
       subject: String(formData.get("subject") || "").trim(),
       message: String(formData.get("message") || "").trim(),
       website: String(formData.get("website") || ""),
-      turnstile_token: window.turnstile ? window.turnstile.getResponse() : "",
+      turnstile_token: turnstileToken,
     };
 
     if (payload.website.length > 0) {
       showStatus(i18n.t("contact.successSent"), "success");
       form.reset();
+      return;
+    }
+
+    if (!turnstileToken) {
+      showStatus("Complete a verificação de segurança antes de enviar.", "error");
       return;
     }
 

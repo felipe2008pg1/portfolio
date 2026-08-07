@@ -1,4 +1,4 @@
-let cachedProjects = null;
+﻿let cachedProjects = null;
 
 function isSafeHttpUrl(value) {
   try {
@@ -40,16 +40,28 @@ function renderProjectsGrid() {
     return;
   }
 
+  const total = cachedProjects.length;
+
   grid.innerHTML = "";
-  cachedProjects.forEach((project) => {
+  cachedProjects.forEach((project, index) => {
     const card = document.createElement("article");
     card.className = "project-card";
+
+    if (project.image_path && isSafeHttpUrl(project.image_path)) {
+      const img = document.createElement("img");
+      img.className = "project-card-image";
+      img.src = project.image_path;
+      img.alt = project.title;
+      img.loading = "lazy";
+      img.onerror = () => img.remove();
+      card.appendChild(img);
+    }
 
     const head = document.createElement("div");
     head.className = "project-card-head";
     const idTag = document.createElement("span");
     idTag.className = "project-card-id";
-    idTag.textContent = `PRJ_${String(project.id).padStart(3, "0")}`;
+    idTag.textContent = `FOLHA ${String(index + 1).padStart(2, "0")}/${String(total).padStart(2, "0")}`;
     head.appendChild(idTag);
 
     const body = document.createElement("div");
@@ -61,7 +73,8 @@ function renderProjectsGrid() {
 
     const desc = document.createElement("p");
     desc.className = "project-card-desc";
-    desc.textContent = project.description;
+    const useEnglish = i18n.getLang() === "en" && project.description_en && project.description_en.trim() !== "";
+    desc.textContent = useEnglish ? project.description_en : project.description;
 
     const stackWrap = document.createElement("div");
     stackWrap.className = "project-card-stack";

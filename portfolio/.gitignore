@@ -1,27 +1,16 @@
-# Environment
 backend/.env
 *.env
 !.env.example
-
-# Database
 backend/*.db
 backend/*.sqlite3
-
-# Python
 __pycache__/
 *.pyc
 .venv/
 venv/
 *.egg-info/
-
-# Logs
 *.log
 backend/logs/
-
-# OS / Editor
 .DS_Store
 .vscode/
 .idea/
-
-# Alembic
 backend/alembic/__pycache__/

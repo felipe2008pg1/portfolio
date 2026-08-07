@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Admin — Dashboard</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../assets/css/reset.css">
   <link rel="stylesheet" href="../assets/css/variables.css">
@@ -73,13 +73,25 @@
           </tbody>
         </table>
       </section>
+
+      <section class="admin-section">
+        <div class="admin-section-head">
+          <h2 class="section-title" style="font-size: var(--fs-lg);">Segurança</h2>
+        </div>
+        <div class="about-fact" style="max-width: 480px;">
+          <span class="about-fact-label">Autenticação em duas etapas (MFA)</span>
+          <p id="mfaStatusText" class="about-fact-value" style="margin-bottom: var(--space-4);">Verificando status…</p>
+          <button class="btn btn-primary btn-sm" id="mfaEnableBtn" style="display:none;">Ativar MFA</button>
+          <button class="btn btn-danger btn-sm" id="mfaDisableBtn" style="display:none;">Desativar MFA</button>
+        </div>
+      </section>
     </main>
   </div>
 
   <div class="admin-modal-overlay" id="projectModalOverlay">
     <div class="admin-modal">
       <div class="admin-modal-head">
-        <h3 id="projectModalTitle" data-i18n="admin.dashboard.newProjectModalTitle">Novo projeto</h3>
+        <h3 id="projectModalTitle">Novo projeto</h3>
         <button class="admin-modal-close" data-close-modal="project">&times;</button>
       </div>
       <div class="admin-alert" id="projectFormAlert" role="alert"></div>
@@ -94,8 +106,16 @@
           <textarea id="projectDescription" required minlength="1" maxlength="2000"></textarea>
         </div>
         <div class="form-field">
+          <label for="projectDescriptionEn">Descrição (inglês, opcional)</label>
+          <textarea id="projectDescriptionEn" maxlength="2000" placeholder="Deixe em branco pra usar a descrição em português também no modo EN"></textarea>
+        </div>
+        <div class="form-field">
           <label for="projectStack" data-i18n="admin.dashboard.fieldStack">Stack (separada por vírgula)</label>
           <input type="text" id="projectStack" required minlength="1" maxlength="255" placeholder="Python, FastAPI, SQLite">
+        </div>
+        <div class="form-field">
+          <label for="projectImageUrl">URL da imagem (opcional)</label>
+          <input type="url" id="projectImageUrl" maxlength="500" placeholder="https://.../screenshot.png">
         </div>
         <div class="form-row">
           <div class="form-field">
@@ -122,7 +142,7 @@
   <div class="admin-modal-overlay" id="skillModalOverlay">
     <div class="admin-modal">
       <div class="admin-modal-head">
-        <h3 id="skillModalTitle" data-i18n="admin.dashboard.newSkillModalTitle">Nova skill</h3>
+        <h3 id="skillModalTitle">Nova skill</h3>
         <button class="admin-modal-close" data-close-modal="skill">&times;</button>
       </div>
       <div class="admin-alert" id="skillFormAlert" role="alert"></div>
@@ -145,6 +165,17 @@
           <button type="submit" class="btn btn-primary" id="skillSubmitBtn" data-i18n="admin.dashboard.save">Salvar</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div class="admin-modal-overlay" id="mfaModalOverlay">
+    <div class="admin-modal">
+      <div class="admin-modal-head">
+        <h3 id="mfaModalTitle">Ativar MFA</h3>
+        <button class="admin-modal-close" data-close-modal="mfa">&times;</button>
+      </div>
+      <div class="admin-alert" id="mfaModalAlert" role="alert"></div>
+      <div id="mfaModalBody"></div>
     </div>
   </div>
 

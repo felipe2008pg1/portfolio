@@ -1,25 +1,26 @@
 :root {
-  /* Colors — "record system" palette: blue-gray graphite + teal + amber */
-  --color-ink: #101820;
-  --color-ink-soft: #182430;
-  --color-paper: #EEF1F6;
-  --color-paper-raised: #FFFFFF;
-  --color-teal: #1F6F78;
-  --color-teal-strong: #16535A;
-  --color-amber: #B8722E;
-  --color-amber-strong: #965E24;
-  --color-text: #17202B;
-  --color-text-muted: #5B6472;
-  --color-text-on-ink: #EAEFF3;
-  --color-text-on-ink-muted: #9BA8B5;
-  --color-border: #D7DCE3;
-  --color-border-on-ink: #2B3946;
+  /* Pallet "Blueprint" — Enginner tecnique plants */
+  --color-blueprint: #0F2942;
+  --color-blueprint-soft: #17324F;
+  --color-bg: #F4F6F2;
+  --color-surface: #FFFFFF;
+  --color-accent: #FF6B35;
+  --color-accent-strong: #E5551F;
+  --color-text: #16232E;
+  --color-text-muted: #4A5D6E;
+  --color-text-on-blueprint: #E8EEF3;
+  --color-text-on-blueprint-muted: #9FB4C4;
+  --color-border: #D7DEE3;
+  --color-border-on-blueprint: #2D5578;
+  --color-grid-line: #2D5578;
+  --color-grid-line-light: #C9D4DC;
   --color-success: #2F7D5C;
-  --color-danger: #B3432E;
+  --color-danger: #C1432E;
 
-  --font-display: "Space Grotesk", "IBM Plex Sans", sans-serif;
-  --font-body: "IBM Plex Sans", -apple-system, sans-serif;
-  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+  /* Tipografy */
+  --font-display: "Archivo", "Inter", sans-serif;
+  --font-body: "Inter", -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
 
   --fs-xs: 0.75rem;
   --fs-sm: 0.875rem;
@@ -42,32 +43,32 @@
   --space-16: 8rem;
 
   --container-max: 1180px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
+  --radius-sm: 3px;
+  --radius-md: 6px;
   --border-w: 1px;
 
-  --shadow-card: 0 1px 2px rgba(16, 24, 32, 0.06),
-                 0 4px 16px rgba(16, 24, 32, 0.06);
-  --shadow-panel: 0 8px 40px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 1px 2px rgba(15, 41, 66, 0.06), 0 4px 16px rgba(15, 41, 66, 0.08);
+  --shadow-panel: 0 12px 48px rgba(0, 0, 0, 0.4);
 
-  --color-header-bg: rgba(255, 255, 255, 0.88);
+  --color-header-bg: rgba(244, 246, 242, 0.9);
 
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
+  --transition-slow: 400ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  --grid-size: 32px;
 }
 
 /* ===== DARK THEME ===== */
 [data-theme="dark"] {
-  --color-paper: #0D1319;
-  --color-paper-raised: #141C24;
-  --color-text: #EAEFF3;
-  --color-text-muted: #9BA8B5;
-  --color-border: #26323D;
-  --color-teal: #35939D;
-  --color-teal-strong: #4AACB6;
-  --color-amber: #D08A42;
-  --color-amber-strong: #E29C54;
-  --color-header-bg: rgba(13, 19, 25, 0.88);
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5),
-                 0 4px 20px rgba(0, 0, 0, 0.4);
+  --color-bg: #0B1520;
+  --color-surface: #12233A;
+  --color-text: #E8EEF3;
+  --color-text-muted: #9FB4C4;
+  --color-border: #24435F;
+  --color-grid-line-light: #1E3450;
+  --color-accent: #FF7A4A;
+  --color-accent-strong: #FF8F63;
+  --color-header-bg: rgba(11, 21, 32, 0.9);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 20px rgba(0, 0, 0, 0.45);
 }

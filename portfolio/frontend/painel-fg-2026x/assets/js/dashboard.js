@@ -90,11 +90,15 @@ function renderProjectsTable() {
 
 function openProjectModal(project) {
   clearFormAlert("projectFormAlert");
-  document.getElementById("projectModalTitle").textContent = project ? "Editar projeto" : "Novo projeto";
+  document.getElementById("projectModalTitle").textContent = project
+    ? i18n.t("admin.dashboard.editProjectModalTitle")
+    : i18n.t("admin.dashboard.newProjectModalTitle");
   document.getElementById("projectId").value = project ? project.id : "";
   document.getElementById("projectTitle").value = project ? project.title : "";
   document.getElementById("projectDescription").value = project ? project.description : "";
+  document.getElementById("projectDescriptionEn").value = project && project.description_en ? project.description_en : "";
   document.getElementById("projectStack").value = project ? project.stack : "";
+  document.getElementById("projectImageUrl").value = project && project.image_path ? project.image_path : "";
   document.getElementById("projectRepoUrl").value = project && project.repo_url ? project.repo_url : "";
   document.getElementById("projectDemoUrl").value = project && project.demo_url ? project.demo_url : "";
   document.getElementById("projectPublished").checked = project ? project.is_published : true;
@@ -122,7 +126,9 @@ document.getElementById("projectForm").addEventListener("submit", async (event) 
   const payload = {
     title: document.getElementById("projectTitle").value.trim(),
     description: document.getElementById("projectDescription").value.trim(),
+    description_en: document.getElementById("projectDescriptionEn").value.trim() || null,
     stack: document.getElementById("projectStack").value.trim(),
+    image_path: document.getElementById("projectImageUrl").value.trim() || null,
     repo_url: document.getElementById("projectRepoUrl").value.trim() || null,
     demo_url: document.getElementById("projectDemoUrl").value.trim() || null,
     is_published: document.getElementById("projectPublished").checked,

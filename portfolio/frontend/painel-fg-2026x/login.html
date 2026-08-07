@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Admin — Login</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../assets/css/reset.css">
   <link rel="stylesheet" href="../assets/css/variables.css">
@@ -30,7 +30,7 @@
 
     <div class="login-card">
       <div class="login-logo">felipe<span style="color: var(--color-teal);">.dev</span> / admin</div>
-      <h1 class="login-title" data-i18n="admin.login.title">Entrar</h1>
+      <h1 class="login-title" id="loginTitle" data-i18n="admin.login.title">Entrar</h1>
 
       <div class="admin-alert" id="loginAlert" role="alert"></div>
 
@@ -47,6 +47,14 @@
         <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="auto"></div>
 
         <button type="submit" class="btn btn-primary" id="loginSubmit" data-i18n="admin.login.submit">Entrar</button>
+      </form>
+
+      <form id="mfaForm" novalidate style="display:none;">
+        <div class="form-field">
+          <label for="mfaCode">Código do autenticador (ou código de backup)</label>
+          <input type="text" id="mfaCode" name="mfaCode" required maxlength="20" autocomplete="one-time-code" placeholder="123456">
+        </div>
+        <button type="submit" class="btn btn-primary" id="mfaSubmit">Verificar</button>
       </form>
     </div>
   </div>

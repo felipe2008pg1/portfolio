@@ -1,38 +1,37 @@
-const API_BASE_URL = "http://127.0.0.1:8000";
-
 async function adminRequest(path, options = {}, isRetry = false) {
-  const url = `${API_BASE_URL}${path}`;
-  
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers: { 
-        "Content-Type": "application/json", 
-        ...(options.headers || {}) 
-      },
-      credentials: "omit",
-    });
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    credentials: "include",
+  });
 
-    // If the backend returns an error (e.g., 400, 401), the fetch does NOT trigger an error in the catch block. 
-    // It returns the response object. You need to check .ok.
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error(`[admin] Erro no fetch para ${path}:`, response.status, errorData);
-      
-      // Error handling logic (ex: 401)
-      if (response.status === 401 && !isRetry) {
-      }
-      
-      const error = new Error(errorData.detail || "Request failed");
-      error.status = response.status;
-      throw error;
+  const excludedFromRetry = ["/api/auth/login", "/api/auth/refresh", "/api/auth/mfa/verify"];
+  if (response.status === 401 && !isRetry && !excludedFromRetry.includes(path)) {
+    try {
+      await adminRequest("/api/auth/refresh", { method: "POST" }, true);
+      return adminRequest(path, options, true);
+    } catch (_) {
+      window.location.href = "login.html";
+      throw new Error("Expired Session.");
     }
-
-    return await response.json();
-  } catch (err) {
-    console.error(`[admin] Fail in the net for ${url}:`, err);
-    throw err;
   }
+
+  let data = null;
+  try { data = await response.json(); } catch (_) {}
+
+  if (!response.ok) {
+    let message = (data && data.detail) || "The request could not be completed.";
+    if (data && Array.isArray(data.errors) && data.errors.length > 0) {
+      const first = data.errors[0];
+      const field = Array.isArray(first.loc) ? first.loc[first.loc.length - 1] : "camp";
+      message = `${field}: ${first.msg}`;
+    }
+    const error = new Error(message);
+    error.status = response.status;
+    error.payload = data;
+    throw error;
+  }
+  return data;
 }
 
 const adminApi = {
@@ -41,8 +40,15 @@ const adminApi = {
       method: "POST",
       body: JSON.stringify({ username, password, turnstile_token: turnstileToken }),
     }),
+  mfaVerify: (mfaToken, code) =>
+    adminRequest("/api/auth/mfa/verify", { method: "POST", body: JSON.stringify({ mfa_token: mfaToken, code }) }),
   logout: () => adminRequest("/api/auth/logout", { method: "POST" }),
   me: () => adminRequest("/api/auth/me"),
+
+  mfaStatus: () => adminRequest("/api/auth/mfa/status"),
+  mfaSetupInit: () => adminRequest("/api/auth/mfa/setup/init", { method: "POST" }),
+  mfaSetupConfirm: (code) => adminRequest("/api/auth/mfa/setup/confirm", { method: "POST", body: JSON.stringify({ code }) }),
+  mfaDisable: (code) => adminRequest("/api/auth/mfa/disable", { method: "POST", body: JSON.stringify({ code }) }),
 
   getAllProjects: () => adminRequest("/api/projects/admin"),
   createProject: (payload) => adminRequest("/api/projects", { method: "POST", body: JSON.stringify(payload) }),
@@ -60,9 +66,7 @@ async function requireAdminSession() {
     await adminApi.me();
     return true;
   } catch (error) {
-    if (!window.location.pathname.endsWith("login.html")) {
-      window.location.href = "login.html";
-    }
+    window.location.href = "login.html";
     return false;
   }
 }
