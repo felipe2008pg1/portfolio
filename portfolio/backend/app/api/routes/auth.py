@@ -25,12 +25,14 @@ settings = get_settings()
 limiter = Limiter(key_func=get_remote_address)
 
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
+    cookie_samesite = "none" if settings.is_production else "strict"
+
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
         secure=settings.is_production,
-        samesite="strict",
+        samesite=cookie_samesite,
         max_age=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",
     )
@@ -39,7 +41,7 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
         value=refresh_token,
         httponly=True,
         secure=settings.is_production,
-        samesite="strict",
+        samesite=cookie_samesite,
         max_age=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
         path="/api/auth",
     )
