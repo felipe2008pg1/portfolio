@@ -46,6 +46,7 @@ function renderProjectsGrid() {
   cachedProjects.forEach((project, index) => {
     const card = document.createElement("article");
     card.className = "project-card";
+    card.style.animationDelay = `${index * 80}ms`;
 
     if (project.image_path && isSafeHttpUrl(project.image_path)) {
       const img = document.createElement("img");

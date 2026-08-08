@@ -880,3 +880,145 @@ h1, h2, h3 {
 .footer-links a:hover {
   color: var(--color-accent);
 }
+
+/* ===== MOBILE RESPONSIVENESS (emphasis) ===== */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.75rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .system-panel {
+    animation: none; /* Prevents wobbling on small screens; more stable when touched. */
+  }
+
+  .about-fact:hover {
+    transform: none; /* "Hover" doesn't exist on touch devices; this prevents getting "stuck" in a displaced state. */
+  }
+
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-card-links {
+    flex-direction: column;
+  }
+
+  .project-card-links .btn {
+    width: 100%;
+  }
+
+  .contact-info {
+    margin-bottom: var(--space-6);
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+}
+
+/* Comfortable touch: minimum 44px target for navigation buttons/links on mobile */
+@media (max-width: 720px) {
+  .nav-links a {
+    display: block;
+    padding-block: var(--space-3);
+    font-size: var(--fs-md);
+  }
+
+  .theme-toggle,
+  .nav-toggle {
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+/* ===== MICRO-INTERAÇÕES ===== */
+
+/* Subtle zoom on the project image on hover */
+.project-card-image {
+  transition: transform var(--transition-slow);
+}
+
+.project-card:hover .project-card-image {
+  transform: scale(1.04);
+}
+
+.project-card {
+  isolation: isolate; /* keeps the enlarged image within the card's rounded edges */
+}
+
+/* Stagger: project cards enter in sequence, not all at once. */
+.projects-grid .project-card {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: card-in var(--transition-slow) forwards;
+}
+
+@keyframes card-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-grid .project-card {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .project-card:hover .project-card-image {
+    transform: none;
+  }
+}
+
+/* Animated underline on text links within the content (e.g., about) */
+.about-text a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--transition-fast);
+}
+
+.about-text a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Button with a subtle "breathing" effect on the main hero CTA; it draws attention without being annoying. */
+.hero-actions .btn-primary {
+  position: relative;
+}
+
+.hero-actions .btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.5);
+  animation: btn-pulse 2.8s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes btn-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.35); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 107, 53, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-actions .btn-primary::after {
+    animation: none;
+  }
+}
