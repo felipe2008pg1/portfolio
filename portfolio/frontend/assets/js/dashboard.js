@@ -44,7 +44,7 @@ function updateStats() {
   document.getElementById("statMfaStatus").textContent = mfaEnabledCache ? "ON" : "OFF";
 }
 
-/* ===== PROJECTS ===== */
+/* ===== PROJETOS ===== */
 async function loadProjects() {
   const tbody = document.getElementById("projectsTableBody");
   try {
@@ -466,8 +466,8 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   }
 });
 
-/* ===== RE-RENDER WHEN CHANGE TO LANGUAGE ===== */
-window.renderProjectsGrid = null; // no used on admin
+/* ===== RE-RENDER AO TROCAR IDIOMA ===== */
+window.renderProjectsGrid = null; // não usado no admin, evita conflito de nome
 const _originalI18nApply = window.i18n;
 
 document.addEventListener("DOMContentLoaded", async () => {
