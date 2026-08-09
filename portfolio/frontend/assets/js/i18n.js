@@ -130,7 +130,16 @@ const TRANSLATIONS = {
     "admin.dashboard.errorSaveProject": "Erro ao salvar projeto.",
     "admin.dashboard.errorDeleteProject": "Erro ao excluir projeto.",
     "admin.dashboard.errorSaveSkill": "Erro ao salvar skill.",
-    "admin.dashboard.errorDeleteSkill": "Erro ao excluir skill.",},
+    "admin.dashboard.errorDeleteSkill": "Erro ao excluir skill.",
+    "admin.security.title": "Segurança",
+    "admin.security.mfaLabel": "Autenticação em duas etapas (MFA)",
+    "admin.security.checking": "Verificando status…",
+    "admin.security.enabled": "Ativado — sua conta está protegida com um segundo fator.",
+    "admin.security.disabled": "Desativado — recomendado ativar pra maior segurança.",
+    "admin.security.checkError": "Não foi possível verificar o status do MFA.",
+    "admin.security.enableBtn": "Ativar MFA",
+    "admin.security.disableBtn": "Desativar MFA",
+  },
 
   en: {
     "meta.title": "Felipe Gonzalez — Full Stack Developer",
@@ -264,6 +273,14 @@ const TRANSLATIONS = {
     "admin.dashboard.errorDeleteProject": "Error deleting project.",
     "admin.dashboard.errorSaveSkill": "Error saving skill.",
     "admin.dashboard.errorDeleteSkill": "Error deleting skill.",
+    "admin.security.title": "Security",
+    "admin.security.mfaLabel": "Two-factor authentication (MFA)",
+    "admin.security.checking": "Checking status…",
+    "admin.security.enabled": "Enabled — your account is protected with a second factor.",
+    "admin.security.disabled": "Disabled — recommended to enable for extra security.",
+    "admin.security.checkError": "Couldn't check MFA status.",
+    "admin.security.enableBtn": "Enable MFA",
+    "admin.security.disableBtn": "Disable MFA",
   },
 };
 

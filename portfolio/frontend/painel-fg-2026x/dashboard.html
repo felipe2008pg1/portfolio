@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="../assets/img/icon-192.png">
-  <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
-  <meta name="theme-color" content="#0F2942">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -19,79 +13,140 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="assets/css/admin.css">
 
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon-32x32.png">
+  <meta name="theme-color" content="#0F2942">
+
   <script src="../assets/js/theme.js"></script>
 </head>
 <body>
   <div class="admin-shell">
-    <header class="admin-header">
-      <span class="admin-header-title">felipe<span style="color: var(--color-teal);">.dev</span> / admin</span>
-      <div style="display:flex; align-items:center; gap: var(--space-4);">
-        <div class="lang-toggle" role="group" aria-label="Idioma / Language">
-          <button type="button" data-lang="pt">PT</button>
-          <button type="button" data-lang="en">EN</button>
-        </div>
-        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Alternar tema" aria-pressed="false">
-          <span class="theme-toggle-icon" aria-hidden="true">☾</span>
-        </button>
-        <button class="btn btn-outline btn-sm" id="logoutBtn" data-i18n="admin.dashboard.logout">Sair</button>
-      </div>
-    </header>
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar-logo">felipe<span style="color: var(--color-accent);">.dev</span> / admin</div>
+      <nav class="admin-sidebar-nav">
+        <a href="#projetos" class="admin-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 9h18" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Projetos
+        </a>
+        <a href="#skills" class="admin-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Skills
+        </a>
+        <a href="#seguranca" class="admin-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Segurança
+        </a>
+      </nav>
+    </aside>
 
-    <main class="admin-main">
-      <div class="admin-alert" id="globalAlert" role="alert"></div>
+    <div class="admin-content">
+      <header class="admin-topbar">
+        <div class="admin-topbar-title">
+          <button type="button" class="admin-mobile-toggle" id="sidebarToggle" aria-label="Abrir menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg>
+          </button>
+          Dashboard
+        </div>
+        <div class="admin-topbar-actions">
+          <div class="lang-toggle" role="group" aria-label="Idioma / Language">
+            <button type="button" data-lang="pt">PT</button>
+            <button type="button" data-lang="en">EN</button>
+          </div>
+          <button type="button" class="theme-toggle" id="themeToggle" aria-label="Alternar tema" aria-pressed="false">
+            <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+          </button>
+          <button class="btn btn-outline btn-sm" id="logoutBtn" data-i18n="admin.dashboard.logout">Sair</button>
+        </div>
+      </header>
 
-      <section class="admin-section">
-        <div class="admin-section-head">
-          <h2 class="section-title" style="font-size: var(--fs-lg);" data-i18n="admin.dashboard.projectsTitle">Projetos</h2>
-          <button class="btn btn-primary btn-sm" id="newProjectBtn" data-i18n="admin.dashboard.newProject">+ Novo projeto</button>
-        </div>
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th data-i18n="admin.dashboard.colTitle">Título</th>
-              <th data-i18n="admin.dashboard.colStack">Stack</th>
-              <th data-i18n="admin.dashboard.colPublished">Publicado</th>
-              <th data-i18n="admin.dashboard.colActions">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="projectsTableBody">
-            <tr class="admin-empty-row"><td colspan="4" data-i18n="admin.dashboard.loading">Carregando…</td></tr>
-          </tbody>
-        </table>
-      </section>
+      <main class="admin-main">
+        <div class="admin-alert" id="globalAlert" role="alert"></div>
 
-      <section class="admin-section">
-        <div class="admin-section-head">
-          <h2 class="section-title" style="font-size: var(--fs-lg);" data-i18n="admin.dashboard.skillsTitle">Skills</h2>
-          <button class="btn btn-primary btn-sm" id="newSkillBtn" data-i18n="admin.dashboard.newSkill">+ Nova skill</button>
+        <div class="admin-stats">
+          <div class="admin-stat-card">
+            <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 9h18" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="admin-stat-value" id="statTotalProjects">—</span>
+            <span class="admin-stat-label">Projetos</span>
+          </div>
+          <div class="admin-stat-card">
+            <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l9 4.5v9L12 20l-9-4.5v-9L12 2z" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="admin-stat-value" id="statPublished">—</span>
+            <span class="admin-stat-label">Publicados</span>
+          </div>
+          <div class="admin-stat-card">
+            <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="admin-stat-value" id="statTotalSkills">—</span>
+            <span class="admin-stat-label">Skills</span>
+          </div>
+          <div class="admin-stat-card">
+            <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="admin-stat-value" id="statMfaStatus">—</span>
+            <span class="admin-stat-label">MFA</span>
+          </div>
         </div>
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th data-i18n="admin.dashboard.colCategory">Categoria</th>
-              <th data-i18n="admin.dashboard.colName">Nome</th>
-              <th data-i18n="admin.dashboard.colOrder">Ordem</th>
-              <th data-i18n="admin.dashboard.colActions">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="skillsTableBody">
-            <tr class="admin-empty-row"><td colspan="4" data-i18n="admin.dashboard.loading">Carregando…</td></tr>
-          </tbody>
-        </table>
-      </section>
 
-      <section class="admin-section">
-        <div class="admin-section-head">
-          <h2 class="section-title" style="font-size: var(--fs-lg);">Segurança</h2>
-        </div>
-        <div class="about-fact" style="max-width: 480px;">
-          <span class="about-fact-label">Autenticação em duas etapas (MFA)</span>
-          <p id="mfaStatusText" class="about-fact-value" style="margin-bottom: var(--space-4);">Verificando status…</p>
-          <button class="btn btn-primary btn-sm" id="mfaEnableBtn" style="display:none;">Ativar MFA</button>
-          <button class="btn btn-danger btn-sm" id="mfaDisableBtn" style="display:none;">Desativar MFA</button>
-        </div>
-      </section>
-    </main>
+        <section class="admin-section" id="projetos">
+          <div class="admin-section-head">
+            <h2 class="section-title" style="font-size: var(--fs-lg);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 9h18" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span data-i18n="admin.dashboard.projectsTitle">Projetos</span>
+            </h2>
+            <button class="btn btn-primary btn-sm" id="newProjectBtn" data-i18n="admin.dashboard.newProject">+ Novo projeto</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th data-i18n="admin.dashboard.colTitle">Título</th>
+                <th data-i18n="admin.dashboard.colStack">Stack</th>
+                <th data-i18n="admin.dashboard.colPublished">Publicado</th>
+                <th data-i18n="admin.dashboard.colActions">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="projectsTableBody">
+              <tr class="admin-empty-row"><td colspan="4" data-i18n="admin.dashboard.loading">Carregando…</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="admin-section" id="skills">
+          <div class="admin-section-head">
+            <h2 class="section-title" style="font-size: var(--fs-lg);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span data-i18n="admin.dashboard.skillsTitle">Skills</span>
+            </h2>
+            <button class="btn btn-primary btn-sm" id="newSkillBtn" data-i18n="admin.dashboard.newSkill">+ Nova skill</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th data-i18n="admin.dashboard.colCategory">Categoria</th>
+                <th data-i18n="admin.dashboard.colName">Nome</th>
+                <th data-i18n="admin.dashboard.colOrder">Ordem</th>
+                <th data-i18n="admin.dashboard.colActions">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="skillsTableBody">
+              <tr class="admin-empty-row"><td colspan="4" data-i18n="admin.dashboard.loading">Carregando…</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="admin-section" id="seguranca">
+          <div class="admin-section-head">
+            <h2 class="section-title" style="font-size: var(--fs-lg);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span data-i18n="admin.security.title">Segurança</span>
+            </h2>
+          </div>
+          <div class="about-fact" style="max-width: 480px;">
+            <span class="about-fact-label" data-i18n="admin.security.mfaLabel">Autenticação em duas etapas (MFA)</span>
+            <p id="mfaStatusText" class="about-fact-value" style="margin-bottom: var(--space-4);" data-i18n="admin.security.checking">Verificando status…</p>
+            <button class="btn btn-primary btn-sm" id="mfaEnableBtn" style="display:none;" data-i18n="admin.security.enableBtn">Ativar MFA</button>
+            <button class="btn btn-danger btn-sm" id="mfaDisableBtn" style="display:none;" data-i18n="admin.security.disableBtn">Desativar MFA</button>
+          </div>
+        </section>
+      </main>
+    </div>
   </div>
 
   <div class="admin-modal-overlay" id="projectModalOverlay">

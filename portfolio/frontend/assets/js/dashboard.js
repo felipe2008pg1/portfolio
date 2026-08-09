@@ -1,5 +1,6 @@
 let projectsCache = [];
 let skillsCache = [];
+let mfaEnabledCache = false;
 
 function showGlobalAlert(message, type) {
   const el = document.getElementById("globalAlert");
@@ -25,6 +26,24 @@ document.querySelectorAll("[data-close-modal]").forEach((btn) => {
   btn.addEventListener("click", () => closeModal(btn.getAttribute("data-close-modal")));
 });
 
+/* ===== SIDEBAR MOBILE ===== */
+const sidebarToggle = document.getElementById("sidebarToggle");
+const adminSidebar = document.getElementById("adminSidebar");
+if (sidebarToggle && adminSidebar) {
+  sidebarToggle.addEventListener("click", () => adminSidebar.classList.toggle("is-open"));
+  document.querySelectorAll(".admin-sidebar-link").forEach((link) => {
+    link.addEventListener("click", () => adminSidebar.classList.remove("is-open"));
+  });
+}
+
+/* ===== STATS ===== */
+function updateStats() {
+  document.getElementById("statTotalProjects").textContent = String(projectsCache.length);
+  document.getElementById("statPublished").textContent = String(projectsCache.filter((p) => p.is_published).length);
+  document.getElementById("statTotalSkills").textContent = String(skillsCache.length);
+  document.getElementById("statMfaStatus").textContent = mfaEnabledCache ? "ON" : "OFF";
+}
+
 /* ===== PROJECTS ===== */
 async function loadProjects() {
   const tbody = document.getElementById("projectsTableBody");
@@ -41,6 +60,7 @@ async function loadProjects() {
     row.appendChild(cell);
     tbody.appendChild(row);
   }
+  updateStats();
 }
 
 function renderProjectsTable() {
@@ -71,12 +91,14 @@ function renderProjectsTable() {
     const actionsCell = document.createElement("td");
     actionsCell.className = "col-actions";
     const editBtn = document.createElement("button");
-    editBtn.className = "btn btn-outline btn-sm";
-    editBtn.textContent = i18n.t("admin.dashboard.edit");
+    editBtn.className = "btn btn-outline btn-sm btn-icon";
+    editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    editBtn.append(i18n.t("admin.dashboard.edit"));
     editBtn.addEventListener("click", () => openProjectModal(project));
     const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn btn-danger btn-sm";
-    deleteBtn.textContent = i18n.t("admin.dashboard.delete");
+    deleteBtn.className = "btn btn-danger btn-sm btn-icon";
+    deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18" stroke-linecap="round"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    deleteBtn.append(i18n.t("admin.dashboard.delete"));
     deleteBtn.addEventListener("click", () => deleteProject(project.id, project.title));
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(deleteBtn);
@@ -172,6 +194,7 @@ async function loadSkills() {
     row.appendChild(cell);
     tbody.appendChild(row);
   }
+  updateStats();
 }
 
 function renderSkillsTable() {
@@ -202,12 +225,14 @@ function renderSkillsTable() {
     const actionsCell = document.createElement("td");
     actionsCell.className = "col-actions";
     const editBtn = document.createElement("button");
-    editBtn.className = "btn btn-outline btn-sm";
-    editBtn.textContent = i18n.t("admin.dashboard.edit");
+    editBtn.className = "btn btn-outline btn-sm btn-icon";
+    editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    editBtn.append(i18n.t("admin.dashboard.edit"));
     editBtn.addEventListener("click", () => openSkillModal(skill));
     const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn btn-danger btn-sm";
-    deleteBtn.textContent = i18n.t("admin.dashboard.delete");
+    deleteBtn.className = "btn btn-danger btn-sm btn-icon";
+    deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18" stroke-linecap="round"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    deleteBtn.append(i18n.t("admin.dashboard.delete"));
     deleteBtn.addEventListener("click", () => deleteSkill(skill.id, skill.name));
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(deleteBtn);
@@ -289,18 +314,20 @@ async function loadMfaStatus() {
   const disableBtn = document.getElementById("mfaDisableBtn");
   try {
     const result = await adminApi.mfaStatus();
+    mfaEnabledCache = !!result.enabled;
     if (result.enabled) {
-      statusText.textContent = "Ativado — sua conta está protegida com um segundo fator.";
+      statusText.textContent = i18n.t("admin.security.enabled");
       enableBtn.style.display = "none";
       disableBtn.style.display = "inline-flex";
     } else {
-      statusText.textContent = "Desativado — recomendado ativar pra maior segurança.";
+      statusText.textContent = i18n.t("admin.security.disabled");
       enableBtn.style.display = "inline-flex";
       disableBtn.style.display = "none";
     }
   } catch (error) {
-    statusText.textContent = "Não foi possível verificar o status do MFA.";
+    statusText.textContent = i18n.t("admin.security.checkError");
   }
+  updateStats();
 }
 
 function renderMfaSetupStep1(data) {
@@ -376,7 +403,7 @@ function renderMfaBackupCodes(codes) {
 
   const list = document.createElement("div");
   list.style.fontFamily = "var(--font-mono)";
-  list.style.background = "var(--color-paper)";
+  list.style.background = "var(--color-bg)";
   list.style.border = "1px solid var(--color-border)";
   list.style.borderRadius = "var(--radius-sm)";
   list.style.padding = "16px";
@@ -439,11 +466,22 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   }
 });
 
-/* ===== INIT ===== */
+/* ===== RE-RENDER WHEN CHANGE TO LANGUAGE ===== */
+window.renderProjectsGrid = null; // no used on admin
+const _originalI18nApply = window.i18n;
+
 document.addEventListener("DOMContentLoaded", async () => {
   const authed = await requireAdminSession();
   if (!authed) return;
   loadProjects();
   loadSkills();
   loadMfaStatus();
+
+  document.querySelectorAll("[data-lang]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      renderProjectsTable();
+      renderSkillsTable();
+      loadMfaStatus();
+    });
+  });
 });

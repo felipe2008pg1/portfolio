@@ -9,40 +9,74 @@ function isSafeHttpUrl(value) {
   }
 }
 
+function buildProjectsSkeleton() {
+  const wrap = document.createDocumentFragment();
+  for (let i = 0; i < 3; i++) {
+    const card = document.createElement("div");
+    card.className = "skeleton-project-card";
+
+    const img = document.createElement("div");
+    img.className = "skeleton skeleton-project-image";
+
+    const body = document.createElement("div");
+    body.className = "skeleton-project-body";
+    for (let j = 0; j < 3; j++) {
+      const line = document.createElement("div");
+      line.className = "skeleton skeleton-line";
+      body.appendChild(line);
+    }
+
+    card.appendChild(img);
+    card.appendChild(body);
+    wrap.appendChild(card);
+  }
+  return wrap;
+}
+
+function buildEmptyState(text) {
+  const wrap = document.createElement("div");
+  wrap.className = "empty-state";
+
+  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  icon.setAttribute("class", "empty-state-icon");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("fill", "none");
+  icon.setAttribute("stroke", "currentColor");
+  icon.setAttribute("stroke-width", "1.5");
+  icon.innerHTML = '<rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 9h18" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 4v5" stroke-linecap="round" stroke-linejoin="round"/>';
+
+  const span = document.createElement("span");
+  span.className = "empty-state-text";
+  span.textContent = text;
+
+  wrap.appendChild(icon);
+  wrap.appendChild(span);
+  return wrap;
+}
+
 function renderProjectsGrid() {
   const grid = document.getElementById("projectsGrid");
   if (!grid) return;
 
+  grid.innerHTML = "";
+
   if (cachedProjects === null) {
-    grid.innerHTML = "";
-    const loading = document.createElement("div");
-    loading.className = "projects-empty";
-    loading.textContent = i18n.t("projects.loading");
-    grid.appendChild(loading);
+    grid.appendChild(buildProjectsSkeleton());
     return;
   }
 
   if (cachedProjects === "error") {
-    grid.innerHTML = "";
-    const error = document.createElement("div");
-    error.className = "projects-empty";
-    error.textContent = i18n.t("projects.error");
-    grid.appendChild(error);
+    grid.appendChild(buildEmptyState(i18n.t("projects.error")));
     return;
   }
 
   if (cachedProjects.length === 0) {
-    grid.innerHTML = "";
-    const empty = document.createElement("div");
-    empty.className = "projects-empty";
-    empty.textContent = i18n.t("projects.empty");
-    grid.appendChild(empty);
+    grid.appendChild(buildEmptyState(i18n.t("projects.empty")));
     return;
   }
 
   const total = cachedProjects.length;
 
-  grid.innerHTML = "";
   cachedProjects.forEach((project, index) => {
     const card = document.createElement("article");
     card.className = "project-card";

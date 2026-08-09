@@ -1022,3 +1022,113 @@ h1, h2, h3 {
     animation: none;
   }
 }
+
+/* ===== SKELETON LOADING ===== */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg) 50%, var(--color-border) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+.skeleton-skills-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  border-bottom: var(--border-w) solid var(--color-border);
+  padding: var(--space-5);
+  gap: var(--space-4);
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .skeleton-skills-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.skeleton-skills-row:last-child {
+  border-bottom: none;
+}
+
+.skeleton-line {
+  height: 14px;
+  width: 100%;
+}
+
+.skeleton-tags {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.skeleton-tag {
+  height: 28px;
+  width: 72px;
+}
+
+.skeleton-project-card {
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.skeleton-project-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.skeleton-project-body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.skeleton-project-body .skeleton-line:nth-child(1) { width: 60%; height: 20px; }
+.skeleton-project-body .skeleton-line:nth-child(2) { width: 100%; }
+.skeleton-project-body .skeleton-line:nth-child(3) { width: 85%; }
+
+/* ===== EMPTY STATES ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  border: var(--border-w) dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+}
+
+.empty-state-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+.empty-state-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+}
+
+/* ===== CONTACT ICONS ===== */
+.contact-info-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
