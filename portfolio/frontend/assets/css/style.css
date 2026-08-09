@@ -1132,3 +1132,150 @@ h1, h2, h3 {
   flex-shrink: 0;
   color: var(--color-accent);
 }
+
+/* ===== MODAL ANIMATION  ===== */
+.admin-modal-overlay {
+  transition: opacity var(--transition-base);
+  opacity: 0;
+}
+
+.admin-modal-overlay.is-open {
+  opacity: 1;
+}
+
+.admin-modal {
+  transform: scale(0.96) translateY(8px);
+  opacity: 0;
+  transition: transform var(--transition-base), opacity var(--transition-base);
+}
+
+.admin-modal-overlay.is-open .admin-modal {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* ===== BUTTONS SPINNER ===== */
+.btn.is-loading {
+  color: transparent !important;
+  pointer-events: none;
+  position: relative;
+}
+
+.btn.is-loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+}
+
+.btn-outline.is-loading::after,
+.btn-ghost.is-loading::after {
+  border-color: rgba(22, 35, 46, 0.25);
+  border-top-color: var(--color-text);
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn.is-loading::after {
+    animation: none;
+  }
+}
+
+/* ===== RESPONSIVE TABLES ===== */
+@media (max-width: 720px) {
+  .admin-table thead {
+    display: none;
+  }
+
+  .admin-table, .admin-table tbody, .admin-table tr, .admin-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-table tr {
+    border-bottom: var(--border-w) solid var(--color-border);
+    padding: var(--space-4);
+  }
+
+  .admin-table tr:last-child {
+    border-bottom: none;
+  }
+
+  .admin-table td {
+    border: none;
+    padding: var(--space-2) 0;
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    text-align: right;
+  }
+
+  .admin-table td::before {
+    content: attr(data-label);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  .admin-table .col-actions {
+    justify-content: flex-end;
+  }
+
+  .admin-table .col-actions::before {
+    content: "";
+  }
+
+  .admin-empty-row {
+    padding: 0;
+  }
+}
+
+/* ===== PAGE 404 ===== */
+.notfound-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-blueprint);
+  background-image:
+    linear-gradient(var(--color-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  padding: var(--space-6);
+}
+
+.notfound-content {
+  text-align: center;
+  max-width: 480px;
+}
+
+.notfound-code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-4);
+}
+
+.notfound-title {
+  font-size: var(--fs-3xl);
+  color: #FFFFFF;
+  margin-bottom: var(--space-4);
+}
+
+.notfound-text {
+  color: var(--color-text-on-blueprint-muted);
+  font-size: var(--fs-md);
+  margin-bottom: var(--space-8);
+}

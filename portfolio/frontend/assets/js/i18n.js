@@ -22,7 +22,7 @@ const TRANSLATIONS = {
     "panel.key.foco": "foco",
     "panel.key.status": "status",
     "panel.val.cargo": "Full Stack Developer",
-    "panel.val.stack": "Python · HTML · JS · CSS",
+    "panel.val.stack": "Python · Flask · FastAPI",
     "panel.val.foco": "Automação & APIs",
     "panel.val.status": "Disponível",
 
@@ -85,6 +85,17 @@ const TRANSLATIONS = {
     "admin.login.errorRateLimit": "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
     "admin.login.errorGeneric": "Usuário ou senha inválidos.",
     "admin.login.errorNetwork": "Não foi possível conectar ao servidor. Verifique se o backend está rodando e o CORS liberado.",
+
+    "admin.nav.dashboard": "Dashboard",
+    "admin.nav.projects": "Projetos",
+    "admin.nav.skills": "Skills",
+    "admin.nav.security": "Segurança",
+
+    "admin.stat.projects": "Projetos",
+    "admin.stat.published": "Publicados",
+    "admin.stat.skills": "Skills",
+    "admin.stat.mfa": "MFA",
+
     "admin.dashboard.logout": "Sair",
     "admin.dashboard.projectsTitle": "Projetos",
     "admin.dashboard.newProject": "+ Novo projeto",
@@ -130,7 +141,17 @@ const TRANSLATIONS = {
     "admin.dashboard.errorSaveProject": "Erro ao salvar projeto.",
     "admin.dashboard.errorDeleteProject": "Erro ao excluir projeto.",
     "admin.dashboard.errorSaveSkill": "Erro ao salvar skill.",
-    "admin.dashboard.errorDeleteSkill": "Erro ao excluir skill.",},
+    "admin.dashboard.errorDeleteSkill": "Erro ao excluir skill.",
+
+    "admin.security.title": "Segurança",
+    "admin.security.mfaLabel": "Autenticação em duas etapas (MFA)",
+    "admin.security.checking": "Verificando status…",
+    "admin.security.enabled": "Ativado — sua conta está protegida com um segundo fator.",
+    "admin.security.disabled": "Desativado — recomendado ativar pra maior segurança.",
+    "admin.security.checkError": "Não foi possível verificar o status do MFA.",
+    "admin.security.enableBtn": "Ativar MFA",
+    "admin.security.disableBtn": "Desativar MFA",
+  },
 
   en: {
     "meta.title": "Felipe Gonzalez — Full Stack Developer",
@@ -155,7 +176,7 @@ const TRANSLATIONS = {
     "panel.key.foco": "focus",
     "panel.key.status": "status",
     "panel.val.cargo": "Full Stack Developer",
-    "panel.val.stack": "Python · HTML · JS · CSS",
+    "panel.val.stack": "Python · Flask · FastAPI",
     "panel.val.foco": "Automation & APIs",
     "panel.val.status": "Available",
 
@@ -218,6 +239,17 @@ const TRANSLATIONS = {
     "admin.login.errorRateLimit": "Too many attempts. Wait a few minutes before trying again.",
     "admin.login.errorGeneric": "Invalid username or password.",
     "admin.login.errorNetwork": "Couldn't connect to the server. Check the backend is running and CORS is allowed.",
+
+    "admin.nav.dashboard": "Dashboard",
+    "admin.nav.projects": "Projects",
+    "admin.nav.skills": "Skills",
+    "admin.nav.security": "Security",
+
+    "admin.stat.projects": "Projects",
+    "admin.stat.published": "Published",
+    "admin.stat.skills": "Skills",
+    "admin.stat.mfa": "MFA",
+
     "admin.dashboard.logout": "Sign out",
     "admin.dashboard.projectsTitle": "Projects",
     "admin.dashboard.newProject": "+ New project",
@@ -264,6 +296,15 @@ const TRANSLATIONS = {
     "admin.dashboard.errorDeleteProject": "Error deleting project.",
     "admin.dashboard.errorSaveSkill": "Error saving skill.",
     "admin.dashboard.errorDeleteSkill": "Error deleting skill.",
+
+    "admin.security.title": "Security",
+    "admin.security.mfaLabel": "Two-factor authentication (MFA)",
+    "admin.security.checking": "Checking status…",
+    "admin.security.enabled": "Enabled — your account is protected with a second factor.",
+    "admin.security.disabled": "Disabled — recommended to enable for extra security.",
+    "admin.security.checkError": "Couldn't check MFA status.",
+    "admin.security.enableBtn": "Enable MFA",
+    "admin.security.disableBtn": "Disable MFA",
   },
 };
 
