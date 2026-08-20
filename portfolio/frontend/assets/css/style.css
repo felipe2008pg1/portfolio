@@ -1287,7 +1287,7 @@ h1, h2, h3 {
   left: 0;
   height: 3px;
   width: 0%;
-  background: var(--color-accent);
+  background: linear-gradient(90deg, var(--color-accent), var(--color-brasil-green), var(--color-brasil-yellow));
   z-index: 1000;
   transition: width 100ms linear;
 }
@@ -1389,3 +1389,30 @@ h1, h2, h3 {
     transform: none !important;
   }
 }
+
+/* ===== BR/US ===== */
+.eyebrow::before {
+  background:
+    linear-gradient(var(--color-accent), var(--color-accent)) top left / 100% 1.5px no-repeat,
+    linear-gradient(90deg, var(--color-brasil-green), var(--color-brasil-yellow)) bottom left / 100% 1.5px no-repeat;
+}
+
+.footer-flag-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-on-blueprint-muted);
+}
+
+.footer-flag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.footer-flag-dot.dot-1 { background: var(--color-brasil-green); }
+.footer-flag-dot.dot-2 { background: var(--color-brasil-yellow); }
+.footer-flag-dot.dot-3 { background: var(--color-accent); }

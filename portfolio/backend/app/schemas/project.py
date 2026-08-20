@@ -1,5 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+﻿from pydantic import BaseModel, ConfigDict, Field, field_validator
 from urllib.parse import urlparse
+
 
 def _validate_public_url(value: str | None) -> str | None:
     if value is None or value == "":
@@ -17,6 +18,19 @@ def _validate_public_url(value: str | None) -> str | None:
         raise ValueError("URL muito longa")
     return value
 
+
+def _validate_image_path(value: str | None) -> str | None:
+    if value is None or value == "":
+        return None
+    if value.startswith("http://") or value.startswith("https://"):
+        return _validate_public_url(value)
+    if ".." in value or value.startswith("/") or not value.startswith("assets/"):
+        raise ValueError("Caminho de imagem inválido. Use uma URL completa ou um caminho iniciando com assets/.")
+    if len(value) > 500:
+        raise ValueError("Caminho muito longo")
+    return value
+
+
 class ProjectBase(BaseModel):
     title: str = Field(min_length=1, max_length=120)
     description: str = Field(min_length=1, max_length=2000)
@@ -28,13 +42,20 @@ class ProjectBase(BaseModel):
     is_published: bool = True
     display_order: int = Field(default=0, ge=0, le=9999)
 
-    @field_validator("repo_url", "demo_url", "image_path")
+    @field_validator("repo_url", "demo_url")
     @classmethod
     def validate_urls(cls, v: str | None) -> str | None:
         return _validate_public_url(v)
 
+    @field_validator("image_path")
+    @classmethod
+    def validate_image(cls, v: str | None) -> str | None:
+        return _validate_image_path(v)
+
+
 class ProjectCreate(ProjectBase):
     pass
+
 
 class ProjectUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=120)
@@ -47,10 +68,16 @@ class ProjectUpdate(BaseModel):
     is_published: bool | None = None
     display_order: int | None = Field(default=None, ge=0, le=9999)
 
-    @field_validator("repo_url", "demo_url", "image_path")
+    @field_validator("repo_url", "demo_url")
     @classmethod
     def validate_urls(cls, v: str | None) -> str | None:
         return _validate_public_url(v)
+
+    @field_validator("image_path")
+    @classmethod
+    def validate_image(cls, v: str | None) -> str | None:
+        return _validate_image_path(v)
+
 
 class ProjectOut(ProjectBase):
     model_config = ConfigDict(from_attributes=True)
