@@ -9,6 +9,11 @@ function isSafeHttpUrl(value) {
   }
 }
 
+function isSafeImageSrc(value) {
+  if (value.startsWith("assets/")) return true; // caminho relativo do próprio site
+  return isSafeHttpUrl(value);
+}
+
 function buildProjectsSkeleton() {
   const wrap = document.createDocumentFragment();
   for (let i = 0; i < 3; i++) {
@@ -82,7 +87,7 @@ function renderProjectsGrid() {
     card.className = "project-card";
     card.style.animationDelay = `${index * 80}ms`;
 
-    if (project.image_path && isSafeHttpUrl(project.image_path)) {
+      if (project.image_path && isSafeImageSrc(project.image_path)) {
       const img = document.createElement("img");
       img.className = "project-card-image";
       img.src = project.image_path;
