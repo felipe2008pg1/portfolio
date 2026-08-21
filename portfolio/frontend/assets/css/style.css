@@ -1416,3 +1416,50 @@ h1, h2, h3 {
 .footer-flag-dot.dot-1 { background: var(--color-brasil-green); }
 .footer-flag-dot.dot-2 { background: var(--color-brasil-yellow); }
 .footer-flag-dot.dot-3 { background: var(--color-accent); }
+
+/* ===== SECTION-BASED COLOR SYSTEM ===== */
+.eyebrow.c-green::before {
+  background:
+    linear-gradient(var(--color-brasil-green), var(--color-brasil-green)) center / 100% 1.5px no-repeat,
+    linear-gradient(90deg, var(--color-brasil-green), var(--color-brasil-green)) center / 1.5px 100% no-repeat;
+}
+.eyebrow.c-green { color: var(--color-brasil-green); }
+
+.eyebrow.c-yellow::before {
+  background:
+    linear-gradient(var(--color-brasil-yellow), var(--color-brasil-yellow)) center / 100% 1.5px no-repeat,
+    linear-gradient(90deg, var(--color-brasil-yellow), var(--color-brasil-yellow)) center / 1.5px 100% no-repeat;
+}
+.eyebrow.c-yellow { color: #A87E10; }
+
+.eyebrow.c-red::before {
+  background:
+    linear-gradient(var(--color-usa-red), var(--color-usa-red)) center / 100% 1.5px no-repeat,
+    linear-gradient(90deg, var(--color-usa-red), var(--color-usa-red)) center / 1.5px 100% no-repeat;
+}
+.eyebrow.c-red { color: var(--color-usa-red); }
+
+.admin-stat-card:nth-child(1)::before { background: var(--color-accent); }
+.admin-stat-card:nth-child(2)::before { background: var(--color-brasil-green); }
+.admin-stat-card:nth-child(3)::before { background: var(--color-brasil-yellow); }
+.admin-stat-card:nth-child(4)::before { background: var(--color-usa-red); }
+
+.project-card {
+  border-top: 3px solid var(--color-accent);
+}
+.project-card:nth-child(4n+2) { border-top-color: var(--color-brasil-green); }
+.project-card:nth-child(4n+3) { border-top-color: var(--color-brasil-yellow); }
+.project-card:nth-child(4n+4) { border-top-color: var(--color-usa-red); }
+
+.skills-row:nth-child(4n+1) .skills-row-label { border-left: 3px solid var(--color-accent); }
+.skills-row:nth-child(4n+2) .skills-row-label { border-left: 3px solid var(--color-brasil-green); }
+.skills-row:nth-child(4n+3) .skills-row-label { border-left: 3px solid var(--color-brasil-yellow); }
+.skills-row:nth-child(4n+4) .skills-row-label { border-left: 3px solid var(--color-usa-red); }
+
+.social-link:nth-child(1):hover { border-color: var(--color-brasil-green); color: var(--color-brasil-green); }
+.social-link:nth-child(2):hover { border-color: var(--color-usa-red); color: var(--color-usa-red); }
+
+.btn-ghost:hover {
+  border-color: var(--color-brasil-green);
+  color: var(--color-brasil-green);
+}

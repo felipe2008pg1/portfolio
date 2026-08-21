@@ -151,6 +151,7 @@ const TRANSLATIONS = {
     "admin.security.checkError": "Não foi possível verificar o status do MFA.",
     "admin.security.enableBtn": "Ativar MFA",
     "admin.security.disableBtn": "Desativar MFA",
+    "footer.builtIn": "Feito no Brasil, para o mundo",
   },
 
   en: {
@@ -305,6 +306,7 @@ const TRANSLATIONS = {
     "admin.security.checkError": "Couldn't check MFA status.",
     "admin.security.enableBtn": "Enable MFA",
     "admin.security.disableBtn": "Disable MFA",
+    "footer.builtIn": "Built in Brazil, shipped worldwide",
   },
 };
 
