@@ -441,12 +441,12 @@ h1, h2, h3 {
   box-shadow: var(--shadow-panel);
   overflow: hidden;
   font-family: var(--font-mono);
-  animation: panel-float 6s ease-in-out infinite;
+  animation: panel-float 3.2s ease-in-out infinite;
 }
 
 @keyframes panel-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  50% { transform: translateY(-8px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1462,4 +1462,56 @@ h1, h2, h3 {
 .btn-ghost:hover {
   border-color: var(--color-brasil-green);
   color: var(--color-brasil-green);
+}
+
+/* ===== Animated flags in the hero background ===== */
+.hero-flags {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-flag {
+  position: absolute;
+  top: 50%;
+  width: 480px;
+  height: auto;
+  opacity: 0.16;
+  transform: translateY(-50%);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.hero-flag img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-flag.flag-brazil {
+  left: -80px;
+}
+
+.hero-flag.flag-usa {
+  right: -80px;
+}
+
+@media (max-width: 900px) {
+  .hero-flag {
+    width: 300px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-flags {
+    display: none;
+  }
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
 }
