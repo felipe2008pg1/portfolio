@@ -1,68 +1,82 @@
 # CHANGELOG_AI.md
 
-> Log cronológico reconstruído a partir do histórico de uma única conversa longa e contínua entre o usuário e um Claude anterior. Não há timestamps reais de commit associados a cada item (não houve acesso a `git log` detalhado durante toda a sessão) — a ordem reflete a ordem das decisões na conversa, não necessariamente a ordem exata dos commits Git.
+> Chronological log reconstructed from the history of a single long and continuous conversation between the user and a previous Claude. There are no actual commit timestamps associated with each item (there was no access to a detailed `git log` throughout the entire session) — the order reflects the order of decisions in the conversation, not necessarily the exact order of Git commits.
 
-## Fase 1 — Planejamento e Scaffold Inicial
-- Definição do projeto: portfólio full stack pessoal (não landing page estática simples)
-- Stack escolhida: Python/FastAPI no backend (a pedido explícito do usuário, que é dev backend Python), HTML/CSS/JS puro no frontend (sem framework)
-- Banco inicial: SQLite (posteriormente migrado para Postgres/Neon — ver Fase 5)
-- Scaffold do backend: estrutura `core/db/models/schemas/api/services`, separação de responsabilidades
-- Seed script (`seed.py`) para criar admin inicial + skills
+## Phase 1 — Planning and Initial Scaffold
 
-## Fase 2 — Frontend Público
-- HTML/CSS/JS estático: hero, sobre, skills (renderizado via API), projetos (via API), contato (formulário → WhatsApp via `wa.me`)
-- Design inicial: conceito "registro de sistema" (paleta grafite/teal/âmbar, painel tipo terminal) — **posteriormente substituído por completo** (ver Fase 7)
-- Tema dark/light com persistência em `localStorage`
-- Internacionalização PT/EN via `data-i18n` + dicionário JS
+* Project definition: personal full stack portfolio (not a simple static landing page)
+* Chosen stack: Python/FastAPI on the backend (at the explicit request of the user, who is a Python backend developer), plain HTML/CSS/JS on the frontend (no framework)
+* Initial database: SQLite (later migrated to Postgres/Neon — see Phase 5)
+* Backend scaffold: `core/db/models/schemas/api/services` structure, separation of responsibilities
+* Seed script (`seed.py`) to create initial admin + skills
 
-## Fase 3 — Painel Administrativo
-- Login com JWT em cookie HttpOnly
-- Dashboard com CRUD de projetos e skills, modais de formulário
-- Rota do admin renomeada de `/admin` para `/painel-fg-2026x` (segurança por obscuridade)
+## Phase 2 — Public Frontend
 
-## Fase 4 — Checklist de Segurança
-Usuário forneceu checklist extensa; agente corrigiu marcações incorretas (vários itens já estavam implementados sem o usuário perceber: SQLAlchemy parametrizado, Pydantic, CORS restrito, cookies HttpOnly, SameSite, lockout de login, logs básicos) e implementou o que faltava, em ordem:
-1. HSTS (já existia, condicional a `ENVIRONMENT=production`)
-2. Admin em rota não óbvia (renomeação de pasta)
-3. JWT curto (15 min) + Refresh Token com rotation (tabela `refresh_tokens`, hash SHA-256, opaco)
-4. Cloudflare Turnstile no login e no formulário de contato
-5. Atualização de dependências (patches pequenos aplicados; major versions adiadas — ver `TODO.md`)
-6. Migração SQLite → PostgreSQL (Neon) para viabilizar backup real (SQLite em disco efêmero de PaaS não é confiável)
-7. MFA (TOTP + backup codes) — modelo `mfa_backup_codes`, QR code gerado via `qrcode`+`Pillow`, fluxo de login em duas etapas
+* Static HTML/CSS/JS: hero, about, skills (rendered via API), projects (via API), contact (form → WhatsApp via `wa.me`)
+* Initial design: "system record" concept (graphite/teal/amber palette, terminal-style panel) — **later completely replaced** (see Phase 7)
+* Dark/light theme with persistence in `localStorage`
+* PT/EN internationalization via `data-i18n` + JS dictionary
 
-Bugs encontrados e corrigidos durante essa fase:
-- `TypeError: can't compare offset-naive and offset-aware datetimes` — SQLite não preserva timezone; corrigido com helper `ensure_aware_utc()`
-- Exceção não serializável em `RequestValidationError` (objeto `ValueError` bruto dentro de `ctx` do Pydantic) quebrando o handler de erro 422 — corrigido filtrando só campos serializáveis
-- Loop de reload infinito do uvicorn causado por escrita no `.db` sendo monitorada pelo watcher — corrigido com `--reload-exclude`
-- Live Server do VS Code recarregando a página do admin repetidamente pelo mesmo motivo — corrigido com `.vscode/settings.json` restringindo o escopo do watcher
+## Phase 3 — Admin Panel
 
-## Fase 5 — Deploy em Produção
-- Backend → Railway (root directory `backend`, `Procfile`, `runtime.txt`)
-- Frontend → Vercel (root directory `frontend`, `vercel.json` com headers de segurança)
-- Banco → Neon Postgres (substituindo SQLite definitivamente)
-- Ajuste crítico pós-deploy: cookies `SameSite=Strict` bloqueavam sessão cross-site (frontend e backend em domínios diferentes) — corrigido para `SameSite=None` condicional a `ENVIRONMENT=production`
-- Troca de Turnstile de chaves de teste para chaves reais, com idas e vindas por causa de mismatch entre site key/secret key em diferentes lugares
+* Login with JWT in HttpOnly cookie
+* Dashboard with CRUD for projects and skills, form modals
+* Admin route renamed from `/admin` to `/painel-fg-2026x` (security through obscurity)
 
-## Fase 6 — Internacionalização e Conteúdo Dinâmico
-- Campo `description_en` adicionado a projetos (migração pontual `add_description_en_column.py`) para permitir descrição de projeto traduzível (diferente do título, que nunca traduz)
-- Correção de categorias de skill que haviam sido digitadas em inglês por engano no admin (quebrando o mapa de tradução `CATEGORY_TRANSLATIONS_EN`)
+## Phase 4 — Security Checklist
 
-## Fase 7 — Redesign Visual Completo ("Blueprint")
-Usuário pediu troca completa de identidade visual (não apenas refinamento). Novo conceito proposto e aceito: paleta azul-blueprint profundo + laranja-segurança, tipografia Archivo/Inter/JetBrains Mono, grid técnico de fundo, painel de status estilo "folha de planta", cards de projeto com numeração "FOLHA XX/XX".
-- Skeleton loading, empty states com ícones SVG, ícones de contato trocados de emoji para SVG
-- Painel admin redesenhado: sidebar de navegação + topbar + stat cards (contagem de projetos/publicados/skills/status MFA)
-- Responsividade mobile reforçada (tabelas viram cards empilhados, touch targets maiores)
-- Micro-interações: zoom em imagem de card no hover, tilt 3D nos cards de projeto, stagger de entrada em listas, barra de progresso de scroll, crosshair seguindo o mouse no hero, spinner em botões durante loading
+User provided an extensive checklist; agent corrected incorrect markings (several items were already implemented without the user realizing it: parameterized SQLAlchemy, Pydantic, restricted CORS, HttpOnly cookies, SameSite, login lockout, basic logs) and implemented what was missing, in order:
 
-## Fase 8 — Identidade Brasil/EUA
-A pedido do usuário ("estilo brasileiro-estadunidense misturado"), adicionados acentos de cor:
-- Verde e amarelo (Brasil) + vermelho (EUA) como cores secundárias por seção (skills=verde, projetos=amarelo, contato=vermelho)
-- Fundo do hero escurecido progressivamente (`#0F2942` → `#081C30` → `#050F1C`) a pedido do usuário
-- Bandeiras animadas no hero: primeira versão em SVG com CSS `@keyframes` de balanço; **substituída** por GIFs animados reais hospedados no Giphy (hotlink direto), por pedido explícito do usuário, com tamanho aumentado
+1. HSTS (already existed, conditional on `ENVIRONMENT=production`)
+2. Admin on a non-obvious route (folder rename)
+3. Short-lived JWT (15 min) + Refresh Token with rotation (`refresh_tokens` table, SHA-256 hash, opaque)
+4. Cloudflare Turnstile on login and contact form
+5. Dependency updates (small patches applied; major versions postponed — see `TODO.md`)
+6. SQLite → PostgreSQL migration (Neon) to enable real backups (SQLite on ephemeral PaaS storage is unreliable)
+7. MFA (TOTP + backup codes) — `mfa_backup_codes` model, QR code generated via `qrcode`+`Pillow`, two-step login flow
 
-## Fase 9 — Correção de Imagens de Projeto
-- Imagens hospedadas no Imgur/LinkedIn CDN retornando 403 (hotlink protection / token expirado)
-- Solução: hospedar imagens localmente em `frontend/assets/img/projects/`, backend passou a aceitar `image_path` como caminho relativo (`assets/...`) além de URL completa, com validação anti-path-traversal
+Bugs found and fixed during this phase:
 
-## Estado no momento da geração deste changelog
-Site público e painel admin funcionais em produção. Último pedido do usuário antes desta documentação: geração dos arquivos `CLAUDE.md`, `ARCHITECTURE.md`, `TODO.md`, `CHANGELOG_AI.md`, `DECISIONS.md`. README do repositório ainda não criado (próximo passo mencionado pelo usuário).
+* `TypeError: can't compare offset-naive and offset-aware datetimes` — SQLite does not preserve timezone; fixed with `ensure_aware_utc()` helper
+* Non-serializable exception in `RequestValidationError` (raw `ValueError` object inside Pydantic's `ctx`) breaking the 422 error handler — fixed by filtering only serializable fields
+* Infinite uvicorn reload loop caused by writes to the `.db` being monitored by the watcher — fixed with `--reload-exclude`
+* VS Code Live Server repeatedly reloading the admin page for the same reason — fixed with `.vscode/settings.json` restricting the watcher scope
+
+## Phase 5 — Production Deployment
+
+* Backend → Railway (root directory `backend`, `Procfile`, `runtime.txt`)
+* Frontend → Vercel (root directory `frontend`, `vercel.json` with security headers)
+* Database → Neon Postgres (definitively replacing SQLite)
+* Critical post-deployment fix: `SameSite=Strict` cookies were blocking cross-site sessions (frontend and backend on different domains) — fixed to `SameSite=None` conditional on `ENVIRONMENT=production`
+* Turnstile switched from test keys to real keys, with back-and-forth caused by a mismatch between site key/secret key in different places
+
+## Phase 6 — Internationalization and Dynamic Content
+
+* `description_en` field added to projects (one-off migration `add_description_en_column.py`) to allow translatable project descriptions (unlike the title, which is never translated)
+* Fixed skill categories that had been entered in English by mistake in the admin panel (breaking the `CATEGORY_TRANSLATIONS_EN` translation map)
+
+## Phase 7 — Complete Visual Redesign ("Blueprint")
+
+User requested a complete change of visual identity (not just refinement). New concept proposed and accepted: deep blue-blueprint + security orange palette, Archivo/Inter/JetBrains Mono typography, technical background grid, status panel styled like a blueprint sheet, project cards with "SHEET XX/XX" numbering.
+
+* Skeleton loading, empty states with SVG icons, contact icons replaced from emoji with SVG
+* Admin panel redesigned: navigation sidebar + topbar + stat cards (project/published/skills/MFA status counts)
+* Enhanced mobile responsiveness (tables become stacked cards, larger touch targets)
+* Micro-interactions: card image zoom on hover, 3D tilt on project cards, staggered list entry animations, scroll progress bar, crosshair following the mouse in the hero, button spinners during loading
+
+## Phase 8 — Brazil/USA Identity
+
+At the user's request ("mixed Brazilian-American style"), color accents were added:
+
+* Green and yellow (Brazil) + red (USA) as secondary colors by section (skills=green, projects=yellow, contact=red)
+* Hero background progressively darkened (`#0F2942` → `#081C30` → `#050F1C`) at the user's request
+* Animated flags in the hero: first version in SVG with CSS `@keyframes` sway animation; **replaced** with real animated GIFs hosted on Giphy (direct hotlink), at the user's explicit request, with increased size
+
+## Phase 9 — Project Image Fixes
+
+* Images hosted on Imgur/LinkedIn CDN returning 403 (hotlink protection / expired token)
+* Solution: host images locally in `frontend/assets/img/projects/`, backend now accepts `image_path` as a relative path (`assets/...`) in addition to full URLs, with anti-path-traversal validation
+
+## State at the Time This Changelog Was Generated
+
+Public site and admin panel functional in production. Last user request before this documentation: generation of the `CLAUDE.md`, `ARCHITECTURE.md`, `TODO.md`, `CHANGELOG_AI.md`, `DECISIONS.md` files. Repository README has not yet been created (next step mentioned by the user).

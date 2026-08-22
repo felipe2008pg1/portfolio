@@ -1,72 +1,74 @@
 claude.md
 
-# CLAUDE.md — Guia de Continuidade do Projeto
+# CLAUDE.md — Project Continuity Guide
 
-> **Como este arquivo foi gerado:** reconstruído a partir do histórico completo de uma conversa entre o usuário (Felipe Gonzalez) e um Claude anterior, não por inspeção direta do repositório. Há risco real de drift entre o que está documentado aqui e o estado real dos arquivos — durante o desenvolvimento houve múltiplos episódios de dessincronia entre o código enviado no chat e o que foi de fato colado/salvo localmente pelo usuário (usuário iniciante em terminal/Git, múltiplos erros de path). **Antes de confiar cegamente nisto, rode os comandos de verificação na seção "Como Verificar o Estado Real" abaixo.**
+> **How this file was generated:** reconstructed from the complete history of a conversation between the user (Felipe Gonzalez) and a previous Claude, not through direct inspection of the repository. There is a real risk of drift between what is documented here and the actual state of the files — during development there were multiple instances of desynchronization between code sent in the chat and what was actually pasted/saved locally by the user (beginner with terminal/Git, multiple path errors). **Before blindly trusting this, run the verification commands in the "How to Verify the Real State" section below.**
 
-## O que é este projeto
+## What this project is
 
-Portfólio pessoal full stack de Felipe Gonzalez (desenvolvedor Full Stack, Python/JS/HTML/CSS, background administrativo/contábil). Site público + painel administrativo autenticado para gerenciar conteúdo (projetos e skills) sem precisar editar código.
+Personal full stack portfolio of Felipe Gonzalez (Full Stack developer, Python/JS/HTML/CSS, administrative/accounting background). Public website + authenticated admin panel for managing content (projects and skills) without needing to edit code.
 
 ## Stack
 
-- **Backend:** FastAPI (Python), SQLAlchemy ORM, PostgreSQL (Neon, gerenciado)
-- **Frontend:** HTML/CSS/JS vanilla — **sem framework, sem build step**. Tudo servido estático.
-- **Auth:** JWT de acesso curto + refresh token com rotation, MFA (TOTP) opcional, Argon2id para senha
-- **Deploy:** Backend no **Railway**, Frontend no **Vercel**, banco no **Neon** (Postgres serverless)
-- **Segurança:** Cloudflare Turnstile (captcha), rate limiting (slowapi), CORS restritivo, headers de segurança
+* **Backend:** FastAPI (Python), SQLAlchemy ORM, PostgreSQL (Neon, managed)
+* **Frontend:** Vanilla HTML/CSS/JS — **no framework, no build step**. Everything is served statically.
+* **Auth:** Short-lived access JWT + refresh token with rotation, optional MFA (TOTP), Argon2id for passwords
+* **Deploy:** Backend on **Railway**, Frontend on **Vercel**, database on **Neon** (serverless Postgres)
+* **Security:** Cloudflare Turnstile (captcha), rate limiting (slowapi), restrictive CORS, security headers
 
-## Estrutura de pastas (conforme o usuário reportou no terminal)
+## Folder structure (as reported by the user in the terminal)
 
 ```
-C:\Users\FAMÍLIA\Documents\projetos_programação\site portfolio\   ← pasta raiz real no PC do usuário
-└── portfolio\                                                     ← raiz do repositório Git
+C:\Users\FAMILY\Documents\programming_projects\portfolio site\   ← actual root folder on the user's PC
+└── portfolio\                                                     ← Git repository root
     ├── backend\
     │   ├── app\
-    │   │   ├── main.py                  # entry point FastAPI
+    │   │   ├── main.py                  # FastAPI entry point
     │   │   ├── core\                    # config, security, middleware, logging, turnstile
-    │   │   ├── db\                      # base declarativa + session
+    │   │   ├── db\                      # declarative base + session
     │   │   ├── models\                  # SQLAlchemy models
     │   │   ├── schemas\                 # Pydantic schemas
     │   │   ├── api\routes\              # auth, projects, skills, contact
-    │   │   └── services\                # lógica de negócio isolada das rotas
+    │   │   └── services\                # business logic isolated from routes
     │   ├── requirements.txt
-    │   ├── Procfile                     # comando de start pro Railway
-    │   ├── runtime.txt                  # versão do Python fixada
-    │   ├── seed.py                      # popula admin + skills iniciais
-    │   ├── add_description_en_column.py # migração pontual (coluna description_en)
-    │   ├── add_mfa_columns.py           # migração pontual (colunas/tabela MFA)
-    │   └── .env                         # NUNCA commitado (.gitignore cobre)
+    │   ├── Procfile                     # start command for Railway
+    │   ├── runtime.txt                  # pinned Python version
+    │   ├── seed.py                      # populates initial admin + skills
+    │   ├── add_description_en_column.py # one-off migration (description_en column)
+    │   ├── add_mfa_columns.py           # one-off migration (MFA columns/table)
+    │   └── .env                         # NEVER committed (.gitignore covers it)
     │
     └── frontend\
-        ├── index.html                   # site público
-        ├── vercel.json                  # headers de segurança do site estático
-        ├── 404.html                     # página de erro customizada
+        ├── index.html                   # public website
+        ├── vercel.json                  # security headers for the static site
+        ├── 404.html                     # custom error page
         ├── assets\
         │   ├── css\ (reset, variables, style)
         │   ├── js\ (config, api, i18n, main, theme, render-skills, render-projects, contact-form)
         │   └── img\ (favicon*, og-image.png, projects\*.png)
-        └── painel-fg-2026x\             # ⚠️ ADMIN — nome da pasta é deliberadamente não-óbvio (segurança por obscuridade)
+        └── painel-fg-2026x\             # ⚠️ ADMIN — folder name is deliberately non-obvious (security through obscurity)
             ├── login.html
             ├── dashboard.html
             └── assets\ (css\admin.css, js\admin-api.js, js\login.js, js\dashboard.js)
 ```
 
-**Importante:** o nome real da pasta do admin é `painel-fg-2026x`, não `admin`. Isso foi intencional (item de segurança "admin em rota menos óbvia"). Se precisar referenciar a URL do admin: `https://<domínio>/painel-fg-2026x/login.html`.
+**Important:** the actual admin folder name is `painel-fg-2026x`, not `admin`. This was intentional (security item "admin on a less obvious route"). If you need to reference the admin URL: `https://<domain>/painel-fg-2026x/login.html`.
 
-## Como rodar localmente
+## How to run locally
 
 Backend:
+
 ```powershell
 cd portfolio/backend
 .\venv\Scripts\Activate.ps1
 uvicorn app.main:app --reload --reload-exclude "*.db" --reload-exclude "*.db-journal" --reload-exclude "*.db-wal" --reload-exclude "*.db-shm"
 ```
-⚠️ O `--reload-exclude` é obrigatório — sem ele, o uvicorn entra em loop de reload infinito porque o SQLite/refresh tokens escrevem no banco a cada request, e o watcher interpreta isso como mudança de código.
 
-Frontend: **Live Server** do VS Code, servindo a pasta `frontend/`. Configuração em `.vscode/settings.json` (na raiz `portfolio/`, não em `backend/`) restringe o watcher só pra `/frontend` e ignora `.db`/`backend/` — sem isso, o Live Server recarrega a página sozinha toda vez que o backend grava no banco.
+⚠️ `--reload-exclude` is mandatory — without it, uvicorn enters an infinite reload loop because SQLite/refresh tokens write to the database on every request, and the watcher interprets this as a code change.
 
-## Variáveis de ambiente (backend/.env)
+Frontend: **VS Code Live Server**, serving the `frontend/` folder. Configuration in `.vscode/settings.json` (at the `portfolio/` root, not in `backend/`) restricts the watcher to `/frontend` and ignores `.db`/`backend/` — without this, Live Server reloads the page by itself every time the backend writes to the database.
+
+## Environment variables (backend/.env)
 
 ```
 ENVIRONMENT, DATABASE_URL, JWT_SECRET_KEY, JWT_ALGORITHM,
@@ -75,33 +77,36 @@ CORS_ALLOWED_ORIGINS, ALLOWED_HOSTS, WHATSAPP_NUMBER,
 ADMIN_USERNAME, ADMIN_PASSWORD, RATE_LIMIT_CONTACT, RATE_LIMIT_LOGIN,
 TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY
 ```
-Todas validadas via Pydantic Settings em `app/core/config.py` — a aplicação **falha ao iniciar** (propositalmente) se alguma estiver ausente ou inválida.
 
-## Produção — URLs conhecidas (conforme último estado confirmado na conversa)
+All are validated via Pydantic Settings in `app/core/config.py` — the application **fails to start** (intentionally) if any are missing or invalid.
 
-- Frontend: `https://portfoliofelipe2008pg1.vercel.app`
-- Backend: `https://portfolio-production-fef5.up.railway.app`
-- Banco: Neon Postgres (host `ep-odd-boat-acmudziu.sa-east-1.aws.neon.tech`)
+## Production — Known URLs (according to the last confirmed state in the conversation)
 
-⚠️ Essas URLs podem ter mudado desde a geração deste documento — confirme nos painéis Railway/Vercel.
+* Frontend: `https://portfoliofelipe2008pg1.vercel.app`
+* Backend: `https://portfolio-production-fef5.up.railway.app`
+* Database: Neon Postgres (host `ep-odd-boat-acmudziu.sa-east-1.aws.neon.tech`)
 
-## Gotchas conhecidos (não repita esses erros)
+⚠️ These URLs may have changed since this document was generated — confirm them in the Railway/Vercel dashboards.
 
-1. **Estrutura de pastas aninhada**: o usuário abre o terminal às vezes na pasta `site portfolio` (raiz no PC), às vezes em `site portfolio\portfolio` (raiz do repo). Causou dezenas de erros de "path not found". Sempre confirme com `pwd` antes de dar instruções de path relativo.
-2. **`Set-Content -Encoding UTF8` no PowerShell adiciona BOM** — isso quebrou o `vercel.json` (JSON parser do Vercel rejeita BOM). Use `[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding $false))` quando o encoding importa (JSON, YAML).
-3. **SQLite não preserva timezone** em colunas `DateTime` — comparações entre `datetime.now(timezone.utc)` (aware) e valores lidos do banco (naive) geram `TypeError`. Existe um helper `ensure_aware_utc()` em `app/core/security.py` — use-o sempre que comparar datas vindas do banco.
-4. **uvicorn `--reload` + banco de dados no mesmo diretório monitorado** = loop de restart infinito. Sempre usar `--reload-exclude` para arquivos `.db*`.
-5. **Cookies cross-site em produção**: como o frontend (Vercel) e o backend (Railway) são domínios diferentes, os cookies de sessão precisam de `SameSite=None` + `Secure=True` em produção (`ENVIRONMENT=production`), mas `SameSite=Strict` em desenvolvimento local (mesma origem). Isso já está implementado condicionalmente em `_set_auth_cookies()` — não reverta para `Strict` fixo.
-6. **Turnstile exige hostname exato cadastrado no painel Cloudflare.** Se o teste local falhar com "Security verification failed" ou o widget não carregar, primeiro suspeite de: (a) chave de teste/real misturada entre frontend e backend, (b) hostname não cadastrado, (c) acessando via `127.0.0.1` quando só `localhost` foi cadastrado (ou vice-versa).
-7. **Categorias de skill são digitadas em português no banco** (`Linguagens`, `Banco de Dados`, `Dados`, `Framework`, `API`, `Ferramentas`) — a tradução PT↔EN é automática via `CATEGORY_TRANSLATIONS_EN` em `i18n.js`. Se alguém digitar a categoria em inglês diretamente no admin, a tradução quebra (fica travada, sem correspondência no mapa).
-8. **Imagens de projeto via serviços externos (Imgur, LinkedIn CDN) frequentemente retornam 403** (hotlink protection). A solução adotada foi hospedar as imagens localmente em `frontend/assets/img/projects/` e referenciar por caminho relativo (`assets/img/projects/nome.png`). O backend valida `image_path` aceitando tanto URL completa (`http://`/`https://`) quanto caminho relativo iniciando em `assets/` (bloqueando path traversal).
+## Known Gotchas (do not repeat these mistakes)
 
-## Como Verificar o Estado Real
+1. **Nested folder structure**: the user sometimes opens the terminal in the `portfolio site` folder (root on the PC), and sometimes in `portfolio site\portfolio` (repo root). This caused dozens of "path not found" errors. Always confirm with `pwd` before giving relative path instructions.
+2. **`Set-Content -Encoding UTF8` in PowerShell adds a BOM** — this broke `vercel.json` (Vercel's JSON parser rejects BOM). Use `[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding($false)))` when encoding matters (JSON, YAML).
+3. **SQLite does not preserve timezone** in `DateTime` columns — comparisons between `datetime.now(timezone.utc)` (aware) and values read from the database (naive) generate `TypeError`. There is an `ensure_aware_utc()` helper in `app/core/security.py` — always use it when comparing dates retrieved from the database.
+4. **uvicorn `--reload` + database in the same monitored directory** = infinite restart loop. Always use `--reload-exclude` for `.db*` files.
+5. **Cross-site cookies in production**: since the frontend (Vercel) and backend (Railway) are different domains, session cookies require `SameSite=None` + `Secure=True` in production (`ENVIRONMENT=production`), but `SameSite=Strict` in local development (same origin). This is already conditionally implemented in `_set_auth_cookies()` — do not revert to fixed `Strict`.
+6. **Turnstile requires the exact hostname to be registered in the Cloudflare dashboard.** If local testing fails with "Security verification failed" or the widget does not load, first suspect: (a) test/real key mixed between frontend and backend, (b) hostname not registered, (c) accessing via `127.0.0.1` when only `localhost` was registered (or vice versa).
+7. **Skill categories are entered in Portuguese in the database** (`Linguagens`, `Banco de Dados`, `Dados`, `Framework`, `API`, `Ferramentas`) — PT↔EN translation is automatic via `CATEGORY_TRANSLATIONS_EN` in `i18n.js`. If someone enters the category in English directly in the admin panel, translation breaks (it gets stuck, with no match in the map).
+8. **Project images via external services (Imgur, LinkedIn CDN) frequently return 403** (hotlink protection). The adopted solution was to host images locally in `frontend/assets/img/projects/` and reference them via relative path (`assets/img/projects/name.png`). The backend validates `image_path`, accepting both full URLs (`http://`/`https://`) and relative paths starting with `assets/` (blocking path traversal).
 
-Antes de continuar o desenvolvimento, rode (na raiz do repo):
+## How to Verify the Real State
+
+Before continuing development, run (from the repo root):
+
 ```powershell
 git log --oneline -20
 git status
 git ls-files | Select-String "\.env$|venv/|\.db$"
 ```
-E compare a estrutura de pastas/arquivos-chave citados aqui com `git ls-files` completo. Se algo neste documento não bater com a realidade do repositório, **confie no repositório, não neste documento**.
+
+And compare the folder structure/key files mentioned here with the complete `git ls-files` output. If anything in this document does not match the actual repository, **trust the repository, not this document**.
