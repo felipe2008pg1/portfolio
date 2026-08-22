@@ -1,0 +1,30 @@
+# TODO.md
+
+> Reconstruído a partir do histórico de conversa. Itens marcados `[confirmar]` precisam de verificação no repositório real antes de agir.
+
+## Pendente — explicitamente adiado pelo usuário/agente anterior
+
+- [ ] **README.md do repositório** — mencionado como próximo passo, ainda não criado até o momento da geração destes documentos.
+- [ ] **Atualização de dependências maiores** (`fastapi`, `starlette`, `uvicorn`, `alembic`, `python-jose`) — deliberadamente adiada por risco de breaking changes; só os patches pequenos (`argon2-cffi`, `email-validator`, `httpx`, `python-multipart`, `slowapi`, `websockets`, `pip`) foram atualizados. Recomendação registrada: fazer isso isolado, com tempo de teste, perto de um próximo ciclo de deploy — não misturado com outra tarefa.
+- [ ] **Migração de `python-jose` para `PyJWT`** — mencionada como melhoria futura de manutenibilidade (`python-jose` tem cadência de manutenção mais lenta), não urgente (o uso atual com HS256 + algoritmo explícito no decode não está exposto à vulnerabilidade de confusão de algoritmo).
+- [ ] **Campo `description_en` por projeto** — implementado, mas depende do usuário preencher manualmente por projeto (não há tradução automática). Confirmar se todos os projetos cadastrados têm a versão em inglês preenchida.
+- [ ] **Refresh token — sem UI de "dispositivos conectados"/revogação manual** — não implementado; escopo deliberadamente simplificado por ser usuário único.
+
+## Riscos / limpeza técnica
+
+- [ ] **Confirmar se o log de diagnóstico temporário em `app/core/turnstile.py`** (`security_logger.warning("turnstile_verify_failed cloudflare_response=%s", result)`) foi mantido ou removido — foi adicionado propositalmente para debugar um erro `invalid-input-secret`, sem instrução explícita de removê-lo depois. Verificar se ainda é desejado ter esse nível de log em produção (pode logar tokens/dados de resposta que não deveriam ficar em log persistente dependendo da política de retenção do Railway).
+- [ ] **Confirmar chaves reais vs. de teste do Turnstile em todos os ambientes** — ao longo da conversa houve trocas repetidas entre chave de teste (`1x00000000000000000000AA`) e chave real (`0x4AAAAAAD2-bMzcMMaQWBgk`) em `frontend/index.html`, `frontend/assets/js/config.js`, `frontend/painel-fg-2026x/login.html` e `backend/.env`/Railway. Confirmar que **todos os 4 lugares** usam a mesma chave (real, para produção real) — inconsistência entre eles causa erro `invalid-input-secret` ou widget não carregar.
+- [ ] **Backup de senha do admin** — o usuário digitou a senha do admin em texto puro no chat em pelo menos uma ocasião (via URL, quando um form submeteu por GET acidentalmente). Foi recomendado trocar a senha depois; **confirmar se isso foi feito** — não há como verificar pelo código, já que a senha real não é visível (só o hash estaria no banco).
+- [ ] **Alembic instalado mas não usado** — `requirements.txt` inclui `alembic==1.13.3`, mas todas as migrações de schema foram feitas via scripts ad-hoc (`add_*_column.py`) + `create_all()`. Se o projeto crescer, vale migrar para migrations versionadas de verdade.
+
+## Possíveis próximos passos (não solicitados explicitamente, mas natural continuação)
+
+- [ ] Popular `description_en` em todos os projetos existentes (se ainda não feito)
+- [ ] Confirmar hostname do Turnstile cadastrado no painel Cloudflare inclui tanto `localhost` (dev) quanto o domínio real do Vercel (produção)
+- [ ] Considerar hospedar os GIFs de bandeira (Brasil/EUA) localmente em vez de via hotlink do Giphy, pelo mesmo motivo que as imagens de projeto foram migradas do Imgur — risco de o link quebrar/ser bloqueado
+- [ ] Domínio próprio — o projeto está rodando em subdomínios gratuitos (`vercel.app`, `up.railway.app`). Se o usuário comprar domínio próprio, será necessário: atualizar `CORS_ALLOWED_ORIGINS`, `ALLOWED_HOSTS`, hostname no Turnstile, e as meta tags `og:url`/`og:image`/`twitter:image` no `index.html`
+- [ ] `MISE_PYTHON_GITHUB_ATTESTATIONS=false` está setado no Railway como workaround de uma falha de infraestrutura deles (verificação de assinatura do Python) — não é uma configuração de segurança nossa, é contorno de bug de terceiro; reavaliar se ainda é necessária no futuro
+
+## Concluído nesta sessão de desenvolvimento (para referência — não re-fazer)
+
+Ver `CHANGELOG_AI.md` para o histórico completo. Resumo: site público completo (hero, sobre, skills, projetos, contato), painel admin completo (CRUD + MFA + estatísticas), checklist de segurança extensa implementada e verificada, identidade visual "Blueprint" com acentos Brasil/EUA, deploy funcional em produção (Railway + Vercel + Neon).

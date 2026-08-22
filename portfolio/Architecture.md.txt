@@ -1,0 +1,97 @@
+Architecture 
+
+# ARCHITECTURE.md
+
+> Reconstruído a partir do histórico de conversa — ver aviso de confiabilidade em `CLAUDE.md`.
+
+## Visão geral
+
+Arquitetura de duas aplicações desacopladas, comunicando via API REST:
+
+```
+┌─────────────────────┐         HTTPS/JSON        ┌──────────────────────┐
+│  Frontend (Vercel)   │ ─────────────────────────>│  Backend (Railway)    │
+│  HTML/CSS/JS estático│ <───────────────────────── │  FastAPI + SQLAlchemy │
+└─────────────────────┘                            └──────────┬───────────┘
+                                                                │
+                                                                v
+                                                     ┌──────────────────────┐
+                                                     │ PostgreSQL (Neon)     │
+                                                     └──────────────────────┘
+```
+
+Não há SSR, não há build step no frontend (sem bundler/transpiler) — arquivos HTML/CSS/JS são servidos como estão.
+
+## Backend
+
+### Camadas (separação de responsabilidades)
+```
+api/routes/*.py   → validação de entrada (via Depends), chamam services, nunca têm lógica de negócio
+services/*.py     → lógica de negócio, única camada que fala com o banco via db.query/db.scalars
+schemas/*.py      → Pydantic — validação/serialização, nunca tocam o banco
+models/*.py       → SQLAlchemy ORM — definição de tabelas
+core/*.py         → config (env vars), security (hash/JWT/TOTP), middleware (headers), turnstile, logging
+```
+
+### Rotas conhecidas (prefixo `/api`)
+- `POST /api/auth/login` — autentica; se MFA ativo, retorna `mfa_required: true` + `mfa_token` temporário (5 min) em vez de logar direto
+- `POST /api/auth/mfa/verify` — segunda etapa do login (código TOTP ou backup code)
+- `POST /api/auth/refresh` — rotation de refresh token (usado automaticamente pelo frontend em 401)
+- `POST /api/auth/logout`
+- `GET /api/auth/me` — checagem de sessão válida
+- `GET/POST /api/auth/mfa/status`, `/mfa/setup/init`, `/mfa/setup/confirm`, `/mfa/disable`
+- `GET /api/projects` — público, só publicados
+- `GET /api/projects/admin` — protegido, todos (inclusive não publicados)
+- `POST/PUT/DELETE /api/projects[/{id}]` — protegido
+- `GET /api/skills`, `POST/PUT/DELETE /api/skills[/{id}]` — GET público, mutações protegidas
+- `POST /api/contact` — público, rate limited, exige `turnstile_token`
+- `GET /api/health` — health check
+
+### Autenticação — fluxo completo
+1. Login com usuário/senha (+ Turnstile obrigatório) → se senha ok e MFA desativado, seta cookies `access_token` (JWT, 15 min) e `refresh_token` (opaco, 7 dias, hash SHA-256 no banco)
+2. Se MFA ativo → retorna token intermediário `mfa_pending` (JWT próprio, 5 min) → segunda chamada `/mfa/verify` com código TOTP ou backup code finaliza o login
+3. Requests subsequentes usam o cookie `access_token`. Se expirar (401), o frontend (`admin-api.js`) automaticamente chama `/api/auth/refresh` uma vez e repete a request original
+4. Refresh token tem **rotation**: cada uso invalida o token antigo e emite um novo — mitiga replay de token roubado
+5. Lockout: 5 tentativas de senha errada → bloqueio de 15 min (campos `failed_login_attempts`/`locked_until` em `admin_users`)
+
+### Banco de dados — tabelas conhecidas
+- `admin_users` (id, username, hashed_password, failed_login_attempts, locked_until, mfa_secret, mfa_enabled, created_at)
+- `projects` (id, title, description, description_en, stack, repo_url, demo_url, image_path, is_published, display_order, created_at)
+- `skills` (id, category, name, display_order)
+- `contact_messages` (id, name, email, subject, message, ip_address, created_at) — log de auditoria, não expostas via API
+- `refresh_tokens` (id, admin_id FK, token_hash, expires_at, revoked_at, created_at)
+- `mfa_backup_codes` (id, admin_id FK, code_hash, used_at, created_at)
+
+Migrations não usam Alembic apesar de estar no `requirements.txt` — na prática, mudanças de schema foram aplicadas via scripts pontuais (`add_description_en_column.py`, `add_mfa_columns.py`) que fazem `ALTER TABLE` condicional, e `Base.metadata.create_all()` roda no startup da app (só cria tabelas que não existem, nunca altera existentes).
+
+### Segurança implementada (ver lista completa em `DECISIONS.md`)
+Argon2id, JWT curto + refresh rotation, MFA/TOTP, rate limiting (slowapi), Cloudflare Turnstile, CORS whitelist, TrustedHost, CSP, HSTS (produção), cookies HttpOnly+Secure+SameSite condicional, honeypot no formulário de contato, validação de URL (bloqueia scheme perigoso e hosts internos), path traversal bloqueado em `image_path`.
+
+## Frontend
+
+### Sem framework — padrões manuais
+- **i18n**: `assets/js/i18n.js` — objeto `TRANSLATIONS` com chaves `pt`/`en`, aplicado via atributos `data-i18n` (textContent), `data-i18n-html` (innerHTML, só para conteúdo estático confiável) e `data-i18n-placeholder`. Preferência salva em `localStorage`. Categorias de skill traduzidas via mapa separado (`CATEGORY_TRANSLATIONS_EN`) porque vêm do banco em português.
+- **Tema dark/light**: `assets/js/theme.js` — aplica `data-theme` no `<html>` antes do primeiro paint (evita flash), persiste em `localStorage`.
+- **Renderização dinâmica**: `render-skills.js` e `render-projects.js` fazem fetch da API e montam DOM via `createElement`/`textContent` (nunca `innerHTML` com dados de API — mitigação de XSS). Projetos usam cache local (`cachedProjects`) para permitir re-render ao trocar idioma sem novo fetch.
+- **API wrapper**: `api.js` (site público, `credentials: "omit"`) e `admin-api.js` (painel, `credentials: "include"`, com lógica de retry automático em 401 via refresh token).
+
+### Design system ("Blueprint")
+Paleta principal definida em `variables.css` como custom properties, com override completo em `[data-theme="dark"]`. Conceito visual: fundo azul-profundo tipo planta técnica de engenharia, grid de linhas finas, laranja como accent de ação (`--color-accent`), com cores adicionais Brasil (verde `--color-brasil-green`, amarelo `--color-brasil-yellow`) e EUA (vermelho `--color-usa-red`) usadas pontualmente por seção (skills=verde, projetos=amarelo, contato=vermelho) e nas bandeiras GIF animadas no hero.
+
+Tipografia: Archivo (display/headings), Inter (corpo), JetBrains Mono (dados/labels técnicos).
+
+### Admin (`painel-fg-2026x/`)
+Layout: sidebar de navegação (Projetos/Skills/Segurança) + topbar (tema/idioma/logout) + cards de estatística (total projetos, publicados, total skills, status MFA) + tabelas CRUD com modais.
+
+## Deploy
+
+- **Backend → Railway**: root directory `portfolio/backend`, `Procfile` define start command (`uvicorn app.main:app --host 0.0.0.0 --port $PORT`), `runtime.txt` fixa Python 3.12.8. Variáveis de ambiente configuradas manualmente no painel Railway (não vêm do `.env`, que não é commitado).
+- **Frontend → Vercel**: root directory `portfolio/frontend`, sem build step (framework preset "Other"), `vercel.json` define headers de segurança.
+- **Banco → Neon**: Postgres serverless, connection string com `sslmode=require`, driver `psycopg2` (`postgresql+psycopg2://`).
+
+## O que NÃO existe nesta arquitetura
+- Sem testes automatizados (não foram mencionados/criados em nenhum momento da conversa)
+- Sem CI/CD além do deploy automático nativo do Railway/Vercel em push pro `main`
+- Sem upload de arquivo real (imagens de projeto são só referência de URL/caminho, não upload via formulário)
+- Sem sistema de múltiplos usuários admin (single-user por design)
+- Sem Alembic em uso efetivo apesar de instalado

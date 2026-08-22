@@ -1,0 +1,107 @@
+claude.md
+
+# CLAUDE.md — Guia de Continuidade do Projeto
+
+> **Como este arquivo foi gerado:** reconstruído a partir do histórico completo de uma conversa entre o usuário (Felipe Gonzalez) e um Claude anterior, não por inspeção direta do repositório. Há risco real de drift entre o que está documentado aqui e o estado real dos arquivos — durante o desenvolvimento houve múltiplos episódios de dessincronia entre o código enviado no chat e o que foi de fato colado/salvo localmente pelo usuário (usuário iniciante em terminal/Git, múltiplos erros de path). **Antes de confiar cegamente nisto, rode os comandos de verificação na seção "Como Verificar o Estado Real" abaixo.**
+
+## O que é este projeto
+
+Portfólio pessoal full stack de Felipe Gonzalez (desenvolvedor Full Stack, Python/JS/HTML/CSS, background administrativo/contábil). Site público + painel administrativo autenticado para gerenciar conteúdo (projetos e skills) sem precisar editar código.
+
+## Stack
+
+- **Backend:** FastAPI (Python), SQLAlchemy ORM, PostgreSQL (Neon, gerenciado)
+- **Frontend:** HTML/CSS/JS vanilla — **sem framework, sem build step**. Tudo servido estático.
+- **Auth:** JWT de acesso curto + refresh token com rotation, MFA (TOTP) opcional, Argon2id para senha
+- **Deploy:** Backend no **Railway**, Frontend no **Vercel**, banco no **Neon** (Postgres serverless)
+- **Segurança:** Cloudflare Turnstile (captcha), rate limiting (slowapi), CORS restritivo, headers de segurança
+
+## Estrutura de pastas (conforme o usuário reportou no terminal)
+
+```
+C:\Users\FAMÍLIA\Documents\projetos_programação\site portfolio\   ← pasta raiz real no PC do usuário
+└── portfolio\                                                     ← raiz do repositório Git
+    ├── backend\
+    │   ├── app\
+    │   │   ├── main.py                  # entry point FastAPI
+    │   │   ├── core\                    # config, security, middleware, logging, turnstile
+    │   │   ├── db\                      # base declarativa + session
+    │   │   ├── models\                  # SQLAlchemy models
+    │   │   ├── schemas\                 # Pydantic schemas
+    │   │   ├── api\routes\              # auth, projects, skills, contact
+    │   │   └── services\                # lógica de negócio isolada das rotas
+    │   ├── requirements.txt
+    │   ├── Procfile                     # comando de start pro Railway
+    │   ├── runtime.txt                  # versão do Python fixada
+    │   ├── seed.py                      # popula admin + skills iniciais
+    │   ├── add_description_en_column.py # migração pontual (coluna description_en)
+    │   ├── add_mfa_columns.py           # migração pontual (colunas/tabela MFA)
+    │   └── .env                         # NUNCA commitado (.gitignore cobre)
+    │
+    └── frontend\
+        ├── index.html                   # site público
+        ├── vercel.json                  # headers de segurança do site estático
+        ├── 404.html                     # página de erro customizada
+        ├── assets\
+        │   ├── css\ (reset, variables, style)
+        │   ├── js\ (config, api, i18n, main, theme, render-skills, render-projects, contact-form)
+        │   └── img\ (favicon*, og-image.png, projects\*.png)
+        └── painel-fg-2026x\             # ⚠️ ADMIN — nome da pasta é deliberadamente não-óbvio (segurança por obscuridade)
+            ├── login.html
+            ├── dashboard.html
+            └── assets\ (css\admin.css, js\admin-api.js, js\login.js, js\dashboard.js)
+```
+
+**Importante:** o nome real da pasta do admin é `painel-fg-2026x`, não `admin`. Isso foi intencional (item de segurança "admin em rota menos óbvia"). Se precisar referenciar a URL do admin: `https://<domínio>/painel-fg-2026x/login.html`.
+
+## Como rodar localmente
+
+Backend:
+```powershell
+cd portfolio/backend
+.\venv\Scripts\Activate.ps1
+uvicorn app.main:app --reload --reload-exclude "*.db" --reload-exclude "*.db-journal" --reload-exclude "*.db-wal" --reload-exclude "*.db-shm"
+```
+⚠️ O `--reload-exclude` é obrigatório — sem ele, o uvicorn entra em loop de reload infinito porque o SQLite/refresh tokens escrevem no banco a cada request, e o watcher interpreta isso como mudança de código.
+
+Frontend: **Live Server** do VS Code, servindo a pasta `frontend/`. Configuração em `.vscode/settings.json` (na raiz `portfolio/`, não em `backend/`) restringe o watcher só pra `/frontend` e ignora `.db`/`backend/` — sem isso, o Live Server recarrega a página sozinha toda vez que o backend grava no banco.
+
+## Variáveis de ambiente (backend/.env)
+
+```
+ENVIRONMENT, DATABASE_URL, JWT_SECRET_KEY, JWT_ALGORITHM,
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES, JWT_REFRESH_TOKEN_EXPIRE_DAYS,
+CORS_ALLOWED_ORIGINS, ALLOWED_HOSTS, WHATSAPP_NUMBER,
+ADMIN_USERNAME, ADMIN_PASSWORD, RATE_LIMIT_CONTACT, RATE_LIMIT_LOGIN,
+TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY
+```
+Todas validadas via Pydantic Settings em `app/core/config.py` — a aplicação **falha ao iniciar** (propositalmente) se alguma estiver ausente ou inválida.
+
+## Produção — URLs conhecidas (conforme último estado confirmado na conversa)
+
+- Frontend: `https://portfoliofelipe2008pg1.vercel.app`
+- Backend: `https://portfolio-production-fef5.up.railway.app`
+- Banco: Neon Postgres (host `ep-odd-boat-acmudziu.sa-east-1.aws.neon.tech`)
+
+⚠️ Essas URLs podem ter mudado desde a geração deste documento — confirme nos painéis Railway/Vercel.
+
+## Gotchas conhecidos (não repita esses erros)
+
+1. **Estrutura de pastas aninhada**: o usuário abre o terminal às vezes na pasta `site portfolio` (raiz no PC), às vezes em `site portfolio\portfolio` (raiz do repo). Causou dezenas de erros de "path not found". Sempre confirme com `pwd` antes de dar instruções de path relativo.
+2. **`Set-Content -Encoding UTF8` no PowerShell adiciona BOM** — isso quebrou o `vercel.json` (JSON parser do Vercel rejeita BOM). Use `[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding $false))` quando o encoding importa (JSON, YAML).
+3. **SQLite não preserva timezone** em colunas `DateTime` — comparações entre `datetime.now(timezone.utc)` (aware) e valores lidos do banco (naive) geram `TypeError`. Existe um helper `ensure_aware_utc()` em `app/core/security.py` — use-o sempre que comparar datas vindas do banco.
+4. **uvicorn `--reload` + banco de dados no mesmo diretório monitorado** = loop de restart infinito. Sempre usar `--reload-exclude` para arquivos `.db*`.
+5. **Cookies cross-site em produção**: como o frontend (Vercel) e o backend (Railway) são domínios diferentes, os cookies de sessão precisam de `SameSite=None` + `Secure=True` em produção (`ENVIRONMENT=production`), mas `SameSite=Strict` em desenvolvimento local (mesma origem). Isso já está implementado condicionalmente em `_set_auth_cookies()` — não reverta para `Strict` fixo.
+6. **Turnstile exige hostname exato cadastrado no painel Cloudflare.** Se o teste local falhar com "Security verification failed" ou o widget não carregar, primeiro suspeite de: (a) chave de teste/real misturada entre frontend e backend, (b) hostname não cadastrado, (c) acessando via `127.0.0.1` quando só `localhost` foi cadastrado (ou vice-versa).
+7. **Categorias de skill são digitadas em português no banco** (`Linguagens`, `Banco de Dados`, `Dados`, `Framework`, `API`, `Ferramentas`) — a tradução PT↔EN é automática via `CATEGORY_TRANSLATIONS_EN` em `i18n.js`. Se alguém digitar a categoria em inglês diretamente no admin, a tradução quebra (fica travada, sem correspondência no mapa).
+8. **Imagens de projeto via serviços externos (Imgur, LinkedIn CDN) frequentemente retornam 403** (hotlink protection). A solução adotada foi hospedar as imagens localmente em `frontend/assets/img/projects/` e referenciar por caminho relativo (`assets/img/projects/nome.png`). O backend valida `image_path` aceitando tanto URL completa (`http://`/`https://`) quanto caminho relativo iniciando em `assets/` (bloqueando path traversal).
+
+## Como Verificar o Estado Real
+
+Antes de continuar o desenvolvimento, rode (na raiz do repo):
+```powershell
+git log --oneline -20
+git status
+git ls-files | Select-String "\.env$|venv/|\.db$"
+```
+E compare a estrutura de pastas/arquivos-chave citados aqui com `git ls-files` completo. Se algo neste documento não bater com a realidade do repositório, **confie no repositório, não neste documento**.
