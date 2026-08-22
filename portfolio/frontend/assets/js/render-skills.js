@@ -83,12 +83,13 @@ function renderSkillsTable() {
 
     const items = document.createElement("div");
     items.className = "skills-row-items";
-    for (const name of names) {
+    names.forEach((name, index) => {
       const tag = document.createElement("span");
       tag.className = "skill-tag";
       tag.textContent = name;
+      tag.style.animationDelay = `${index * 45}ms`;
       items.appendChild(tag);
-    }
+    });
 
     row.appendChild(label);
     row.appendChild(items);

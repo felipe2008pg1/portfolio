@@ -5,14 +5,13 @@ async function adminRequest(path, options = {}, isRetry = false) {
     credentials: "include",
   });
 
-  const excludedFromRetry = ["/api/auth/login", "/api/auth/refresh", "/api/auth/mfa/verify"];
-  if (response.status === 401 && !isRetry && !excludedFromRetry.includes(path)) {
+  if (response.status === 401 && !isRetry && path !== "/api/auth/login" && path !== "/api/auth/refresh") {
     try {
       await adminRequest("/api/auth/refresh", { method: "POST" }, true);
       return adminRequest(path, options, true);
     } catch (_) {
       window.location.href = "login.html";
-      throw new Error("Expired Session.");
+      throw new Error("Sessão expirada.");
     }
   }
 
@@ -20,10 +19,10 @@ async function adminRequest(path, options = {}, isRetry = false) {
   try { data = await response.json(); } catch (_) {}
 
   if (!response.ok) {
-    let message = (data && data.detail) || "The request could not be completed.";
+    let message = (data && data.detail) || "Não foi possível completar a solicitação.";
     if (data && Array.isArray(data.errors) && data.errors.length > 0) {
       const first = data.errors[0];
-      const field = Array.isArray(first.loc) ? first.loc[first.loc.length - 1] : "camp";
+      const field = Array.isArray(first.loc) ? first.loc[first.loc.length - 1] : "campo";
       message = `${field}: ${first.msg}`;
     }
     const error = new Error(message);
@@ -40,15 +39,8 @@ const adminApi = {
       method: "POST",
       body: JSON.stringify({ username, password, turnstile_token: turnstileToken }),
     }),
-  mfaVerify: (mfaToken, code) =>
-    adminRequest("/api/auth/mfa/verify", { method: "POST", body: JSON.stringify({ mfa_token: mfaToken, code }) }),
   logout: () => adminRequest("/api/auth/logout", { method: "POST" }),
   me: () => adminRequest("/api/auth/me"),
-
-  mfaStatus: () => adminRequest("/api/auth/mfa/status"),
-  mfaSetupInit: () => adminRequest("/api/auth/mfa/setup/init", { method: "POST" }),
-  mfaSetupConfirm: (code) => adminRequest("/api/auth/mfa/setup/confirm", { method: "POST", body: JSON.stringify({ code }) }),
-  mfaDisable: (code) => adminRequest("/api/auth/mfa/disable", { method: "POST", body: JSON.stringify({ code }) }),
 
   getAllProjects: () => adminRequest("/api/projects/admin"),
   createProject: (payload) => adminRequest("/api/projects", { method: "POST", body: JSON.stringify(payload) }),
@@ -59,6 +51,8 @@ const adminApi = {
   createSkill: (payload) => adminRequest("/api/skills", { method: "POST", body: JSON.stringify(payload) }),
   updateSkill: (id, payload) => adminRequest(`/api/skills/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   deleteSkill: (id) => adminRequest(`/api/skills/${id}`, { method: "DELETE" }),
+
+  getMfaStatus: () => adminRequest("/api/auth/mfa/status"),
 };
 
 async function requireAdminSession() {

@@ -661,7 +661,28 @@ h1, h2, h3 {
   border: var(--border-w) solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--color-text);
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.skills-table.is-visible .skill-tag {
+  animation: tag-in var(--transition-fast) forwards;
+}
+
+@keyframes tag-in {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skill-tag {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
 }
 
 .skill-tag:hover {
@@ -703,12 +724,21 @@ h1, h2, h3 {
   box-shadow: 0 12px 32px rgba(15, 41, 66, 0.14);
 }
 
-.project-card-image {
+.project-card-image-wrap {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  object-fit: cover;
+  overflow: hidden;
   background: var(--color-bg);
   border-bottom: var(--border-w) solid var(--color-border);
+}
+
+.project-card-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
@@ -951,6 +981,21 @@ h1, h2, h3 {
 
 .project-card:hover .project-card-image {
   transform: scale(1.04);
+}
+
+/* Depth overlay: gradient fades in over the image on hover */
+.project-card-image-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(5, 15, 28, 0.55) 100%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+}
+
+.project-card:hover .project-card-image-wrap::after {
+  opacity: 1;
 }
 
 .project-card {
@@ -1287,14 +1332,31 @@ h1, h2, h3 {
   left: 0;
   height: 3px;
   width: 0%;
-  background: linear-gradient(90deg, var(--color-accent), var(--color-brasil-green), var(--color-brasil-yellow));
+  background: linear-gradient(
+    90deg,
+    var(--color-accent),
+    var(--color-brasil-green),
+    var(--color-brasil-yellow),
+    var(--color-usa-red),
+    var(--color-accent)
+  );
+  background-size: 300% 100%;
+  animation: scroll-progress-flow 6s linear infinite;
+  box-shadow: 0 0 8px 0 var(--color-accent);
   z-index: 1000;
   transition: width 100ms linear;
+}
+
+@keyframes scroll-progress-flow {
+  to {
+    background-position: -300% 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .scroll-progress {
     transition: none;
+    animation: none;
   }
 }
 
@@ -1464,23 +1526,20 @@ h1, h2, h3 {
   color: var(--color-brasil-green);
 }
 
-/* ===== Animated flags in the hero background ===== */
+/* ===== Animated flags in the hero background — split 50/50 ===== */
 .hero-flags {
   position: absolute;
   inset: 0;
+  display: flex;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
 }
 
 .hero-flag {
-  position: absolute;
-  top: 50%;
-  width: 480px;
-  height: auto;
-  opacity: 0.16;
-  transform: translateY(-50%);
-  border-radius: var(--radius-md);
+  position: relative;
+  flex: 1 1 50%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -1489,29 +1548,148 @@ h1, h2, h3 {
   height: 100%;
   object-fit: cover;
   display: block;
+  opacity: 0.24;
+  filter: saturate(0.85);
+  transform: scale(1.1);
+  animation: heroFlagDrift 26s ease-in-out infinite alternate;
 }
 
-.hero-flag.flag-brazil {
-  left: -80px;
+.hero-flag.flag-usa img {
+  animation-delay: -13s; /* dessincroniza o movimento das duas bandeiras */
 }
 
-.hero-flag.flag-usa {
-  right: -80px;
+/* Funde o topo/base de cada bandeira com o azul do blueprint */
+.hero-flag::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    var(--color-blueprint) 0%,
+    transparent 25%,
+    transparent 80%,
+    var(--color-blueprint) 100%
+  );
 }
 
-@media (max-width: 900px) {
-  .hero-flag {
-    width: 300px;
+/* Costura central: cada metade esmaece na direção do meio, criando a divisão BR/EUA */
+.hero-flag.flag-brazil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 78%, var(--color-blueprint) 100%);
+}
+
+.hero-flag.flag-usa::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--color-blueprint) 0%, transparent 22%);
+}
+
+@keyframes heroFlagDrift {
+  from {
+    transform: scale(1.1) translateX(0);
+  }
+  to {
+    transform: scale(1.18) translateX(-2.5%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-flag img {
+    animation: none;
+    transform: scale(1.1);
   }
 }
 
 @media (max-width: 640px) {
-  .hero-flags {
-    display: none;
+  .hero-flag img {
+    opacity: 0.14;
   }
 }
 
 .hero-inner {
   position: relative;
   z-index: 1;
+}
+/* ===== Custom cursor (desktop only) ===== */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  pointer-events: none;
+  z-index: 1001;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity var(--transition-fast), transform 120ms ease-out;
+}
+
+.cursor-dot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-accent);
+  border-radius: 50%;
+  opacity: 0.5;
+  transform: translate(-50%, -50%);
+  transition: width 150ms ease-out, height 150ms ease-out, opacity 150ms ease-out;
+}
+
+.cursor-dot.is-active {
+  opacity: 1;
+}
+
+.cursor-dot.is-pointer::after {
+  width: 40px;
+  height: 40px;
+  opacity: 0.9;
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .cursor-dot {
+    display: none;
+  }
+}
+
+/* ===== Typing effect caret on system-panel values ===== */
+.system-panel-value.is-typing::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  background: var(--color-accent);
+  vertical-align: -0.15em;
+  animation: caret-blink 800ms step-end infinite;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ===== Initial page fade-in (avoids flash of unstyled/unanimated content) ===== */
+/* Opt-in via body.fade-init — pages without main.js (404, admin login/dashboard) are unaffected. */
+body.fade-init {
+  opacity: 0;
+}
+
+body.fade-init.is-loaded {
+  opacity: 1;
+  transition: opacity 400ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.fade-init.is-loaded {
+    transition: none;
+  }
 }

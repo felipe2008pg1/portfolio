@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+  document.body.classList.add("is-loaded");
+
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
@@ -108,5 +110,47 @@ document.addEventListener("DOMContentLoaded", () => {
         event.target.style.transform = "";
       }
     }, true);
+  }
+
+  // Custom cursor (desktop only)
+  const cursorDot = document.getElementById("cursorDot");
+  if (cursorDot && window.matchMedia("(hover: hover)").matches) {
+    document.addEventListener("mousemove", (event) => {
+      cursorDot.style.left = `${event.clientX}px`;
+      cursorDot.style.top = `${event.clientY}px`;
+      cursorDot.classList.add("is-active");
+    });
+
+    document.addEventListener("mouseleave", () => {
+      cursorDot.classList.remove("is-active");
+    });
+
+    const interactiveSelector = "a, button, input, textarea, [role='button']";
+    document.addEventListener("mouseover", (event) => {
+      cursorDot.classList.toggle("is-pointer", Boolean(event.target.closest(interactiveSelector)));
+    });
+  }
+
+  // Typing effect on the system-panel values (runs once on load)
+  const panelValues = document.querySelectorAll(".system-panel-value");
+  if (panelValues.length && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    panelValues.forEach((el, rowIndex) => {
+      const fullText = el.textContent;
+      el.textContent = "";
+      el.classList.add("is-typing");
+
+      let charIndex = 0;
+      const startDelay = rowIndex * 220;
+      const typeChar = () => {
+        el.textContent = fullText.slice(0, charIndex);
+        charIndex += 1;
+        if (charIndex <= fullText.length) {
+          setTimeout(typeChar, 22);
+        } else {
+          el.classList.remove("is-typing");
+        }
+      };
+      setTimeout(typeChar, startDelay);
+    });
   }
 });

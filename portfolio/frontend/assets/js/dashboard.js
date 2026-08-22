@@ -1,6 +1,5 @@
 let projectsCache = [];
 let skillsCache = [];
-let mfaEnabledCache = false;
 
 function showGlobalAlert(message, type) {
   const el = document.getElementById("globalAlert");
@@ -26,41 +25,43 @@ document.querySelectorAll("[data-close-modal]").forEach((btn) => {
   btn.addEventListener("click", () => closeModal(btn.getAttribute("data-close-modal")));
 });
 
-/* ===== SIDEBAR MOBILE ===== */
-const sidebarToggle = document.getElementById("sidebarToggle");
-const adminSidebar = document.getElementById("adminSidebar");
-if (sidebarToggle && adminSidebar) {
-  sidebarToggle.addEventListener("click", () => adminSidebar.classList.toggle("is-open"));
-  document.querySelectorAll(".admin-sidebar-link").forEach((link) => {
-    link.addEventListener("click", () => adminSidebar.classList.remove("is-open"));
-  });
-}
-
-/* ===== STATS ===== */
 function updateStats() {
-  document.getElementById("statTotalProjects").textContent = String(projectsCache.length);
-  document.getElementById("statPublished").textContent = String(projectsCache.filter((p) => p.is_published).length);
-  document.getElementById("statTotalSkills").textContent = String(skillsCache.length);
-  document.getElementById("statMfaStatus").textContent = mfaEnabledCache ? "ON" : "OFF";
+  const totalProjects = document.getElementById("statTotalProjects");
+  const published = document.getElementById("statPublished");
+  const totalSkills = document.getElementById("statTotalSkills");
+
+  if (totalProjects) totalProjects.textContent = String(projectsCache.length);
+  if (published) published.textContent = String(projectsCache.filter((p) => p.is_published).length);
+  if (totalSkills) totalSkills.textContent = String(skillsCache.length);
 }
 
-/* ===== PROJETOS ===== */
+async function updateMfaStat() {
+  const mfaStat = document.getElementById("statMfaStatus");
+  if (!mfaStat) return;
+  try {
+    const { enabled } = await adminApi.getMfaStatus();
+    mfaStat.textContent = i18n.t(enabled ? "admin.stat.mfaOn" : "admin.stat.mfaOff");
+  } catch (error) {
+    mfaStat.textContent = "—";
+  }
+}
+
 async function loadProjects() {
   const tbody = document.getElementById("projectsTableBody");
   try {
     projectsCache = await adminApi.getAllProjects();
     renderProjectsTable();
+    updateStats();
   } catch (error) {
     tbody.innerHTML = "";
     const row = document.createElement("tr");
     row.className = "admin-empty-row";
     const cell = document.createElement("td");
     cell.colSpan = 4;
-    cell.textContent = i18n.t("admin.dashboard.errorLoadProjects");
+    cell.textContent = "Erro ao carregar projetos.";
     row.appendChild(cell);
     tbody.appendChild(row);
   }
-  updateStats();
 }
 
 function renderProjectsTable() {
@@ -72,7 +73,7 @@ function renderProjectsTable() {
     row.className = "admin-empty-row";
     const cell = document.createElement("td");
     cell.colSpan = 4;
-    cell.textContent = i18n.t("admin.dashboard.noProjects");
+    cell.textContent = "Nenhum projeto cadastrado.";
     row.appendChild(cell);
     tbody.appendChild(row);
     return;
@@ -86,19 +87,17 @@ function renderProjectsTable() {
     const stackCell = document.createElement("td");
     stackCell.textContent = project.stack;
     const publishedCell = document.createElement("td");
-    publishedCell.textContent = project.is_published ? i18n.t("admin.dashboard.yes") : i18n.t("admin.dashboard.no");
+    publishedCell.textContent = project.is_published ? "Sim" : "Não";
 
     const actionsCell = document.createElement("td");
     actionsCell.className = "col-actions";
     const editBtn = document.createElement("button");
-    editBtn.className = "btn btn-outline btn-sm btn-icon";
-    editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    editBtn.append(i18n.t("admin.dashboard.edit"));
+    editBtn.className = "btn btn-outline btn-sm";
+    editBtn.textContent = "Editar";
     editBtn.addEventListener("click", () => openProjectModal(project));
     const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn btn-danger btn-sm btn-icon";
-    deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18" stroke-linecap="round"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    deleteBtn.append(i18n.t("admin.dashboard.delete"));
+    deleteBtn.className = "btn btn-danger btn-sm";
+    deleteBtn.textContent = "Excluir";
     deleteBtn.addEventListener("click", () => deleteProject(project.id, project.title));
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(deleteBtn);
@@ -129,14 +128,13 @@ function openProjectModal(project) {
 }
 
 async function deleteProject(id, title) {
-  const msg = i18n.t("admin.dashboard.confirmDeleteProject").replace("{name}", title);
-  if (!window.confirm(msg)) return;
+  if (!window.confirm(`Excluir o projeto "${title}"? Essa ação não pode ser desfeita.`)) return;
   try {
     await adminApi.deleteProject(id);
-    showGlobalAlert(i18n.t("admin.dashboard.projectDeleted"), "success");
+    showGlobalAlert("Projeto excluído.", "success");
     loadProjects();
   } catch (error) {
-    showGlobalAlert(error.message || i18n.t("admin.dashboard.errorDeleteProject"), "error");
+    showGlobalAlert(error.message || "Erro ao excluir projeto.", "error");
   }
 }
 
@@ -169,32 +167,31 @@ document.getElementById("projectForm").addEventListener("submit", async (event) 
       await adminApi.createProject(payload);
     }
     closeModal("project");
-    showGlobalAlert(i18n.t("admin.dashboard.projectSaved"), "success");
+    showGlobalAlert("Projeto salvo com sucesso.", "success");
     loadProjects();
   } catch (error) {
-    showFormAlert("projectFormAlert", error.message || i18n.t("admin.dashboard.errorSaveProject"));
+    showFormAlert("projectFormAlert", error.message || "Erro ao salvar projeto.");
   } finally {
     submitBtn.disabled = false;
   }
 });
 
-/* ===== SKILLS ===== */
 async function loadSkills() {
   const tbody = document.getElementById("skillsTableBody");
   try {
     skillsCache = await adminApi.getSkills();
     renderSkillsTable();
+    updateStats();
   } catch (error) {
     tbody.innerHTML = "";
     const row = document.createElement("tr");
     row.className = "admin-empty-row";
     const cell = document.createElement("td");
     cell.colSpan = 4;
-    cell.textContent = i18n.t("admin.dashboard.errorLoadSkills");
+    cell.textContent = "Erro ao carregar skills.";
     row.appendChild(cell);
     tbody.appendChild(row);
   }
-  updateStats();
 }
 
 function renderSkillsTable() {
@@ -206,7 +203,7 @@ function renderSkillsTable() {
     row.className = "admin-empty-row";
     const cell = document.createElement("td");
     cell.colSpan = 4;
-    cell.textContent = i18n.t("admin.dashboard.noSkills");
+    cell.textContent = "Nenhuma skill cadastrada.";
     row.appendChild(cell);
     tbody.appendChild(row);
     return;
@@ -225,14 +222,12 @@ function renderSkillsTable() {
     const actionsCell = document.createElement("td");
     actionsCell.className = "col-actions";
     const editBtn = document.createElement("button");
-    editBtn.className = "btn btn-outline btn-sm btn-icon";
-    editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    editBtn.append(i18n.t("admin.dashboard.edit"));
+    editBtn.className = "btn btn-outline btn-sm";
+    editBtn.textContent = "Editar";
     editBtn.addEventListener("click", () => openSkillModal(skill));
     const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn btn-danger btn-sm btn-icon";
-    deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18" stroke-linecap="round"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    deleteBtn.append(i18n.t("admin.dashboard.delete"));
+    deleteBtn.className = "btn btn-danger btn-sm";
+    deleteBtn.textContent = "Excluir";
     deleteBtn.addEventListener("click", () => deleteSkill(skill.id, skill.name));
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(deleteBtn);
@@ -247,9 +242,7 @@ function renderSkillsTable() {
 
 function openSkillModal(skill) {
   clearFormAlert("skillFormAlert");
-  document.getElementById("skillModalTitle").textContent = skill
-    ? i18n.t("admin.dashboard.editSkillModalTitle")
-    : i18n.t("admin.dashboard.newSkillModalTitle");
+  document.getElementById("skillModalTitle").textContent = skill ? "Editar skill" : "Nova skill";
   document.getElementById("skillId").value = skill ? skill.id : "";
   document.getElementById("skillCategory").value = skill ? skill.category : "";
   document.getElementById("skillName").value = skill ? skill.name : "";
@@ -258,14 +251,13 @@ function openSkillModal(skill) {
 }
 
 async function deleteSkill(id, name) {
-  const msg = i18n.t("admin.dashboard.confirmDeleteSkill").replace("{name}", name);
-  if (!window.confirm(msg)) return;
+  if (!window.confirm(`Excluir a skill "${name}"?`)) return;
   try {
     await adminApi.deleteSkill(id);
-    showGlobalAlert(i18n.t("admin.dashboard.skillDeleted"), "success");
+    showGlobalAlert("Skill excluída.", "success");
     loadSkills();
   } catch (error) {
-    showGlobalAlert(error.message || i18n.t("admin.dashboard.errorDeleteSkill"), "error");
+    showGlobalAlert(error.message || "Erro ao excluir skill.", "error");
   }
 }
 
@@ -292,172 +284,15 @@ document.getElementById("skillForm").addEventListener("submit", async (event) =>
       await adminApi.createSkill(payload);
     }
     closeModal("skill");
-    showGlobalAlert(i18n.t("admin.dashboard.skillSaved"), "success");
+    showGlobalAlert("Skill salva com sucesso.", "success");
     loadSkills();
   } catch (error) {
-    showFormAlert("skillFormAlert", error.message || i18n.t("admin.dashboard.errorSaveSkill"));
+    showFormAlert("skillFormAlert", error.message || "Erro ao salvar skill.");
   } finally {
     submitBtn.disabled = false;
   }
 });
 
-/* ===== MFA ===== */
-function showMfaModalAlert(message, type) {
-  const el = document.getElementById("mfaModalAlert");
-  el.textContent = message;
-  el.className = `admin-alert is-visible is-${type}`;
-}
-
-async function loadMfaStatus() {
-  const statusText = document.getElementById("mfaStatusText");
-  const enableBtn = document.getElementById("mfaEnableBtn");
-  const disableBtn = document.getElementById("mfaDisableBtn");
-  try {
-    const result = await adminApi.mfaStatus();
-    mfaEnabledCache = !!result.enabled;
-    if (result.enabled) {
-      statusText.textContent = i18n.t("admin.security.enabled");
-      enableBtn.style.display = "none";
-      disableBtn.style.display = "inline-flex";
-    } else {
-      statusText.textContent = i18n.t("admin.security.disabled");
-      enableBtn.style.display = "inline-flex";
-      disableBtn.style.display = "none";
-    }
-  } catch (error) {
-    statusText.textContent = i18n.t("admin.security.checkError");
-  }
-  updateStats();
-}
-
-function renderMfaSetupStep1(data) {
-  const body = document.getElementById("mfaModalBody");
-  body.innerHTML = "";
-
-  const p1 = document.createElement("p");
-  p1.style.marginBottom = "12px";
-  p1.textContent = "Escaneie o QR code com o Google Authenticator, Authy ou similar:";
-  body.appendChild(p1);
-
-  const img = document.createElement("img");
-  img.src = data.qr_code_base64;
-  img.alt = "QR code MFA";
-  img.style.display = "block";
-  img.style.margin = "0 auto 16px";
-  img.style.width = "200px";
-  img.style.height = "200px";
-  body.appendChild(img);
-
-  const p2 = document.createElement("p");
-  p2.style.fontSize = "var(--fs-xs)";
-  p2.style.color = "var(--color-text-muted)";
-  p2.style.marginBottom = "16px";
-  p2.textContent = `Ou digite manualmente: ${data.secret}`;
-  body.appendChild(p2);
-
-  const field = document.createElement("div");
-  field.className = "form-field";
-  const label = document.createElement("label");
-  label.textContent = "Digite o código de 6 dígitos gerado pelo app";
-  label.setAttribute("for", "mfaSetupCode");
-  const input = document.createElement("input");
-  input.type = "text";
-  input.id = "mfaSetupCode";
-  input.maxLength = 6;
-  input.placeholder = "123456";
-  field.appendChild(label);
-  field.appendChild(input);
-  body.appendChild(field);
-
-  const actions = document.createElement("div");
-  actions.className = "admin-form-actions";
-  const confirmBtn = document.createElement("button");
-  confirmBtn.className = "btn btn-primary";
-  confirmBtn.textContent = "Confirmar e ativar";
-  confirmBtn.addEventListener("click", async () => {
-    const code = input.value.trim();
-    if (!code) return;
-    confirmBtn.disabled = true;
-    try {
-      const result = await adminApi.mfaSetupConfirm(code);
-      renderMfaBackupCodes(result.backup_codes);
-    } catch (error) {
-      showMfaModalAlert(error.message || "Código inválido.", "error");
-      confirmBtn.disabled = false;
-    }
-  });
-  actions.appendChild(confirmBtn);
-  body.appendChild(actions);
-}
-
-function renderMfaBackupCodes(codes) {
-  document.getElementById("mfaModalTitle").textContent = "Guarde seus códigos de backup";
-  const body = document.getElementById("mfaModalBody");
-  body.innerHTML = "";
-
-  const warning = document.createElement("p");
-  warning.style.marginBottom = "12px";
-  warning.style.color = "var(--color-danger)";
-  warning.textContent = "Esses códigos só aparecem uma vez. Guarde em local seguro — cada um funciona uma única vez caso você perca acesso ao app autenticador.";
-  body.appendChild(warning);
-
-  const list = document.createElement("div");
-  list.style.fontFamily = "var(--font-mono)";
-  list.style.background = "var(--color-bg)";
-  list.style.border = "1px solid var(--color-border)";
-  list.style.borderRadius = "var(--radius-sm)";
-  list.style.padding = "16px";
-  list.style.marginBottom = "16px";
-  list.style.display = "grid";
-  list.style.gridTemplateColumns = "1fr 1fr";
-  list.style.gap = "8px";
-  codes.forEach((code) => {
-    const span = document.createElement("span");
-    span.textContent = code;
-    list.appendChild(span);
-  });
-  body.appendChild(list);
-
-  const actions = document.createElement("div");
-  actions.className = "admin-form-actions";
-  const doneBtn = document.createElement("button");
-  doneBtn.className = "btn btn-primary";
-  doneBtn.textContent = "Já salvei, fechar";
-  doneBtn.addEventListener("click", () => {
-    closeModal("mfa");
-    loadMfaStatus();
-    showGlobalAlert("MFA ativado com sucesso.", "success");
-  });
-  actions.appendChild(doneBtn);
-  body.appendChild(actions);
-}
-
-document.getElementById("mfaEnableBtn").addEventListener("click", async () => {
-  document.getElementById("mfaModalTitle").textContent = "Ativar MFA";
-  document.getElementById("mfaModalAlert").className = "admin-alert";
-  document.getElementById("mfaModalBody").innerHTML = "<p>Gerando QR code…</p>";
-  openModal("mfa");
-  try {
-    const data = await adminApi.mfaSetupInit();
-    renderMfaSetupStep1(data);
-  } catch (error) {
-    showMfaModalAlert(error.message || "Erro ao iniciar configuração.", "error");
-  }
-});
-
-document.getElementById("mfaDisableBtn").addEventListener("click", async () => {
-  const code = window.prompt("Digite um código do autenticador (ou código de backup) pra confirmar a desativação:");
-  if (!code) return;
-  try {
-    await adminApi.mfaDisable(code);
-    showGlobalAlert("MFA desativado.", "success");
-    loadMfaStatus();
-  } catch (error) {
-    showGlobalAlert(error.message || "Código inválido.", "error");
-  }
-});
-
-/* ===== LOGOUT ===== */
 document.getElementById("logoutBtn").addEventListener("click", async () => {
   try {
     await adminApi.logout();
@@ -466,22 +301,10 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   }
 });
 
-/* ===== RE-RENDER AO TROCAR IDIOMA ===== */
-window.renderProjectsGrid = null; // não usado no admin, evita conflito de nome
-const _originalI18nApply = window.i18n;
-
 document.addEventListener("DOMContentLoaded", async () => {
   const authed = await requireAdminSession();
   if (!authed) return;
   loadProjects();
   loadSkills();
-  loadMfaStatus();
-
-  document.querySelectorAll("[data-lang]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      renderProjectsTable();
-      renderSkillsTable();
-      loadMfaStatus();
-    });
-  });
+  updateMfaStat();
 });

@@ -10,7 +10,7 @@ function isSafeHttpUrl(value) {
 }
 
 function isSafeImageSrc(value) {
-  if (value.startsWith("assets/")) return true; // caminho relativo do próprio site
+  if (value.startsWith("assets/")) return true;
   return isSafeHttpUrl(value);
 }
 
@@ -88,13 +88,18 @@ function renderProjectsGrid() {
     card.style.animationDelay = `${index * 80}ms`;
 
       if (project.image_path && isSafeImageSrc(project.image_path)) {
+      const imgWrap = document.createElement("div");
+      imgWrap.className = "project-card-image-wrap";
+
       const img = document.createElement("img");
       img.className = "project-card-image";
       img.src = project.image_path;
       img.alt = project.title;
       img.loading = "lazy";
-      img.onerror = () => img.remove();
-      card.appendChild(img);
+      img.onerror = () => imgWrap.remove();
+
+      imgWrap.appendChild(img);
+      card.appendChild(imgWrap);
     }
 
     const head = document.createElement("div");
