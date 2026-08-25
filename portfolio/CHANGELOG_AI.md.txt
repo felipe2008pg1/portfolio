@@ -120,6 +120,20 @@ The user asked for visual/animation improvements one at a time. Each was impleme
 * Discovered mid-session that AI sandbox tool edits don't sync to the user's real project — the user reported the Part B fix "still not working," which turned out to mean it had simply never been applied yet (see `CLAUDE.md` gotcha #9).
 * Caught and fixed a self-introduced bug (global `body{opacity:0}` breaking pages without `main.js`) before it was ever shipped to the user.
 
+### Phase 11 — Major backend dependency updates
+
+Implemented on branch `chore/update-backend-dependencies` as an isolated change, following the TODO instruction not to mix dependency upgrades with other tasks.
+
+* `fastapi`: `0.115.0` → `0.141.1`
+* `uvicorn[standard]`: `0.32.0` → `0.52.4`
+* `alembic`: `1.13.3` → `1.19.1`
+* `python-jose[cryptography]`: `3.3.0` → `3.5.0`
+* `SQLAlchemy`, Pydantic, and the remaining dependencies were left unchanged to avoid expanding the scope.
+
+The selected FastAPI, Uvicorn, and Alembic versions are current releases verified against PyPI as of 2026-08-25; `python-jose` 3.5.0 is its current/latest release. citeturn2search1turn2search0turn0search1turn1search1
+
+**Testing:** not executed in the remote repository environment. The branch must be checked locally by installing `requirements.txt` and running the backend before merging.
+
 ### What remains unfinished
 
 * Everything in Part C — needs re-delivery (full file dumps or clear diffs) or re-implementation, and confirmation that it's actually in the repository.
