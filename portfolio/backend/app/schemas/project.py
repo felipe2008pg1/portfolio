@@ -7,15 +7,15 @@ def _validate_public_url(value: str | None) -> str | None:
         return None
     parsed = urlparse(value)
     if parsed.scheme not in ("http", "https"):
-        raise ValueError("URL deve usar http:// ou https://")
+        raise ValueError("URL must use http:// or https://")
     if not parsed.netloc:
-        raise ValueError("URL inválida")
+        raise ValueError("Invalid URL")
     blocked_hosts = {"localhost", "127.0.0.1", "0.0.0.0", "::1"}
     hostname = (parsed.hostname or "").lower()
     if hostname in blocked_hosts or hostname.endswith(".local"):
-        raise ValueError("URL aponta para host interno, não permitido")
+        raise ValueError("URL points to an internal host, which is not allowed")
     if len(value) > 500:
-        raise ValueError("URL muito longa")
+        raise ValueError("URL is too long")
     return value
 
 
@@ -25,9 +25,9 @@ def _validate_image_path(value: str | None) -> str | None:
     if value.startswith("http://") or value.startswith("https://"):
         return _validate_public_url(value)
     if ".." in value or value.startswith("/") or not value.startswith("assets/"):
-        raise ValueError("Caminho de imagem inválido. Use uma URL completa ou um caminho iniciando com assets/.")
+        raise ValueError("Invalid image path. Use a full URL or a path starting with assets/.")
     if len(value) > 500:
-        raise ValueError("Caminho muito longo")
+        raise ValueError("Path is too long")
     return value
 
 

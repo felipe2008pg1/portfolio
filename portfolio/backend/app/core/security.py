@@ -50,8 +50,8 @@ def decode_access_token(token: str) -> Optional[str]:
 
 
 def ensure_aware_utc(dt):
-    """SQLite/Postgres podem devolver datetime sem timezone — normaliza pra UTC-aware
-    antes de qualquer comparação com datetime.now(timezone.utc)."""
+    """SQLite/Postgres may return a naive datetime (no timezone) — normalize it to
+    UTC-aware before comparing it against datetime.now(timezone.utc)."""
     if dt is None:
         return None
     if dt.tzinfo is None:
@@ -68,13 +68,13 @@ def hash_refresh_token(token: str) -> str:
 
 
 def hash_opaque_token(value: str) -> str:
-    """Mesmo algoritmo do refresh token — usado também pros códigos de backup do MFA."""
+    """Same algorithm as the refresh token — also used for MFA backup codes."""
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
 def create_mfa_pending_token(subject: str) -> str:
-    """Token intermediário de 5 minutos: prova que a senha já foi validada,
-    mas a sessão completa só é liberada depois do código MFA."""
+    """Intermediate 5-minute token: proves the password was already validated,
+    but the full session is only granted after the MFA code is verified."""
     expire = datetime.now(timezone.utc) + timedelta(minutes=5)
     to_encode = {"sub": subject, "exp": expire, "type": "mfa_pending"}
     return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
