@@ -8,7 +8,6 @@
 
 ## Pending — explicitly postponed by the user/previous agent
 
-* [ ] **Major dependency updates** (`fastapi`, `starlette`, `uvicorn`, `alembic`, `python-jose`) — deliberately postponed due to risk of breaking changes; only small patches were updated. Do in isolation, not mixed with another task.
 * [ ] **Migrate from `python-jose` to `PyJWT`** — future maintainability improvement, not urgent.
 * [ ] **`description_en` field per project** — implemented, but depends on manual entry. Confirm all registered projects have it filled in.
 * [ ] **Refresh token — no "connected devices"/manual revocation UI** — not implemented; deliberately simplified (single-user system).
@@ -45,3 +44,4 @@ See `CHANGELOG_AI.md` for the complete history.
 * **Confirmed complete and stable** (pre-2026-08-25, verified against actual code): public site, admin panel CRUD, MFA, refresh token rotation, PT/EN i18n, Blueprint visual identity, production deployment (Railway + Vercel + Neon).
 * **2026-08-25, Part B (admin stats fix)** — reasonably likely applied to the repo (full file pasted at user's request), not 100% confirmed. See `CHANGELOG_AI.md` Phase 10.
 * **2026-08-25, Part C (visual polish)** — designed in an AI sandbox, almost certainly **not** yet applied to the actual repo (only described in chat). Treat as a spec, not as done. See `CHANGELOG_AI.md` Phase 10 Part C for the exact list.
+* **2026-08-25, Part D (major backend dependency updates)** — completed on branch `chore/update-backend-dependencies`. Updated FastAPI, Uvicorn, Alembic, and python-jose to current pinned releases. Verification requires installing the new environment and running the backend locally; no sandboxed local repository was available in this session.
