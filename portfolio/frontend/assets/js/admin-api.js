@@ -51,7 +51,12 @@ const adminApi = {
   createSkill: (payload) => adminRequest("/api/skills", { method: "POST", body: JSON.stringify(payload) }),
   updateSkill: (id, payload) => adminRequest(`/api/skills/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   deleteSkill: (id) => adminRequest(`/api/skills/${id}`, { method: "DELETE" }),
-  deleteSkill: (id) => adminRequest(`/api/skills/${id}`, { method: "DELETE" }),
+
+  getAllExperiences: () => adminRequest("/api/experiences/admin"),
+  createExperience: (payload) => adminRequest("/api/experiences", { method: "POST", body: JSON.stringify(payload) }),
+  updateExperience: (id, payload) => adminRequest(`/api/experiences/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  deleteExperience: (id) => adminRequest(`/api/experiences/${id}`, { method: "DELETE" }),
+
   getMfaStatus: () => adminRequest("/api/auth/mfa/status"),
 };
 

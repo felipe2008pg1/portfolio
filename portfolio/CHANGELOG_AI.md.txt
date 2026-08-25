@@ -129,6 +129,28 @@ The user asked for visual/animation improvements one at a time. Each was impleme
 
 Before writing any new code: run `git status` / `git diff` in the actual repository to determine exactly what from this session (Part B and/or Part C) is really there. Do not assume Part C exists. Then either re-request full code for the missing pieces, or continue from whatever is confirmed present.
 
+## Phase 11 — Session 2026-08-25 (2): Middleware Hardening
+
+Picked up TODO.md Priority 0 items (bugs confirmed by Phase 10 Part A inspection, not the unconfirmed Part C visual work).
+
+* `backend/app/main.py`: removed the duplicate, permissive `CORSMiddleware` registration (`allow_methods=["*"]`, `allow_headers=["*"]`) that was undermining the restrictive one. Only the restrictive registration remains.
+* `backend/app/main.py`: registered `TrustedHostMiddleware` (was imported but never added) using the existing `settings.allowed_hosts_list`. Added as the last middleware so it's outermost and validates the `Host` header before CORS/routing — mitigates Host Header Injection (cache poisoning, password-reset-link poisoning via forged `Host`).
+* No functional/behavioral change to CORS policy itself (same origins, now enforced consistently); no schema/API changes; no frontend changes required.
+* Verified: `main.py` parses (`ast.parse`), no other references to the removed middleware block.
+
+**⚠️ Follow-up required (cannot be verified from the repo, needs Railway dashboard access):** confirm the `ALLOWED_HOSTS` env var in production includes the real Railway backend hostname. Default fallback is `localhost,127.0.0.1` only — if `ALLOWED_HOSTS` was never explicitly set on Railway, this change will cause **all production requests to start failing with 400 Invalid host header** immediately on deploy. Set it before/with this deploy, e.g.: `ALLOWED_HOSTS=portfolio-production-fef5.up.railway.app` (confirm exact domain in Railway dashboard first — see gotcha in `CLAUDE.md` about URLs possibly having changed).
+
+## Phase 12 — Session 2026-08-25 (3): Cursor Fix + i18n Cleanup (schemas/security)
+
+* `frontend/assets/css/style.css`: added `html { cursor: none }` scoped to `@media (hover: hover) and (prefers-reduced-motion: no-preference)`, matching the exact condition under which `main.js` activates `.cursor-dot` and the condition under which `.cursor-dot` itself is hidden. Prevents the native OS cursor and the custom cursor-dot from showing at the same time, without leaving touch/reduced-motion users with no cursor at all. No other `cursor:` declarations exist in `style.css`, so nothing conflicts.
+* `backend/app/schemas/project.py`: translated all PT `ValueError` messages to English ("URL inválida" → "Invalid URL", etc.) — these are user-facing (returned in 422 API responses), so this was a real inconsistency, not just an internal comment. Also stripped a leading UTF-8 BOM (harmless to CPython, but inconsistent with the rest of the repo).
+* `backend/app/core/security.py`: translated remaining PT docstrings/comments (`ensure_aware_utc`, `hash_opaque_token`, `create_mfa_pending_token`) to English. No logic changes.
+* Verified: both files still parse (`ast.parse`), no PT characters remain in either file.
+
+### Noted but out of scope for this task (flagged for a future security pass)
+
+* `_validate_public_url()` in `project.py` blocks `localhost`/`127.0.0.1`/`0.0.0.0`/`::1`/`*.local` but not RFC1918 private ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), link-local (`169.254.0.0/16` — includes the cloud metadata IP `169.254.169.254`), or IPv6 unique-local/link-local ranges. **Confirmed low risk today**: grepped the backend for any server-side fetch of `repo_url`/`demo_url`/`image_path` (`requests.`, `httpx.`, `urlopen`) — none exists; these fields are only stored and rendered as `<a href>`/`<img src>` on the client, so there's no SSRF vector currently. Would become a real SSRF risk if a future feature (e.g. link preview/thumbnail generation) ever fetches these URLs server-side — the validator would need a proper private-IP-range check (and DNS-rebinding-safe resolution) before that happens.
+
 ## State at the Time This Changelog Was Last Updated (2026-08-25)
 
 Public site and admin panel functional in production, modulo the admin stat cards fix from Phase 10 (delivery unconfirmed) and the visual polish from Phase 10 Part C (delivery almost certainly did NOT happen). `README.md` exists at repo root but is a placeholder "in development" badge, not real documentation. `DECISIONS.md` created in Phase 10.

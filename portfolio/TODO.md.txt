@@ -15,11 +15,11 @@
 
 ## Bugs / Inconsistencies found during 2026-08-25 code inspection
 
-* [ ] **`TrustedHostMiddleware` is imported in `backend/app/main.py` but never registered** via `app.add_middleware()` — inactive despite `ARCHITECTURE.md` previously claiming otherwise (doc now corrected). Either add it or remove the dead import.
-* [ ] **`CORSMiddleware` registered twice in `main.py`** — once restrictive, once with `allow_methods=["*"]`/`allow_headers=["*"]`. The permissive one undermines the first. Reconcile into a single registration.
+* [x] **`TrustedHostMiddleware` is imported in `backend/app/main.py` but never registered** — Fixed 2026-08-25 (session 2): now registered via `app.add_middleware()`, added last (outermost) so it rejects spoofed/invalid `Host` headers before CORS/routing runs. Uses existing `settings.allowed_hosts_list` (`ALLOWED_HOSTS` env var). **⚠️ Action required on Railway:** confirm `ALLOWED_HOSTS` includes the real production backend hostname (e.g. `portfolio-production-fef5.up.railway.app`), not just `localhost,127.0.0.1` — otherwise all production requests will get `400 Invalid host header`.
+* [x] **`CORSMiddleware` registered twice in `main.py`** — Fixed 2026-08-25 (session 2): removed the second, permissive registration (`allow_methods=["*"]`/`allow_headers=["*"]`) that undermined the first. Only the restrictive registration remains (`GET/POST/PUT/DELETE`, `Content-Type`).
 * [ ] **Dead scaffolding for an unbuilt "Experience" feature**: `backend/app/models/experience.py`, `schemas/experience.py`, `api/routes/experiences.py`, `frontend/assets/js/render-experience.js` — all empty (0 bytes), unregistered, unmounted. Decide: implement or delete.
 * [ ] **`backend/app/db/init_db.py` is empty/dead** — `create_all()` is called directly in `main.py` instead. Delete the unused file or wire it up properly.
-* [ ] **Portuguese strings remain in user-facing code**: `ValueError` messages in `backend/app/schemas/project.py` ("URL inválida", etc.) and comments/docstrings in `backend/app/core/security.py`. Contradicts the "standardized to English" status — translate.
+* [x] **Portuguese strings remain in user-facing code** — Fixed 2026-08-25 (session 3): all `ValueError` messages in `backend/app/schemas/project.py` translated to English (these surface to the frontend/API consumer via 422 responses — user-facing, not just internal). All PT docstrings/comments in `backend/app/core/security.py` translated. Also stripped a stray UTF-8 BOM at the top of `project.py`.
 * [ ] **Duplicate `README.md`** at repo root and inside `portfolio/` (near-identical, redundant). Consolidate to one.
 * [ ] **Root `README.md` content is just an "in development" badge**, not real project documentation — still needs to be written for real.
 

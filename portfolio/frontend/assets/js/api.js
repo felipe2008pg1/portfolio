@@ -27,6 +27,7 @@
 const api = {
   getSkills: () => apiRequest("/api/skills"),
   getProjects: () => apiRequest("/api/projects"),
+  getExperiences: () => apiRequest("/api/experiences"),
   sendContact: (payload) =>
     apiRequest("/api/contact", { method: "POST", body: JSON.stringify(payload) }),
 };

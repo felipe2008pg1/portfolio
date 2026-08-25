@@ -4,6 +4,7 @@ const TRANSLATIONS = {
     "meta.description": "Felipe Gonzalez, Full Stack Developer. Automação, bancos de dados, sistemas web e APIs com Python, JavaScript, HTML e CSS.",
 
     "nav.about": "Sobre",
+    "nav.experience": "Experiência",
     "nav.skills": "Skills",
     "nav.projects": "Projetos",
     "nav.contact": "Contato",
@@ -35,6 +36,14 @@ const TRANSLATIONS = {
     "about.fact2.value": "Interfaces organizadas, responsivas e centradas no usuário.",
     "about.fact3.label": "Diferencial",
     "about.fact3.value": "Background administrativo/contábil aplicado ao design de sistemas.",
+
+    "experience.eyebrow": "Experiência",
+    "experience.title": "Trajetória profissional",
+    "experience.lede": "Empresas e projetos onde apliquei desenvolvimento back-end, front-end e automação.",
+    "experience.loading": "Carregando experiência…",
+    "experience.empty": "Nenhuma experiência cadastrada ainda.",
+    "experience.error": "Não foi possível carregar a experiência agora.",
+    "experience.present": "Atual",
 
     "skills.eyebrow": "Skills",
     "skills.title": "Stack técnica",
@@ -163,6 +172,7 @@ const TRANSLATIONS = {
     "meta.description": "Felipe Gonzalez, Full Stack Developer. Automation, databases, web systems and APIs with Python, JavaScript, HTML and CSS.",
 
     "nav.about": "About",
+    "nav.experience": "Experience",
     "nav.skills": "Skills",
     "nav.projects": "Projects",
     "nav.contact": "Contact",
@@ -194,6 +204,14 @@ const TRANSLATIONS = {
     "about.fact2.value": "Organized, responsive, user-centered interfaces.",
     "about.fact3.label": "Edge",
     "about.fact3.value": "Administrative/accounting background applied to software design.",
+
+    "experience.eyebrow": "Experience",
+    "experience.title": "Professional background",
+    "experience.lede": "Companies and projects where I applied back-end, front-end, and automation development.",
+    "experience.loading": "Loading experience…",
+    "experience.empty": "No experience added yet.",
+    "experience.error": "Couldn't load experience right now.",
+    "experience.present": "Present",
 
     "skills.eyebrow": "Skills",
     "skills.title": "Technical stack",
@@ -373,6 +391,7 @@ const i18n = (() => {
 
     if (typeof window.renderSkillsTable === "function") window.renderSkillsTable();
     if (typeof window.renderProjectsGrid === "function") window.renderProjectsGrid();
+    if (typeof window.renderExperienceList === "function") window.renderExperienceList();
   }
 
   function setLang(lang) {

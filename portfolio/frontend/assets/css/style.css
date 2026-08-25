@@ -690,7 +690,62 @@ h1, h2, h3 {
   background: var(--color-bg);
 }
 
-.skills-empty, .projects-empty {
+/* ===== Experience timeline (reuses .skills-table container pattern) ===== */
+.experience-item {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  border-bottom: var(--border-w) solid var(--color-border);
+}
+
+.experience-item:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 640px) {
+  .experience-item {
+    grid-template-columns: 1fr;
+  }
+}
+
+.experience-item-period {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  padding: var(--space-5);
+  background: var(--color-bg);
+  border-right: var(--border-w) solid var(--color-border);
+}
+
+@media (max-width: 640px) {
+  .experience-item-period {
+    border-right: none;
+    border-bottom: var(--border-w) solid var(--color-border);
+  }
+}
+
+.experience-item-body {
+  padding: var(--space-5);
+}
+
+.experience-item-role {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.experience-item-company {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.experience-item-desc {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.skills-empty, .projects-empty, .experience-empty {
   font-family: var(--font-mono);
   font-size: var(--fs-sm);
   color: var(--color-text-muted);
@@ -1614,6 +1669,16 @@ h1, h2, h3 {
   z-index: 1;
 }
 /* ===== Custom cursor (desktop only) ===== */
+/* Hides the native OS cursor only when the custom cursor-dot is actually
+   active (pointer device + no reduced-motion preference) — mirrors the JS
+   condition in main.js (`hover: hover`) and the .cursor-dot display rule
+   below, so touch devices / reduced-motion users always keep a real cursor. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html {
+    cursor: none;
+  }
+}
+
 .cursor-dot {
   position: fixed;
   top: 0;

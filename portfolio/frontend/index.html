@@ -49,6 +49,7 @@
       <div class="nav-right">
         <ul class="nav-links" id="navLinks">
           <li><a href="#sobre" data-nav-link data-i18n="nav.about">Sobre</a></li>
+          <li><a href="#experiencia" data-nav-link data-i18n="nav.experience">Experiência</a></li>
           <li><a href="#skills" data-nav-link data-i18n="nav.skills">Skills</a></li>
           <li><a href="#projetos" data-nav-link data-i18n="nav.projects">Projetos</a></li>
           <li><a href="#contato" data-nav-link data-i18n="nav.contact">Contato</a></li>
@@ -181,6 +182,21 @@
       </div>
     </section>
 
+    <!-- EXPERIÊNCIA -->
+    <section class="section" id="experiencia">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-i18n="experience.eyebrow">Experiência</span>
+          <h2 class="section-title" data-i18n="experience.title">Trajetória profissional</h2>
+          <p class="section-lede" data-i18n="experience.lede">Empresas e projetos onde apliquei desenvolvimento back-end, front-end e automação.</p>
+        </div>
+
+        <div class="skills-table reveal" id="experienceList" aria-live="polite">
+          <div class="skills-empty" data-i18n="experience.loading">Carregando experiência…</div>
+        </div>
+      </div>
+    </section>
+
     <!-- SKILLS -->
     <section class="section" id="skills">
       <div class="container">
@@ -286,6 +302,7 @@
   <script src="assets/js/api.js"></script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/render-experience.js"></script>
   <script src="assets/js/render-skills.js"></script>
   <script src="assets/js/render-projects.js"></script>
   <script src="assets/js/contact-form.js"></script>
