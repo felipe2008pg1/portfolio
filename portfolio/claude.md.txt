@@ -88,6 +88,12 @@ All are validated via Pydantic Settings in `app/core/config.py` — the applicat
 
 ⚠️ These URLs may have changed since this document was generated — confirm them in the Railway/Vercel dashboards.
 
+## Development Conventions
+
+* All code, comments, commit messages, and documentation: **English**, even though conversations with the user happen in Portuguese.
+* Session preference (2026-08-25): work incrementally, one change at a time, confirm before moving to the next. Keep chat responses concise/token-efficient — code first, minimal explanation, no repeated context, no narrated reasoning.
+* When an AI agent works in a sandboxed/tool-based environment (edits files via internal tools rather than a shared working directory), **those edits do not reach the user's actual project automatically**. Only code explicitly pasted as text in the chat response gets copied into the user's real files, and only if the user actually copies it. See gotcha #9 below — this caused a real incident in the 2026-08-25 session.
+
 ## Known Gotchas (do not repeat these mistakes)
 
 1. **Nested folder structure**: the user sometimes opens the terminal in the `portfolio site` folder (root on the PC), and sometimes in `portfolio site\portfolio` (repo root). This caused dozens of "path not found" errors. Always confirm with `pwd` before giving relative path instructions.
@@ -98,6 +104,7 @@ All are validated via Pydantic Settings in `app/core/config.py` — the applicat
 6. **Turnstile requires the exact hostname to be registered in the Cloudflare dashboard.** If local testing fails with "Security verification failed" or the widget does not load, first suspect: (a) test/real key mixed between frontend and backend, (b) hostname not registered, (c) accessing via `127.0.0.1` when only `localhost` was registered (or vice versa).
 7. **Skill categories are entered in Portuguese in the database** (`Linguagens`, `Banco de Dados`, `Dados`, `Framework`, `API`, `Ferramentas`) — PT↔EN translation is automatic via `CATEGORY_TRANSLATIONS_EN` in `i18n.js`. If someone enters the category in English directly in the admin panel, translation breaks (it gets stuck, with no match in the map).
 8. **Project images via external services (Imgur, LinkedIn CDN) frequently return 403** (hotlink protection). The adopted solution was to host images locally in `frontend/assets/img/projects/` and reference them via relative path (`assets/img/projects/name.png`). The backend validates `image_path`, accepting both full URLs (`http://`/`https://`) and relative paths starting with `assets/` (blocking path traversal).
+9. **AI sandbox edits ≠ user's real repository.** During the 2026-08-25 session, an AI agent made a series of file edits (CSS/JS animations, an admin dashboard bug fix) inside its own sandboxed working copy of the repo, and only described the changes in prose in the chat instead of pasting the full code. The user reported the dashboard fix "still not working" — it wasn't broken, it simply had never been copied into the user's actual project. **Lesson: when working with a user who copy-pastes code manually (no shared filesystem/git access), always paste complete, copy-pasteable code for every change, not just a prose summary — otherwise assume nothing reached the real repository.** See `CHANGELOG_AI.md` Phase 10 for exactly which changes from that session are confirmed delivered vs. only designed.
 
 ## How to Verify the Real State
 

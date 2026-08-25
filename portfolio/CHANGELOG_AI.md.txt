@@ -77,6 +77,58 @@ At the user's request ("mixed Brazilian-American style"), color accents were add
 * Images hosted on Imgur/LinkedIn CDN returning 403 (hotlink protection / expired token)
 * Solution: host images locally in `frontend/assets/img/projects/`, backend now accepts `image_path` as a relative path (`assets/...`) in addition to full URLs, with anti-path-traversal validation
 
-## State at the Time This Changelog Was Generated
+## Phase 10 — Session 2026-08-25: Context Reconstruction, Admin Stats Fix, Visual Polish
 
-Public site and admin panel functional in production. Last user request before this documentation: generation of the `CLAUDE.md`, `ARCHITECTURE.md`, `TODO.md`, `CHANGELOG_AI.md`, `DECISIONS.md` files. Repository README has not yet been created (next step mentioned by the user).
+### Part A — Context reconstruction (read-only analysis)
+
+Full static inspection of the repository (no code changes), comparing actual code against `CLAUDE.md`/`ARCHITECTURE.md`/`TODO.md`/`CHANGELOG_AI.md`. Discrepancies found:
+
+* Dead scaffolding: `backend/app/models/experience.py`, `schemas/experience.py`, `api/routes/experiences.py`, `frontend/assets/js/render-experience.js` — all empty, unregistered, never mounted. Not mentioned in any doc.
+* `TrustedHostMiddleware` imported in `main.py` but never registered — `ARCHITECTURE.md` incorrectly listed it as active (now corrected).
+* `CORSMiddleware` registered twice in `main.py` (restrictive, then `allow_methods=["*"]`) — undermines the restrictive intent, not yet fixed.
+* `app/db/init_db.py` is empty/unused; `Base.metadata.create_all()` is called directly in `main.py` instead.
+* Portuguese strings still present in user-facing `ValueError` messages in `backend/app/schemas/project.py`, and in comments/docstrings in `backend/app/core/security.py` — contradicts the "standardized to English" status.
+* Turnstile diagnostic log in `app/core/turnstile.py` (flagged in `TODO.md` for removal) confirmed still present.
+* Turnstile site key confirmed consistent across 3 of 4 locations (`index.html`, `login.html`, `config.js` all use `0x4AAAAAAD2-bMzcMMaQWBgk`); 4th location (Railway env var) not verifiable from the repo.
+* `DECISIONS.md`, referenced by both `CLAUDE.md` and this file, did not exist — created this session.
+* Duplicate, near-identical `README.md` at repo root and inside `portfolio/`.
+* Admin dashboard stat cards (see Part B) found to be non-functional.
+
+### Part B — Admin dashboard stats bug fix
+
+`statTotalProjects`, `statPublished`, `statTotalSkills`, `statMfaStatus` existed in `dashboard.html` but were never populated by any JS (permanently showed `—`). Fixed:
+
+* `adminApi.getMfaStatus()` added to `admin-api.js` (`GET /api/auth/mfa/status`)
+* `updateStats()` added to `dashboard.js` — derives counts from the already-loaded `projectsCache`/`skillsCache`, called after `loadProjects()`/`loadSkills()` succeed
+* `updateMfaStat()` added to `dashboard.js` — calls `getMfaStatus()`, called on `DOMContentLoaded`
+* `admin.stat.mfaOn`/`admin.stat.mfaOff` i18n keys added (PT/EN) to `i18n.js`
+
+**Delivery:** full `dashboard.js` and the `admin-api.js`/`i18n.js` snippets were pasted as complete, copy-pasteable code in the chat, at the user's explicit request. Reasonably confident this reached the real repo, but not confirmed — verify with `git diff`/`git status` before building on top of it.
+
+### Part C — Visual polish (public site) — ⚠️ delivery NOT confirmed
+
+The user asked for visual/animation improvements one at a time. Each was implemented in the AI's sandboxed working copy and only *described* in the chat response (prose summary), not pasted as full code. **This almost certainly means none of the following reached the actual repository** — see gotcha #9 in `CLAUDE.md`, discovered because of this exact issue. Treat all of the below as a spec to re-implement or re-deliver, not as done:
+
+* `index.html`: fixed a pre-existing stray extra `</div>` right after `.hero-flags`. Added `#cursorDot` element. Added `class="fade-init"` to `<body>`. Added `<noscript>` fallback for the fade-in.
+* `style.css`: `.hero-flags`/`.hero-flag` rewritten — each flag now fills 50% width/100% height (was two 480px rectangles), soft gradient blend at the center seam and top/bottom, slow drift animation (`heroFlagDrift`, desynced between the two flags). `.skill-tag` given a `tag-in` fade+scale-in animation, staggered per tag via inline `animationDelay` (set in `render-skills.js`). `.scroll-progress` given an animated flowing gradient (`scroll-progress-flow`) + glow. `.project-card-image` wrapped in a new `.project-card-image-wrap` (required a JS structural change, see below) with a hover depth gradient overlay. New `.cursor-dot` styles (dot + ring, hides on touch devices/`prefers-reduced-motion`). New `.system-panel-value.is-typing::after` blinking caret. New `body.fade-init`/`body.fade-init.is-loaded` fade-in rule — **intentionally scoped to `.fade-init`, not a bare `body` selector**, because an earlier version of this change (bare `body { opacity: 0 }`) would have permanently blanked `404.html`, `painel-fg-2026x/login.html`, and `dashboard.html`, none of which load `main.js` to remove that state. This was caught and fixed within the same session, before ever being described to the user — but it's a concrete example of why full-file review matters before pasting fixes.
+* `render-skills.js`: tags now get `tag.style.animationDelay` based on index (45ms step).
+* `render-projects.js`: image creation changed from `card.appendChild(img)` directly to wrapping in a new `imgWrap` (`.project-card-image-wrap`) div — **structural change, higher risk if applied partially**.
+* `main.js`: added the custom cursor logic (mousemove/mouseover listeners), the system-panel typing effect (runs once on `DOMContentLoaded`, after `i18n.apply()` — relies on script load order: `i18n.js` before `main.js`), and `document.body.classList.add("is-loaded")` as the first line of the `DOMContentLoaded` handler.
+
+### Problems encountered
+
+* Discovered mid-session that AI sandbox tool edits don't sync to the user's real project — the user reported the Part B fix "still not working," which turned out to mean it had simply never been applied yet (see `CLAUDE.md` gotcha #9).
+* Caught and fixed a self-introduced bug (global `body{opacity:0}` breaking pages without `main.js`) before it was ever shipped to the user.
+
+### What remains unfinished
+
+* Everything in Part C — needs re-delivery (full file dumps or clear diffs) or re-implementation, and confirmation that it's actually in the repository.
+* All Part A discrepancies except the admin stats fix (Part B) — still open, see `TODO.md`.
+
+### Recommended next step
+
+Before writing any new code: run `git status` / `git diff` in the actual repository to determine exactly what from this session (Part B and/or Part C) is really there. Do not assume Part C exists. Then either re-request full code for the missing pieces, or continue from whatever is confirmed present.
+
+## State at the Time This Changelog Was Last Updated (2026-08-25)
+
+Public site and admin panel functional in production, modulo the admin stat cards fix from Phase 10 (delivery unconfirmed) and the visual polish from Phase 10 Part C (delivery almost certainly did NOT happen). `README.md` exists at repo root but is a placeholder "in development" badge, not real documentation. `DECISIONS.md` created in Phase 10.

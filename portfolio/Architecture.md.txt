@@ -70,7 +70,9 @@ Migrations do not use Alembic despite it being in `requirements.txt` — in prac
 
 ### Implemented security (see complete list in `DECISIONS.md`)
 
-Argon2id, short-lived JWT + refresh rotation, MFA/TOTP, rate limiting (slowapi), Cloudflare Turnstile, CORS whitelist, TrustedHost, CSP, HSTS (production), conditional HttpOnly+Secure+SameSite cookies, honeypot in the contact form, URL validation (blocks dangerous schemes and internal hosts), path traversal blocked in `image_path`.
+Argon2id, short-lived JWT + refresh rotation, MFA/TOTP, rate limiting (slowapi), Cloudflare Turnstile, CORS whitelist, CSP, HSTS (production), conditional HttpOnly+Secure+SameSite cookies, honeypot in the contact form, URL validation (blocks dangerous schemes and internal hosts), path traversal blocked in `image_path`.
+
+⚠️ `TrustedHostMiddleware` is **imported** in `app/main.py` but never actually registered via `app.add_middleware()` — it is not active despite being imported. Also, `CORSMiddleware` is registered **twice** in `main.py` (once restrictive, once with `allow_methods=["*"]`/`allow_headers=["*"]`), which undermines the restrictive intent. Both confirmed by direct code inspection on 2026-08-25; not yet fixed — see `TODO.md`.
 
 ## Frontend
 
@@ -91,6 +93,8 @@ Typography: Archivo (display/headings), Inter (body), JetBrains Mono (technical 
 
 Layout: navigation sidebar (Projects/Skills/Security) + topbar (theme/language/logout) + statistic cards (total projects, published, total skills, MFA status) + CRUD tables with modals.
 
+⚠️ Until 2026-08-25, the four stat card values (`statTotalProjects`, `statPublished`, `statTotalSkills`, `statMfaStatus`) were dead — the DOM elements existed in `dashboard.html` but no JS ever populated them (permanently showed `—`). Fixed in that session by adding `updateStats()` (derives counts from the already-fetched `projectsCache`/`skillsCache`) and `updateMfaStat()` (calls the new `adminApi.getMfaStatus()` → `GET /api/auth/mfa/status`) to `dashboard.js`, plus `admin.stat.mfaOn`/`admin.stat.mfaOff` i18n keys. **Delivery status uncertain** — see `CHANGELOG_AI.md` Phase 10 and `TODO.md` before assuming this is live in the actual repository.
+
 ## Deploy
 
 * **Backend → Railway**: root directory `portfolio/backend`, `Procfile` defines start command (`uvicorn app.main:app --host 0.0.0.0 --port $PORT`), `runtime.txt` pins Python 3.12.8. Environment variables configured manually in the Railway dashboard (not loaded from `.env`, which is not committed).
@@ -100,7 +104,8 @@ Layout: navigation sidebar (Projects/Skills/Security) + topbar (theme/language/l
 ## What does NOT exist in this architecture
 
 * No automated tests (they were never mentioned/created at any point in the conversation)
-* No CI/CD beyond the native automatic deployment from Railway/Vercel on push to `main`
+* No CI/CD beyond the native automatic deployment from Railway/Vercel on push to `main` (Dependabot is configured for weekly dependency PRs, but that's not CI)
 * No actual file upload (project images are only URL/path references, not uploaded via a form)
 * No multi-admin user system (single-user by design)
 * No Alembic in active use despite being installed
+* No "Experience"/work-history feature — despite `backend/app/models/experience.py`, `backend/app/schemas/experience.py`, `backend/app/api/routes/experiences.py`, and `frontend/assets/js/render-experience.js` existing as files, **all four are empty (0 bytes)**, unregistered in `app/models/__init__.py`, and never mounted in `main.py` or referenced in `index.html`. Confirmed by direct inspection on 2026-08-25 — this is dead scaffolding for a feature that was never built, not a regression.

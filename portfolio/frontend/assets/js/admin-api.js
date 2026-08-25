@@ -51,7 +51,7 @@ const adminApi = {
   createSkill: (payload) => adminRequest("/api/skills", { method: "POST", body: JSON.stringify(payload) }),
   updateSkill: (id, payload) => adminRequest(`/api/skills/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   deleteSkill: (id) => adminRequest(`/api/skills/${id}`, { method: "DELETE" }),
-
+  deleteSkill: (id) => adminRequest(`/api/skills/${id}`, { method: "DELETE" }),
   getMfaStatus: () => adminRequest("/api/auth/mfa/status"),
 };
 
