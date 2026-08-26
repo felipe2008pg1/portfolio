@@ -23,6 +23,8 @@
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
+  <div class="cursor-dot" id="cursorDot"></div>
+
   <div class="login-shell">
     <div class="login-topbar">
       <div class="lang-toggle" role="group" aria-label="Idioma / Language">
@@ -45,6 +47,7 @@
           <label for="username" data-i18n="admin.login.username">Usuário</label>
           <input type="text" id="username" name="username" required maxlength="64" autocomplete="username">
         </div>
+
         <div class="form-field">
           <label for="password" data-i18n="admin.login.password">Senha</label>
           <input type="password" id="password" name="password" required maxlength="256" autocomplete="current-password">
@@ -60,6 +63,7 @@
           <label for="mfaCode">Código do autenticador (ou código de backup)</label>
           <input type="text" id="mfaCode" name="mfaCode" required maxlength="20" autocomplete="one-time-code" placeholder="123456">
         </div>
+
         <button type="submit" class="btn btn-primary" id="mfaSubmit">Verificar</button>
       </form>
     </div>
@@ -69,5 +73,6 @@
   <script src="../assets/js/i18n.js"></script>
   <script src="assets/js/admin-api.js"></script>
   <script src="assets/js/login.js"></script>
+  <script src="../assets/js/custom-cursor.js"></script>
 </body>
 </html>

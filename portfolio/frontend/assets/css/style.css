@@ -1758,3 +1758,36 @@ body.fade-init.is-loaded {
     transition: none;
   }
 }
+
+/* Custom cursor */
+.cursor-dot {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  pointer-events: none;
+  z-index: 99999;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.15s ease,
+    height 0.15s ease,
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.cursor-dot.is-active {
+  opacity: 1;
+}
+
+.cursor-dot.is-pointer {
+  width: 14px;
+  height: 14px;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor-dot {
+    display: none;
+  }
+}
