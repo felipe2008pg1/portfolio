@@ -1,4 +1,8 @@
-async function adminRequest(path, options = {}, isRetry = false) {
+async function adminRequest(
+  path,
+  options = {},
+  isRetry = false
+) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
@@ -12,19 +16,25 @@ async function adminRequest(path, options = {}, isRetry = false) {
     response.status === 401 &&
     !isRetry &&
     path !== "/api/auth/login" &&
-    path !== "/api/auth/refresh" &&
-    path !== "/api/auth/mfa/verify"
+    path !== "/api/auth/refresh"
   ) {
     try {
       await adminRequest(
         "/api/auth/refresh",
-        { method: "POST" },
+        {
+          method: "POST",
+        },
         true
       );
 
-      return adminRequest(path, options, true);
+      return adminRequest(
+        path,
+        options,
+        true
+      );
     } catch (_) {
       window.location.href = "login.html";
+
       throw new Error("Session expired.");
     }
   }
@@ -46,6 +56,7 @@ async function adminRequest(path, options = {}, isRetry = false) {
       data.errors.length > 0
     ) {
       const first = data.errors[0];
+
       const field = Array.isArray(first.loc)
         ? first.loc[first.loc.length - 1]
         : "field";
@@ -63,72 +74,144 @@ async function adminRequest(path, options = {}, isRetry = false) {
   return data;
 }
 
+
 const adminApi = {
-  login: (username, password, turnstileToken) =>
-    adminRequest("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({
-        username,
-        password,
-        turnstile_token: turnstileToken,
-      }),
-    }),
+  login: (
+    username,
+    password,
+    turnstileToken
+  ) =>
+    adminRequest(
+      "/api/auth/login",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          username,
+          password,
+          turnstile_token: turnstileToken,
+        }),
+      }
+    ),
 
   logout: () =>
-    adminRequest("/api/auth/logout", {
-      method: "POST",
-    }),
+    adminRequest(
+      "/api/auth/logout",
+      {
+        method: "POST",
+      }
+    ),
 
   me: () =>
-    adminRequest("/api/auth/me"),
+    adminRequest(
+      "/api/auth/me"
+    ),
+
 
   getAllProjects: () =>
-    adminRequest("/api/projects/admin"),
+    adminRequest(
+      "/api/projects/admin"
+    ),
 
   createProject: (payload) =>
-    adminRequest("/api/projects", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+    adminRequest(
+      "/api/projects",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }
+    ),
 
   updateProject: (id, payload) =>
-    adminRequest(`/api/projects/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(payload),
-    }),
+    adminRequest(
+      `/api/projects/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }
+    ),
 
   deleteProject: (id) =>
-    adminRequest(`/api/projects/${id}`, {
-      method: "DELETE",
-    }),
+    adminRequest(
+      `/api/projects/${id}`,
+      {
+        method: "DELETE",
+      }
+    ),
+
 
   getSkills: () =>
-    adminRequest("/api/skills"),
+    adminRequest(
+      "/api/skills"
+    ),
 
   createSkill: (payload) =>
-    adminRequest("/api/skills", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+    adminRequest(
+      "/api/skills",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }
+    ),
 
   updateSkill: (id, payload) =>
-    adminRequest(`/api/skills/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(payload),
-    }),
+    adminRequest(
+      `/api/skills/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }
+    ),
 
   deleteSkill: (id) =>
-    adminRequest(`/api/skills/${id}`, {
-      method: "DELETE",
-    }),
+    adminRequest(
+      `/api/skills/${id}`,
+      {
+        method: "DELETE",
+      }
+    ),
+
+
+  getAllExperiences: () =>
+    adminRequest(
+      "/api/experiences/admin"
+    ),
+
+  createExperience: (payload) =>
+    adminRequest(
+      "/api/experiences",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }
+    ),
+
+  updateExperience: (id, payload) =>
+    adminRequest(
+      `/api/experiences/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }
+    ),
+
+  deleteExperience: (id) =>
+    adminRequest(
+      `/api/experiences/${id}`,
+      {
+        method: "DELETE",
+      }
+    ),
 };
+
 
 async function requireAdminSession() {
   try {
     await adminApi.me();
+
     return true;
   } catch (error) {
     window.location.href = "login.html";
+
     return false;
   }
 }
