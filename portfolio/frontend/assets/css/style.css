@@ -693,12 +693,15 @@ h1, h2, h3 {
 /* ===== Experience timeline (reuses .skills-table container pattern) ===== */
 .experience-item {
   display: grid;
-  grid-template-columns: 200px 1fr;
-  border-bottom: var(--border-w) solid var(--color-border);
+  grid-template-columns: 22% 1fr;
+  border: var(--border-w) solid var(--color-border-on-blueprint);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-blueprint-soft);
 }
 
-.experience-item:last-child {
-  border-bottom: none;
+.experience-item + .experience-item {
+  margin-top: var(--space-4);
 }
 
 @media (max-width: 640px) {
@@ -707,42 +710,85 @@ h1, h2, h3 {
   }
 }
 
-.experience-item-period {
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
-  padding: var(--space-5);
-  background: var(--color-bg);
-  border-right: var(--border-w) solid var(--color-border);
+.experience-item-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-blueprint);
+  overflow: hidden;
 }
 
-@media (max-width: 640px) {
-  .experience-item-period {
-    border-right: none;
-    border-bottom: var(--border-w) solid var(--color-border);
-  }
+.experience-item-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.experience-item-logo-fallback {
+  width: 100%;
+  height: 100%;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--color-text-on-blueprint-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xl);
+  font-weight: 600;
 }
 
 .experience-item-body {
   padding: var(--space-5);
 }
 
-.experience-item-role {
-  font-weight: 600;
-  color: var(--color-text);
+.experience-item-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-3);
+  border-bottom: var(--border-w) solid var(--color-border-on-blueprint);
 }
 
 .experience-item-company {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--color-text-on-blueprint);
+}
+
+.experience-item-period {
   font-family: var(--font-mono);
-  font-size: var(--fs-sm);
-  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.05em;
+  color: var(--color-text-on-blueprint-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.experience-item-role {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--color-text-on-blueprint);
   margin-bottom: var(--space-2);
 }
 
 .experience-item-desc {
-  color: var(--color-text-muted);
+  color: var(--color-text-on-blueprint-muted);
   font-size: var(--fs-sm);
+  margin-bottom: var(--space-4);
+}
+
+.experience-item-link {
+  display: inline-flex;
+  color: var(--color-text-on-blueprint);
+  border-color: var(--color-border-on-blueprint);
+}
+
+.experience-item-link:hover {
+  background: var(--color-blueprint);
 }
 
 .skills-empty, .projects-empty, .experience-empty {

@@ -30,13 +30,14 @@ async function loadProjects() {
   try {
     projectsCache = await adminApi.getAllProjects();
     renderProjectsTable();
+    updateStats();
   } catch (error) {
     tbody.innerHTML = "";
     const row = document.createElement("tr");
     row.className = "admin-empty-row";
     const cell = document.createElement("td");
     cell.colSpan = 4;
-    cell.textContent = "Erro ao carregar projetos.";
+    cell.textContent = i18n.t("admin.dashboard.errorLoadingProjects");
     row.appendChild(cell);
     tbody.appendChild(row);
   }
@@ -51,7 +52,7 @@ function renderProjectsTable() {
     row.className = "admin-empty-row";
     const cell = document.createElement("td");
     cell.colSpan = 4;
-    cell.textContent = "Nenhum projeto cadastrado.";
+    cell.textContent = i18n.t("admin.dashboard.noProjects");
     row.appendChild(cell);
     tbody.appendChild(row);
     return;
@@ -65,17 +66,17 @@ function renderProjectsTable() {
     const stackCell = document.createElement("td");
     stackCell.textContent = project.stack;
     const publishedCell = document.createElement("td");
-    publishedCell.textContent = project.is_published ? "Sim" : "Não";
+    publishedCell.textContent = project.is_published ? i18n.t("admin.dashboard.yes") : i18n.t("admin.dashboard.no");
 
     const actionsCell = document.createElement("td");
     actionsCell.className = "col-actions";
     const editBtn = document.createElement("button");
     editBtn.className = "btn btn-outline btn-sm";
-    editBtn.textContent = "Editar";
+    editBtn.textContent = i18n.t("admin.dashboard.edit");
     editBtn.addEventListener("click", () => openProjectModal(project));
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "btn btn-danger btn-sm";
-    deleteBtn.textContent = "Excluir";
+    deleteBtn.textContent = i18n.t("admin.dashboard.delete");
     deleteBtn.addEventListener("click", () => deleteProject(project.id, project.title));
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(deleteBtn);
@@ -159,13 +160,14 @@ async function loadSkills() {
   try {
     skillsCache = await adminApi.getSkills();
     renderSkillsTable();
+    updateStats();
   } catch (error) {
     tbody.innerHTML = "";
     const row = document.createElement("tr");
     row.className = "admin-empty-row";
     const cell = document.createElement("td");
     cell.colSpan = 4;
-    cell.textContent = "Erro ao carregar skills.";
+    cell.textContent = i18n.t("admin.dashboard.errorLoadingSkills");
     row.appendChild(cell);
     tbody.appendChild(row);
   }
@@ -180,7 +182,7 @@ function renderSkillsTable() {
     row.className = "admin-empty-row";
     const cell = document.createElement("td");
     cell.colSpan = 4;
-    cell.textContent = "Nenhuma skill cadastrada.";
+    cell.textContent = i18n.t("admin.dashboard.noSkills");
     row.appendChild(cell);
     tbody.appendChild(row);
     return;
@@ -200,11 +202,11 @@ function renderSkillsTable() {
     actionsCell.className = "col-actions";
     const editBtn = document.createElement("button");
     editBtn.className = "btn btn-outline btn-sm";
-    editBtn.textContent = "Editar";
+    editBtn.textContent = i18n.t("admin.dashboard.edit");
     editBtn.addEventListener("click", () => openSkillModal(skill));
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "btn btn-danger btn-sm";
-    deleteBtn.textContent = "Excluir";
+    deleteBtn.textContent = i18n.t("admin.dashboard.delete");
     deleteBtn.addEventListener("click", () => deleteSkill(skill.id, skill.name));
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(deleteBtn);
@@ -270,6 +272,179 @@ document.getElementById("skillForm").addEventListener("submit", async (event) =>
   }
 });
 
+function updateStats() {
+  const totalProjectsEl = document.getElementById("statTotalProjects");
+  const publishedEl = document.getElementById("statPublished");
+  const totalSkillsEl = document.getElementById("statTotalSkills");
+
+  if (totalProjectsEl) totalProjectsEl.textContent = String(projectsCache.length);
+  if (publishedEl) {
+    const publishedCount = projectsCache.filter((project) => project.is_published).length;
+    publishedEl.textContent = String(publishedCount);
+  }
+  if (totalSkillsEl) totalSkillsEl.textContent = String(skillsCache.length);
+}
+
+let mfaStatusCache = null;
+
+async function updateMfaStat() {
+  try {
+    const { enabled } = await adminApi.getMfaStatus();
+    mfaStatusCache = enabled ? "on" : "off";
+  } catch (error) {
+    mfaStatusCache = "error";
+  }
+  renderMfaStat();
+}
+
+function renderMfaStat() {
+  const mfaStatusEl = document.getElementById("statMfaStatus");
+  if (!mfaStatusEl) return;
+
+  if (mfaStatusCache === "on") {
+    mfaStatusEl.textContent = i18n.t("admin.stat.mfaOn");
+  } else if (mfaStatusCache === "off") {
+    mfaStatusEl.textContent = i18n.t("admin.stat.mfaOff");
+  } else if (mfaStatusCache === "error") {
+    mfaStatusEl.textContent = "—";
+  }
+}
+
+let experiencesCache = [];
+
+async function loadExperiences() {
+  const tbody = document.getElementById("experiencesTableBody");
+  try {
+    experiencesCache = await adminApi.getAllExperiences();
+    renderExperiencesTable();
+  } catch (error) {
+    tbody.innerHTML = "";
+    const row = document.createElement("tr");
+    row.className = "admin-empty-row";
+    const cell = document.createElement("td");
+    cell.colSpan = 5;
+    cell.textContent = i18n.t("admin.dashboard.errorLoadingExperiences");
+    row.appendChild(cell);
+    tbody.appendChild(row);
+  }
+}
+
+function renderExperiencesTable() {
+  const tbody = document.getElementById("experiencesTableBody");
+  tbody.innerHTML = "";
+
+  if (experiencesCache.length === 0) {
+    const row = document.createElement("tr");
+    row.className = "admin-empty-row";
+    const cell = document.createElement("td");
+    cell.colSpan = 5;
+    cell.textContent = i18n.t("admin.dashboard.noExperiences");
+    row.appendChild(cell);
+    tbody.appendChild(row);
+    return;
+  }
+
+  experiencesCache.forEach((experience) => {
+    const row = document.createElement("tr");
+
+    const companyCell = document.createElement("td");
+    companyCell.textContent = experience.company;
+    const roleCell = document.createElement("td");
+    roleCell.textContent = experience.role;
+    const periodCell = document.createElement("td");
+    periodCell.textContent = experience.period;
+    const publishedCell = document.createElement("td");
+    publishedCell.textContent = experience.is_published ? i18n.t("admin.dashboard.yes") : i18n.t("admin.dashboard.no");
+
+    const actionsCell = document.createElement("td");
+    actionsCell.className = "col-actions";
+    const editBtn = document.createElement("button");
+    editBtn.className = "btn btn-outline btn-sm";
+    editBtn.textContent = i18n.t("admin.dashboard.edit");
+    editBtn.addEventListener("click", () => openExperienceModal(experience));
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "btn btn-danger btn-sm";
+    deleteBtn.textContent = i18n.t("admin.dashboard.delete");
+    deleteBtn.addEventListener("click", () => deleteExperience(experience.id, experience.company));
+    actionsCell.appendChild(editBtn);
+    actionsCell.appendChild(deleteBtn);
+
+    row.appendChild(companyCell);
+    row.appendChild(roleCell);
+    row.appendChild(periodCell);
+    row.appendChild(publishedCell);
+    row.appendChild(actionsCell);
+    tbody.appendChild(row);
+  });
+}
+
+function openExperienceModal(experience) {
+  clearFormAlert("experienceFormAlert");
+  document.getElementById("experienceModalTitle").textContent = experience
+    ? i18n.t("admin.dashboard.editExperienceModalTitle")
+    : i18n.t("admin.dashboard.newExperienceModalTitle");
+  document.getElementById("experienceId").value = experience ? experience.id : "";
+  document.getElementById("experienceCompany").value = experience ? experience.company : "";
+  document.getElementById("experienceRole").value = experience ? experience.role : "";
+  document.getElementById("experiencePeriod").value = experience ? experience.period : "";
+  document.getElementById("experienceDescription").value = experience ? experience.description : "";
+  document.getElementById("experienceDescriptionEn").value = experience && experience.description_en ? experience.description_en : "";
+  document.getElementById("experienceCompanyUrl").value = experience && experience.company_url ? experience.company_url : "";
+  document.getElementById("experienceLogoUrl").value = experience && experience.logo_url ? experience.logo_url : "";
+  document.getElementById("experienceOrder").value = experience ? experience.display_order : 0;
+  document.getElementById("experiencePublished").checked = experience ? experience.is_published : true;
+  openModal("experience");
+}
+
+async function deleteExperience(id, company) {
+  if (!window.confirm(`Excluir a experiência "${company}"? Essa ação não pode ser desfeita.`)) return;
+  try {
+    await adminApi.deleteExperience(id);
+    showGlobalAlert("Experiência excluída.", "success");
+    loadExperiences();
+  } catch (error) {
+    showGlobalAlert(error.message || "Erro ao excluir experiência.", "error");
+  }
+}
+
+document.getElementById("newExperienceBtn").addEventListener("click", () => openExperienceModal(null));
+
+document.getElementById("experienceForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  clearFormAlert("experienceFormAlert");
+
+  const id = document.getElementById("experienceId").value;
+  const payload = {
+    company: document.getElementById("experienceCompany").value.trim(),
+    role: document.getElementById("experienceRole").value.trim(),
+    period: document.getElementById("experiencePeriod").value.trim(),
+    description: document.getElementById("experienceDescription").value.trim(),
+    description_en: document.getElementById("experienceDescriptionEn").value.trim() || null,
+    company_url: document.getElementById("experienceCompanyUrl").value.trim() || null,
+    logo_url: document.getElementById("experienceLogoUrl").value.trim() || null,
+    is_published: document.getElementById("experiencePublished").checked,
+    display_order: Number(document.getElementById("experienceOrder").value) || 0,
+  };
+
+  const submitBtn = document.getElementById("experienceSubmitBtn");
+  submitBtn.disabled = true;
+
+  try {
+    if (id) {
+      await adminApi.updateExperience(id, payload);
+    } else {
+      await adminApi.createExperience(payload);
+    }
+    closeModal("experience");
+    showGlobalAlert("Experiência salva com sucesso.", "success");
+    loadExperiences();
+  } catch (error) {
+    showFormAlert("experienceFormAlert", error.message || "Erro ao salvar experiência.");
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
 document.getElementById("logoutBtn").addEventListener("click", async () => {
   try {
     await adminApi.logout();
@@ -283,4 +458,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!authed) return;
   loadProjects();
   loadSkills();
+  loadExperiences();
+  updateMfaStat();
 });
