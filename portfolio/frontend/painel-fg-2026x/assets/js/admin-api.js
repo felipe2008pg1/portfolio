@@ -16,7 +16,7 @@
   }
 
   let data = null;
-  try { data = await response.json(); } catch (_) {}
+  try { data = await response.json(); } catch (_) { }
 
   if (!response.ok) {
     let message = (data && data.detail) || "Não foi possível completar a solicitação.";
@@ -58,6 +58,11 @@ const adminApi = {
   deleteExperience: (id) => adminRequest(`/api/experiences/${id}`, { method: "DELETE" }),
 
   getMfaStatus: () => adminRequest("/api/auth/mfa/status"),
+  mfaSetupInit: () => adminRequest("/api/auth/mfa/setup/init", { method: "POST" }),
+  mfaSetupConfirm: (code) =>
+    adminRequest("/api/auth/mfa/setup/confirm", { method: "POST", body: JSON.stringify({ code }) }),
+  mfaDisable: (code) =>
+    adminRequest("/api/auth/mfa/disable", { method: "POST", body: JSON.stringify({ code }) }),
 };
 
 async function requireAdminSession() {

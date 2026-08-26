@@ -276,6 +276,7 @@ function updateStats() {
   const totalProjectsEl = document.getElementById("statTotalProjects");
   const publishedEl = document.getElementById("statPublished");
   const totalSkillsEl = document.getElementById("statTotalSkills");
+  const totalExperiencesEl = document.getElementById("statTotalExperiences");
 
   if (totalProjectsEl) totalProjectsEl.textContent = String(projectsCache.length);
   if (publishedEl) {
@@ -283,6 +284,7 @@ function updateStats() {
     publishedEl.textContent = String(publishedCount);
   }
   if (totalSkillsEl) totalSkillsEl.textContent = String(skillsCache.length);
+  if (totalExperiencesEl) totalExperiencesEl.textContent = String(experiencesCache.length);
 }
 
 let mfaStatusCache = null;
@@ -295,6 +297,7 @@ async function updateMfaStat() {
     mfaStatusCache = "error";
   }
   renderMfaStat();
+  renderSecurityPanel();
 }
 
 function renderMfaStat() {
@@ -310,6 +313,199 @@ function renderMfaStat() {
   }
 }
 
+function renderSecurityPanel() {
+  const statusText = document.getElementById("mfaStatusText");
+  const enableBtn = document.getElementById("mfaEnableBtn");
+  const disableBtn = document.getElementById("mfaDisableBtn");
+  if (!statusText || !enableBtn || !disableBtn) return;
+
+  if (mfaStatusCache === "on") {
+    statusText.textContent = i18n.t("admin.security.enabled");
+    enableBtn.style.display = "none";
+    disableBtn.style.display = "";
+  } else if (mfaStatusCache === "off") {
+    statusText.textContent = i18n.t("admin.security.disabled");
+    enableBtn.style.display = "";
+    disableBtn.style.display = "none";
+  } else if (mfaStatusCache === "error") {
+    statusText.textContent = i18n.t("admin.security.checkError");
+    enableBtn.style.display = "none";
+    disableBtn.style.display = "none";
+  }
+}
+
+function buildMfaField(labelText, value, mono) {
+  const wrap = document.createElement("div");
+  wrap.style.marginBottom = "var(--space-4)";
+
+  const label = document.createElement("p");
+  label.className = "about-fact-label";
+  label.textContent = labelText;
+
+  const val = document.createElement("p");
+  val.className = "about-fact-value";
+  val.textContent = value;
+  if (mono) val.style.fontFamily = "var(--font-mono)";
+  val.style.wordBreak = "break-all";
+
+  wrap.appendChild(label);
+  wrap.appendChild(val);
+  return wrap;
+}
+
+function startMfaSetup() {
+  const enableBtn = document.getElementById("mfaEnableBtn");
+  enableBtn.disabled = true;
+
+  adminApi
+    .mfaSetupInit()
+    .then((data) => {
+      document.getElementById("mfaModalTitle").textContent = i18n.t("admin.security.enableBtn");
+      clearFormAlert("mfaModalAlert");
+
+      const body = document.getElementById("mfaModalBody");
+      body.innerHTML = "";
+
+      const instructions = document.createElement("p");
+      instructions.className = "about-fact-value";
+      instructions.style.marginBottom = "var(--space-4)";
+      instructions.textContent = i18n.t("admin.security.scanQr");
+      body.appendChild(instructions);
+
+      const qr = document.createElement("img");
+      qr.src = data.qr_code_base64;
+      qr.alt = "QR code";
+      qr.style.display = "block";
+      qr.style.margin = "0 auto var(--space-4)";
+      qr.style.maxWidth = "200px";
+      body.appendChild(qr);
+
+      body.appendChild(buildMfaField(i18n.t("admin.security.secretLabel"), data.secret, true));
+
+      const form = document.createElement("form");
+      form.id = "mfaSetupConfirmForm";
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.id = "mfaSetupCode";
+      input.className = "form-input";
+      input.placeholder = i18n.t("admin.security.codePlaceholder");
+      input.maxLength = 6;
+      input.autocomplete = "one-time-code";
+      input.required = true;
+      input.style.marginBottom = "var(--space-3)";
+
+      const submitBtn = document.createElement("button");
+      submitBtn.type = "submit";
+      submitBtn.className = "btn btn-primary btn-sm";
+      submitBtn.textContent = i18n.t("admin.security.confirmBtn");
+
+      form.appendChild(input);
+      form.appendChild(submitBtn);
+      body.appendChild(form);
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        submitBtn.disabled = true;
+        clearFormAlert("mfaModalAlert");
+        try {
+          const { backup_codes } = await adminApi.mfaSetupConfirm(input.value.trim());
+          renderMfaBackupCodes(backup_codes);
+          await updateMfaStat();
+        } catch (error) {
+          showFormAlert("mfaModalAlert", error.message);
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      openModal("mfa");
+    })
+    .catch((error) => showGlobalAlert(error.message, "error"))
+    .finally(() => {
+      enableBtn.disabled = false;
+    });
+}
+
+function renderMfaBackupCodes(codes) {
+  document.getElementById("mfaModalTitle").textContent = i18n.t("admin.security.backupCodesTitle");
+
+  const body = document.getElementById("mfaModalBody");
+  body.innerHTML = "";
+
+  const desc = document.createElement("p");
+  desc.className = "about-fact-value";
+  desc.style.marginBottom = "var(--space-4)";
+  desc.textContent = i18n.t("admin.security.backupCodesDesc");
+  body.appendChild(desc);
+
+  const list = document.createElement("ul");
+  list.style.fontFamily = "var(--font-mono)";
+  list.style.marginBottom = "var(--space-4)";
+  codes.forEach((code) => {
+    const li = document.createElement("li");
+    li.textContent = code;
+    list.appendChild(li);
+  });
+  body.appendChild(list);
+
+  const doneBtn = document.createElement("button");
+  doneBtn.type = "button";
+  doneBtn.className = "btn btn-primary btn-sm";
+  doneBtn.textContent = i18n.t("admin.security.doneBtn");
+  doneBtn.addEventListener("click", () => closeModal("mfa"));
+  body.appendChild(doneBtn);
+}
+
+function startMfaDisable() {
+  document.getElementById("mfaModalTitle").textContent = i18n.t("admin.security.disableBtn");
+  clearFormAlert("mfaModalAlert");
+
+  const body = document.getElementById("mfaModalBody");
+  body.innerHTML = "";
+
+  const form = document.createElement("form");
+  form.id = "mfaDisableForm";
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.id = "mfaDisableCode";
+  input.className = "form-input";
+  input.placeholder = i18n.t("admin.security.disableCodePlaceholder");
+  input.autocomplete = "one-time-code";
+  input.required = true;
+  input.style.marginBottom = "var(--space-3)";
+
+  const submitBtn = document.createElement("button");
+  submitBtn.type = "submit";
+  submitBtn.className = "btn btn-danger btn-sm";
+  submitBtn.textContent = i18n.t("admin.security.disableBtn");
+
+  form.appendChild(input);
+  form.appendChild(submitBtn);
+  body.appendChild(form);
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    submitBtn.disabled = true;
+    clearFormAlert("mfaModalAlert");
+    try {
+      await adminApi.mfaDisable(input.value.trim());
+      closeModal("mfa");
+      await updateMfaStat();
+    } catch (error) {
+      showFormAlert("mfaModalAlert", error.message);
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  openModal("mfa");
+}
+
+document.getElementById("mfaEnableBtn").addEventListener("click", startMfaSetup);
+document.getElementById("mfaDisableBtn").addEventListener("click", startMfaDisable);
+
 let experiencesCache = [];
 
 async function loadExperiences() {
@@ -317,6 +513,7 @@ async function loadExperiences() {
   try {
     experiencesCache = await adminApi.getAllExperiences();
     renderExperiencesTable();
+    updateStats();
   } catch (error) {
     tbody.innerHTML = "";
     const row = document.createElement("tr");

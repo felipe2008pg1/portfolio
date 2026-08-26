@@ -18,7 +18,10 @@ async def verify_turnstile_token(token: str, remote_ip: str | None) -> bool:
             result = response.json()
             success = bool(result.get("success"))
             if not success:
-                security_logger.warning("turnstile_verify_failed cloudflare_response=%s", result)
+                security_logger.warning(
+                    "turnstile_verify_failed error_codes=%s",
+                    result.get("error-codes"),
+                )
             return success
     except (httpx.HTTPError, ValueError) as exc:
         security_logger.warning("turnstile_verify_failed exception=%s", exc)

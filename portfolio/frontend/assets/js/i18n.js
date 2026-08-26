@@ -106,6 +106,7 @@ const TRANSLATIONS = {
     "admin.stat.published": "Publicados",
     "admin.stat.skills": "Skills",
     "admin.stat.mfa": "MFA",
+    "admin.stat.experiences": "Experiências",
     "admin.stat.mfaOn": "Ativo",
     "admin.stat.mfaOff": "Inativo",
     "admin.stat.mfaOn": "Ativo",
@@ -183,6 +184,14 @@ const TRANSLATIONS = {
     "admin.security.checkError": "Não foi possível verificar o status do MFA.",
     "admin.security.enableBtn": "Ativar MFA",
     "admin.security.disableBtn": "Desativar MFA",
+    "admin.security.scanQr": "Escaneie o QR code com seu app autenticador (Google Authenticator, Authy, etc.) e digite o código gerado.",
+    "admin.security.secretLabel": "Ou insira a chave manualmente:",
+    "admin.security.codePlaceholder": "Código de 6 dígitos",
+    "admin.security.confirmBtn": "Confirmar",
+    "admin.security.backupCodesTitle": "Guarde seus códigos de backup",
+    "admin.security.backupCodesDesc": "Use um desses códigos se perder acesso ao app autenticador. Cada código funciona uma única vez.",
+    "admin.security.doneBtn": "Concluir",
+    "admin.security.disableCodePlaceholder": "Código do app ou de backup",
     "footer.builtIn": "Feito no Brasil, para o mundo",
   },
 
@@ -293,6 +302,7 @@ const TRANSLATIONS = {
     "admin.stat.published": "Published",
     "admin.stat.skills": "Skills",
     "admin.stat.mfa": "MFA",
+    "admin.stat.experiences": "Experience",
     "admin.stat.mfaOn": "Active",
     "admin.stat.mfaOff": "Inactive",
     "admin.stat.mfaOn": "Active",
@@ -370,6 +380,14 @@ const TRANSLATIONS = {
     "admin.security.checkError": "Couldn't check MFA status.",
     "admin.security.enableBtn": "Enable MFA",
     "admin.security.disableBtn": "Disable MFA",
+    "admin.security.scanQr": "Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.) and enter the generated code.",
+    "admin.security.secretLabel": "Or enter the key manually:",
+    "admin.security.codePlaceholder": "6-digit code",
+    "admin.security.confirmBtn": "Confirm",
+    "admin.security.backupCodesTitle": "Save your backup codes",
+    "admin.security.backupCodesDesc": "Use one of these codes if you lose access to your authenticator app. Each code works only once.",
+    "admin.security.doneBtn": "Done",
+    "admin.security.disableCodePlaceholder": "Authenticator or backup code",
     "footer.builtIn": "Built in Brazil, shipped worldwide",
   },
 };
@@ -433,6 +451,7 @@ const i18n = (() => {
     if (typeof window.renderProjectsTable === "function") window.renderProjectsTable();
     if (typeof window.renderExperiencesTable === "function") window.renderExperiencesTable();
     if (typeof window.renderMfaStat === "function") window.renderMfaStat();
+    if (typeof window.renderSecurityPanel === "function") window.renderSecurityPanel();
   }
 
   function setLang(lang) {

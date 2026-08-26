@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Admin — Dashboard</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" crossorigin>
 
   <link rel="stylesheet" href="../assets/css/reset.css">
   <link rel="stylesheet" href="../assets/css/variables.css">
@@ -38,30 +41,32 @@
 
         <a href="#projetos" class="admin-sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M3 9h18" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M3 9h18" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <span data-i18n="admin.nav.projects">Projetos</span>
         </a>
 
         <a href="#skills" class="admin-sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z" stroke-linecap="round"
+              stroke-linejoin="round" />
           </svg>
           <span data-i18n="admin.nav.skills">Skills</span>
         </a>
 
         <a href="#experiencia" class="admin-sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M8 9h8M8 13h5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M8 9h8M8 13h5" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <span data-i18n="admin.nav.experience">Experiência</span>
         </a>
 
         <a href="#seguranca" class="admin-sidebar-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke-linecap="round"
+              stroke-linejoin="round" />
           </svg>
           <span data-i18n="admin.nav.security">Segurança</span>
         </a>
@@ -77,14 +82,9 @@
 
         <div class="admin-topbar-title">
 
-          <button
-            type="button"
-            class="admin-mobile-toggle"
-            id="sidebarToggle"
-            aria-label="Abrir menu"
-          >
+          <button type="button" class="admin-mobile-toggle" id="sidebarToggle" aria-label="Abrir menu">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/>
+              <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" />
             </svg>
           </button>
 
@@ -97,48 +97,25 @@
 
         <div class="admin-topbar-actions">
 
-          <div
-            class="lang-toggle"
-            role="group"
-            aria-label="Idioma / Language"
-          >
-            <button
-              type="button"
-              data-lang="pt"
-            >
+          <div class="lang-toggle" role="group" aria-label="Idioma / Language">
+            <button type="button" data-lang="pt">
               PT
             </button>
 
-            <button
-              type="button"
-              data-lang="en"
-            >
+            <button type="button" data-lang="en">
               EN
             </button>
           </div>
 
 
-          <button
-            type="button"
-            class="theme-toggle"
-            id="themeToggle"
-            aria-label="Alternar tema"
-            aria-pressed="false"
-          >
-            <span
-              class="theme-toggle-icon"
-              aria-hidden="true"
-            >
+          <button type="button" class="theme-toggle" id="themeToggle" aria-label="Alternar tema" aria-pressed="false">
+            <span class="theme-toggle-icon" aria-hidden="true">
               ☾
             </span>
           </button>
 
 
-          <button
-            class="btn btn-outline btn-sm"
-            id="logoutBtn"
-            data-i18n="admin.dashboard.logout"
-          >
+          <button class="btn btn-outline btn-sm" id="logoutBtn" data-i18n="admin.dashboard.logout">
             Sair
           </button>
 
@@ -149,11 +126,7 @@
 
       <main class="admin-main">
 
-        <div
-          class="admin-alert"
-          id="globalAlert"
-          role="alert"
-        ></div>
+        <div class="admin-alert" id="globalAlert" role="alert"></div>
 
 
         <!-- =========================
@@ -164,40 +137,16 @@
 
           <div class="admin-stat-card">
 
-            <svg
-              class="admin-stat-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-            >
-              <rect
-                x="3"
-                y="4"
-                width="18"
-                height="16"
-                rx="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                d="M3 9h18"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
+            <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M3 9h18" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
 
-            <span
-              class="admin-stat-value"
-              id="statTotalProjects"
-            >
+            <span class="admin-stat-value" id="statTotalProjects">
               —
             </span>
 
-            <span
-              class="admin-stat-label"
-              data-i18n="admin.stat.projects"
-            >
+            <span class="admin-stat-label" data-i18n="admin.stat.projects">
               Projetos
             </span>
 
@@ -206,36 +155,16 @@
 
           <div class="admin-stat-card">
 
-            <svg
-              class="admin-stat-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-            >
-              <path
-                d="M12 2l9 4.5v9L12 20l-9-4.5v-9L12 2z"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                d="M9 12l2 2 4-4"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
+            <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2l9 4.5v9L12 20l-9-4.5v-9L12 2z" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
 
-            <span
-              class="admin-stat-value"
-              id="statPublished"
-            >
+            <span class="admin-stat-value" id="statPublished">
               —
             </span>
 
-            <span
-              class="admin-stat-label"
-              data-i18n="admin.stat.published"
-            >
+            <span class="admin-stat-label" data-i18n="admin.stat.published">
               Publicados
             </span>
 
@@ -244,31 +173,16 @@
 
           <div class="admin-stat-card">
 
-            <svg
-              class="admin-stat-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-            >
-              <path
-                d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
+            <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
 
-            <span
-              class="admin-stat-value"
-              id="statTotalSkills"
-            >
+            <span class="admin-stat-value" id="statTotalSkills">
               —
             </span>
 
-            <span
-              class="admin-stat-label"
-              data-i18n="admin.stat.skills"
-            >
+            <span class="admin-stat-label" data-i18n="admin.stat.skills">
               Skills
             </span>
 
@@ -277,32 +191,35 @@
 
           <div class="admin-stat-card">
 
-            <svg
-              class="admin-stat-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-            >
-              <path
-                d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
+            <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
 
-            <span
-              class="admin-stat-value"
-              id="statMfaStatus"
-            >
+            <span class="admin-stat-value" id="statMfaStatus">
               —
             </span>
 
-            <span
-              class="admin-stat-label"
-              data-i18n="admin.stat.mfa"
-            >
+            <span class="admin-stat-label" data-i18n="admin.stat.mfa">
               MFA
+            </span>
+
+          </div>
+
+
+          <div class="admin-stat-card">
+
+            <svg class="admin-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="7" width="20" height="14" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+
+            <span class="admin-stat-value" id="statTotalExperiences">
+              —
+            </span>
+
+            <span class="admin-stat-label" data-i18n="admin.stat.experiences">
+              Experiências
             </span>
 
           </div>
@@ -314,38 +231,15 @@
              PROJECTS
         ========================== -->
 
-        <section
-          class="admin-section"
-          id="projetos"
-        >
+        <section class="admin-section" id="projetos">
 
           <div class="admin-section-head">
 
-            <h2
-              class="section-title"
-              style="font-size: var(--fs-lg);"
-            >
+            <h2 class="section-title" style="font-size: var(--fs-lg);">
 
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <rect
-                  x="3"
-                  y="4"
-                  width="18"
-                  height="16"
-                  rx="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M3 9h18"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M3 9h18" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
 
               <span data-i18n="admin.dashboard.projectsTitle">
@@ -355,11 +249,7 @@
             </h2>
 
 
-            <button
-              class="btn btn-primary btn-sm"
-              id="newProjectBtn"
-              data-i18n="admin.dashboard.newProject"
-            >
+            <button class="btn btn-primary btn-sm" id="newProjectBtn" data-i18n="admin.dashboard.newProject">
               + Novo projeto
             </button>
 
@@ -397,10 +287,7 @@
 
               <tr class="admin-empty-row">
 
-                <td
-                  colspan="4"
-                  data-i18n="admin.dashboard.loading"
-                >
+                <td colspan="4" data-i18n="admin.dashboard.loading">
                   Carregando…
                 </td>
 
@@ -417,29 +304,15 @@
              SKILLS
         ========================== -->
 
-        <section
-          class="admin-section"
-          id="skills"
-        >
+        <section class="admin-section" id="skills">
 
           <div class="admin-section-head">
 
-            <h2
-              class="section-title"
-              style="font-size: var(--fs-lg);"
-            >
+            <h2 class="section-title" style="font-size: var(--fs-lg);">
 
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1 3-6z" stroke-linecap="round"
+                  stroke-linejoin="round" />
               </svg>
 
               <span data-i18n="admin.dashboard.skillsTitle">
@@ -449,11 +322,7 @@
             </h2>
 
 
-            <button
-              class="btn btn-primary btn-sm"
-              id="newSkillBtn"
-              data-i18n="admin.dashboard.newSkill"
-            >
+            <button class="btn btn-primary btn-sm" id="newSkillBtn" data-i18n="admin.dashboard.newSkill">
               + Nova skill
             </button>
 
@@ -491,10 +360,7 @@
 
               <tr class="admin-empty-row">
 
-                <td
-                  colspan="4"
-                  data-i18n="admin.dashboard.loading"
-                >
+                <td colspan="4" data-i18n="admin.dashboard.loading">
                   Carregando…
                 </td>
 
@@ -511,39 +377,16 @@
              EXPERIENCE
         ========================== -->
 
-        <section
-          class="admin-section"
-          id="experiencia"
-        >
+        <section class="admin-section" id="experiencia">
 
           <div class="admin-section-head">
 
-            <h2
-              class="section-title"
-              style="font-size: var(--fs-lg);"
-            >
+            <h2 class="section-title" style="font-size: var(--fs-lg);">
 
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <rect
-                  x="3"
-                  y="4"
-                  width="18"
-                  height="16"
-                  rx="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round" />
 
-                <path
-                  d="M8 9h8M8 13h5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+                <path d="M8 9h8M8 13h5" stroke-linecap="round" stroke-linejoin="round" />
 
               </svg>
 
@@ -554,11 +397,7 @@
             </h2>
 
 
-            <button
-              class="btn btn-primary btn-sm"
-              id="newExperienceBtn"
-              data-i18n="admin.dashboard.newExperience"
-            >
+            <button class="btn btn-primary btn-sm" id="newExperienceBtn" data-i18n="admin.dashboard.newExperience">
               + Nova experiência
             </button>
 
@@ -617,30 +456,16 @@
              SECURITY
         ========================== -->
 
-        <section
-          class="admin-section"
-          id="seguranca"
-        >
+        <section class="admin-section" id="seguranca">
 
           <div class="admin-section-head">
 
-            <h2
-              class="section-title"
-              style="font-size: var(--fs-lg);"
-            >
+            <h2 class="section-title" style="font-size: var(--fs-lg);">
 
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 
-                <path
-                  d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+                <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke-linecap="round"
+                  stroke-linejoin="round" />
 
               </svg>
 
@@ -653,45 +478,27 @@
           </div>
 
 
-          <div
-            class="about-fact"
-            style="max-width: 480px;"
-          >
+          <div class="about-fact" style="max-width: 480px;">
 
-            <span
-              class="about-fact-label"
-              data-i18n="admin.security.mfaLabel"
-            >
+            <span class="about-fact-label" data-i18n="admin.security.mfaLabel">
               Autenticação em duas etapas (MFA)
             </span>
 
 
-            <p
-              id="mfaStatusText"
-              class="about-fact-value"
-              style="margin-bottom: var(--space-4);"
-              data-i18n="admin.security.checking"
-            >
+            <p id="mfaStatusText" class="about-fact-value" style="margin-bottom: var(--space-4);"
+              data-i18n="admin.security.checking">
               Verificando status…
             </p>
 
 
-            <button
-              class="btn btn-primary btn-sm"
-              id="mfaEnableBtn"
-              style="display:none;"
-              data-i18n="admin.security.enableBtn"
-            >
+            <button class="btn btn-primary btn-sm" id="mfaEnableBtn" style="display:none;"
+              data-i18n="admin.security.enableBtn">
               Ativar MFA
             </button>
 
 
-            <button
-              class="btn btn-danger btn-sm"
-              id="mfaDisableBtn"
-              style="display:none;"
-              data-i18n="admin.security.disableBtn"
-            >
+            <button class="btn btn-danger btn-sm" id="mfaDisableBtn" style="display:none;"
+              data-i18n="admin.security.disableBtn">
               Desativar MFA
             </button>
 
@@ -710,10 +517,7 @@
        PROJECT MODAL
   ========================== -->
 
-  <div
-    class="admin-modal-overlay"
-    id="projectModalOverlay"
-  >
+  <div class="admin-modal-overlay" id="projectModalOverlay">
 
     <div class="admin-modal">
 
@@ -723,69 +527,39 @@
           Novo projeto
         </h3>
 
-        <button
-          class="admin-modal-close"
-          data-close-modal="project"
-        >
+        <button class="admin-modal-close" data-close-modal="project">
           &times;
         </button>
 
       </div>
 
 
-      <div
-        class="admin-alert"
-        id="projectFormAlert"
-        role="alert"
-      ></div>
+      <div class="admin-alert" id="projectFormAlert" role="alert"></div>
 
 
-      <form
-        id="projectForm"
-        novalidate
-      >
+      <form id="projectForm" novalidate>
 
-        <input
-          type="hidden"
-          id="projectId"
-        >
+        <input type="hidden" id="projectId">
 
 
         <div class="form-field">
 
-          <label
-            for="projectTitle"
-            data-i18n="admin.dashboard.fieldTitle"
-          >
+          <label for="projectTitle" data-i18n="admin.dashboard.fieldTitle">
             Título
           </label>
 
-          <input
-            type="text"
-            id="projectTitle"
-            required
-            minlength="1"
-            maxlength="120"
-          >
+          <input type="text" id="projectTitle" required minlength="1" maxlength="120">
 
         </div>
 
 
         <div class="form-field">
 
-          <label
-            for="projectDescription"
-            data-i18n="admin.dashboard.fieldDescription"
-          >
+          <label for="projectDescription" data-i18n="admin.dashboard.fieldDescription">
             Descrição
           </label>
 
-          <textarea
-            id="projectDescription"
-            required
-            minlength="1"
-            maxlength="2000"
-          ></textarea>
+          <textarea id="projectDescription" required minlength="1" maxlength="2000"></textarea>
 
         </div>
 
@@ -796,32 +570,20 @@
             Descrição (inglês, opcional)
           </label>
 
-          <textarea
-            id="projectDescriptionEn"
-            maxlength="2000"
-            placeholder="Deixe em branco pra usar a descrição em português também no modo EN"
-          ></textarea>
+          <textarea id="projectDescriptionEn" maxlength="2000"
+            placeholder="Deixe em branco pra usar a descrição em português também no modo EN"></textarea>
 
         </div>
 
 
         <div class="form-field">
 
-          <label
-            for="projectStack"
-            data-i18n="admin.dashboard.fieldStack"
-          >
+          <label for="projectStack" data-i18n="admin.dashboard.fieldStack">
             Stack (separada por vírgula)
           </label>
 
-          <input
-            type="text"
-            id="projectStack"
-            required
-            minlength="1"
-            maxlength="255"
-            placeholder="Python, FastAPI, SQLite"
-          >
+          <input type="text" id="projectStack" required minlength="1" maxlength="255"
+            placeholder="Python, FastAPI, SQLite">
 
         </div>
 
@@ -832,12 +594,7 @@
             URL da imagem (opcional)
           </label>
 
-          <input
-            type="url"
-            id="projectImageUrl"
-            maxlength="500"
-            placeholder="https://.../screenshot.png"
-          >
+          <input type="url" id="projectImageUrl" maxlength="500" placeholder="https://.../screenshot.png">
 
         </div>
 
@@ -846,38 +603,22 @@
 
           <div class="form-field">
 
-            <label
-              for="projectRepoUrl"
-              data-i18n="admin.dashboard.fieldRepoUrl"
-            >
+            <label for="projectRepoUrl" data-i18n="admin.dashboard.fieldRepoUrl">
               URL do repositório (opcional)
             </label>
 
-            <input
-              type="url"
-              id="projectRepoUrl"
-              maxlength="500"
-              placeholder="https://github.com/..."
-            >
+            <input type="url" id="projectRepoUrl" maxlength="500" placeholder="https://github.com/...">
 
           </div>
 
 
           <div class="form-field">
 
-            <label
-              for="projectDemoUrl"
-              data-i18n="admin.dashboard.fieldDemoUrl"
-            >
+            <label for="projectDemoUrl" data-i18n="admin.dashboard.fieldDemoUrl">
               URL da demo (opcional)
             </label>
 
-            <input
-              type="url"
-              id="projectDemoUrl"
-              maxlength="500"
-              placeholder="https://..."
-            >
+            <input type="url" id="projectDemoUrl" maxlength="500" placeholder="https://...">
 
           </div>
 
@@ -886,16 +627,9 @@
 
         <div class="form-check">
 
-          <input
-            type="checkbox"
-            id="projectPublished"
-            checked
-          >
+          <input type="checkbox" id="projectPublished" checked>
 
-          <label
-            for="projectPublished"
-            data-i18n="admin.dashboard.fieldPublished"
-          >
+          <label for="projectPublished" data-i18n="admin.dashboard.fieldPublished">
             Publicado (visível no site)
           </label>
 
@@ -904,22 +638,12 @@
 
         <div class="admin-form-actions">
 
-          <button
-            type="button"
-            class="btn btn-outline"
-            data-close-modal="project"
-            data-i18n="admin.dashboard.cancel"
-          >
+          <button type="button" class="btn btn-outline" data-close-modal="project" data-i18n="admin.dashboard.cancel">
             Cancelar
           </button>
 
 
-          <button
-            type="submit"
-            class="btn btn-primary"
-            id="projectSubmitBtn"
-            data-i18n="admin.dashboard.save"
-          >
+          <button type="submit" class="btn btn-primary" id="projectSubmitBtn" data-i18n="admin.dashboard.save">
             Salvar
           </button>
 
@@ -936,10 +660,7 @@
        SKILL MODAL
   ========================== -->
 
-  <div
-    class="admin-modal-overlay"
-    id="skillModalOverlay"
-  >
+  <div class="admin-modal-overlay" id="skillModalOverlay">
 
     <div class="admin-modal">
 
@@ -949,114 +670,62 @@
           Nova skill
         </h3>
 
-        <button
-          class="admin-modal-close"
-          data-close-modal="skill"
-        >
+        <button class="admin-modal-close" data-close-modal="skill">
           &times;
         </button>
 
       </div>
 
 
-      <div
-        class="admin-alert"
-        id="skillFormAlert"
-        role="alert"
-      ></div>
+      <div class="admin-alert" id="skillFormAlert" role="alert"></div>
 
 
-      <form
-        id="skillForm"
-        novalidate
-      >
+      <form id="skillForm" novalidate>
 
-        <input
-          type="hidden"
-          id="skillId"
-        >
+        <input type="hidden" id="skillId">
 
 
         <div class="form-field">
 
-          <label
-            for="skillCategory"
-            data-i18n="admin.dashboard.fieldCategory"
-          >
+          <label for="skillCategory" data-i18n="admin.dashboard.fieldCategory">
             Categoria
           </label>
 
-          <input
-            type="text"
-            id="skillCategory"
-            required
-            minlength="1"
-            maxlength="64"
-            placeholder="Linguagens"
-          >
+          <input type="text" id="skillCategory" required minlength="1" maxlength="64" placeholder="Linguagens">
 
         </div>
 
 
         <div class="form-field">
 
-          <label
-            for="skillName"
-            data-i18n="admin.dashboard.fieldName"
-          >
+          <label for="skillName" data-i18n="admin.dashboard.fieldName">
             Nome
           </label>
 
-          <input
-            type="text"
-            id="skillName"
-            required
-            minlength="1"
-            maxlength="64"
-            placeholder="Python"
-          >
+          <input type="text" id="skillName" required minlength="1" maxlength="64" placeholder="Python">
 
         </div>
 
 
         <div class="form-field">
 
-          <label
-            for="skillOrder"
-            data-i18n="admin.dashboard.fieldOrder"
-          >
+          <label for="skillOrder" data-i18n="admin.dashboard.fieldOrder">
             Ordem de exibição
           </label>
 
-          <input
-            type="number"
-            id="skillOrder"
-            min="0"
-            max="9999"
-            value="0"
-          >
+          <input type="number" id="skillOrder" min="0" max="9999" value="0">
 
         </div>
 
 
         <div class="admin-form-actions">
 
-          <button
-            type="button"
-            class="btn btn-outline"
-            data-close-modal="skill"
-            data-i18n="admin.dashboard.cancel"
-          >
+          <button type="button" class="btn btn-outline" data-close-modal="skill" data-i18n="admin.dashboard.cancel">
             Cancelar
           </button>
 
 
-          <button
-            type="submit"
-            class="btn btn-primary"
-            id="skillSubmitBtn"
-            data-i18n="admin.dashboard.save"
-          >
+          <button type="submit" class="btn btn-primary" id="skillSubmitBtn" data-i18n="admin.dashboard.save">
             Salvar
           </button>
 
@@ -1073,10 +742,7 @@
        EXPERIENCE MODAL
   ========================== -->
 
-  <div
-    class="admin-modal-overlay"
-    id="experienceModalOverlay"
-  >
+  <div class="admin-modal-overlay" id="experienceModalOverlay">
 
     <div class="admin-modal">
 
@@ -1086,32 +752,19 @@
           Nova experiência
         </h3>
 
-        <button
-          class="admin-modal-close"
-          data-close-modal="experience"
-        >
+        <button class="admin-modal-close" data-close-modal="experience">
           &times;
         </button>
 
       </div>
 
 
-      <div
-        class="admin-alert"
-        id="experienceFormAlert"
-        role="alert"
-      ></div>
+      <div class="admin-alert" id="experienceFormAlert" role="alert"></div>
 
 
-      <form
-        id="experienceForm"
-        novalidate
-      >
+      <form id="experienceForm" novalidate>
 
-        <input
-          type="hidden"
-          id="experienceId"
-        >
+        <input type="hidden" id="experienceId">
 
 
         <div class="form-field">
@@ -1120,14 +773,8 @@
             Empresa
           </label>
 
-          <input
-            type="text"
-            id="experienceCompany"
-            required
-            minlength="1"
-            maxlength="120"
-            placeholder="Nome da empresa"
-          >
+          <input type="text" id="experienceCompany" required minlength="1" maxlength="120"
+            placeholder="Nome da empresa">
 
         </div>
 
@@ -1138,14 +785,8 @@
             Cargo
           </label>
 
-          <input
-            type="text"
-            id="experienceRole"
-            required
-            minlength="1"
-            maxlength="120"
-            placeholder="Desenvolvedor Full Stack"
-          >
+          <input type="text" id="experienceRole" required minlength="1" maxlength="120"
+            placeholder="Desenvolvedor Full Stack">
 
         </div>
 
@@ -1156,14 +797,7 @@
             Período
           </label>
 
-          <input
-            type="text"
-            id="experiencePeriod"
-            required
-            minlength="1"
-            maxlength="120"
-            placeholder="2025 — 2026"
-          >
+          <input type="text" id="experiencePeriod" required minlength="1" maxlength="120" placeholder="2025 — 2026">
 
         </div>
 
@@ -1174,13 +808,8 @@
             Descrição
           </label>
 
-          <textarea
-            id="experienceDescription"
-            required
-            minlength="1"
-            maxlength="3000"
-            placeholder="Descreva sua experiência..."
-          ></textarea>
+          <textarea id="experienceDescription" required minlength="1" maxlength="3000"
+            placeholder="Descreva sua experiência..."></textarea>
 
         </div>
 
@@ -1191,11 +820,7 @@
             Descrição (inglês, opcional)
           </label>
 
-          <textarea
-            id="experienceDescriptionEn"
-            maxlength="3000"
-            placeholder="Descrição em inglês..."
-          ></textarea>
+          <textarea id="experienceDescriptionEn" maxlength="3000" placeholder="Descrição em inglês..."></textarea>
 
         </div>
 
@@ -1206,12 +831,7 @@
             URL da empresa (opcional)
           </label>
 
-          <input
-            type="url"
-            id="experienceCompanyUrl"
-            maxlength="500"
-            placeholder="https://empresa.com"
-          >
+          <input type="url" id="experienceCompanyUrl" maxlength="500" placeholder="https://empresa.com">
 
         </div>
 
@@ -1222,12 +842,7 @@
             URL da logo (opcional)
           </label>
 
-          <input
-            type="url"
-            id="experienceLogoUrl"
-            maxlength="500"
-            placeholder="https://empresa.com/logo.png"
-          >
+          <input type="url" id="experienceLogoUrl" maxlength="500" placeholder="https://empresa.com/logo.png">
 
         </div>
 
@@ -1238,24 +853,14 @@
             Ordem de exibição
           </label>
 
-          <input
-            type="number"
-            id="experienceOrder"
-            min="0"
-            max="9999"
-            value="0"
-          >
+          <input type="number" id="experienceOrder" min="0" max="9999" value="0">
 
         </div>
 
 
         <div class="form-check">
 
-          <input
-            type="checkbox"
-            id="experiencePublished"
-            checked
-          >
+          <input type="checkbox" id="experiencePublished" checked>
 
           <label for="experiencePublished">
             Publicado (visível no site)
@@ -1266,20 +871,12 @@
 
         <div class="admin-form-actions">
 
-          <button
-            type="button"
-            class="btn btn-outline"
-            data-close-modal="experience"
-          >
+          <button type="button" class="btn btn-outline" data-close-modal="experience">
             Cancelar
           </button>
 
 
-          <button
-            type="submit"
-            class="btn btn-primary"
-            id="experienceSubmitBtn"
-          >
+          <button type="submit" class="btn btn-primary" id="experienceSubmitBtn">
             Salvar
           </button>
 
@@ -1296,34 +893,22 @@
        MFA MODAL
   ========================== -->
 
-  <div
-    class="admin-modal-overlay"
-    id="mfaModalOverlay"
-  >
+  <div class="admin-modal-overlay" id="mfaModalOverlay">
 
     <div class="admin-modal">
 
       <div class="admin-modal-head">
 
-        <h3 id="mfaModalTitle">
-          Ativar MFA
-        </h3>
+        <h3 id="mfaModalTitle"></h3>
 
-        <button
-          class="admin-modal-close"
-          data-close-modal="mfa"
-        >
+        <button class="admin-modal-close" data-close-modal="mfa">
           &times;
         </button>
 
       </div>
 
 
-      <div
-        class="admin-alert"
-        id="mfaModalAlert"
-        role="alert"
-      ></div>
+      <div class="admin-alert" id="mfaModalAlert" role="alert"></div>
 
 
       <div id="mfaModalBody"></div>
@@ -1343,4 +928,5 @@
   <script src="assets/js/dashboard.js"></script>
 
 </body>
+
 </html>

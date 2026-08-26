@@ -1,25 +1,111 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 — Página não encontrada</title>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" crossorigin>
   <link rel="stylesheet" href="assets/css/reset.css">
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
-  <script src="../assets/js/custom-cursor.js"></script>
+  <script src="assets/js/custom-cursor.js"></script>
+  <style>
+    @property --notfound-angle {
+      syntax: "<angle>";
+      initial-value: 0deg;
+      inherits: false;
+    }
+
+    .notfound-lang-toggle button {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      isolation: isolate;
+    }
+
+    .notfound-lang-toggle button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      padding: 2px;
+      background: conic-gradient(from var(--notfound-angle),
+          #ff0040, #ff8c00, #ffee00, #00ff85, #00c3ff, #7a00ff, #ff0040);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.35));
+      animation: notfound-lang-spin 3s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes notfound-lang-spin {
+      to {
+        --notfound-angle: 360deg;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <div class="cursor-dot" id="cursorDot"></div>
+  <div class="lang-toggle notfound-lang-toggle" role="group" aria-label="Idioma / Language"
+    style="position:fixed;top:20px;right:20px;z-index:50;background:transparent;border:none;">
+    <button type="button" data-lang="pt" style="background:transparent;border:none;">PT</button>
+    <button type="button" data-lang="en" style="background:transparent;border:none;">EN</button>
+  </div>
   <div class="notfound-shell">
     <div class="notfound-content">
-      <div class="notfound-code">// ERRO 404 · FOLHA NÃO ENCONTRADA</div>
-      <h1 class="notfound-title">Essa página não existe na planta.</h1>
-      <p class="notfound-text">O link pode estar quebrado ou a página foi movida. Volta pro início e tenta de novo.</p>
-      <a href="/" class="btn btn-primary">Voltar ao início</a>
+      <div class="notfound-code" data-i18n-pt="// ERRO 404 · FOLHA NÃO ENCONTRADA"
+        data-i18n-en="// ERROR 404 · SHEET NOT FOUND">// ERRO 404 · FOLHA NÃO ENCONTRADA</div>
+      <h1 class="notfound-title" data-i18n-pt="Essa página não existe na planta."
+        data-i18n-en="This page doesn't exist on the blueprint.">Essa página não existe na planta.</h1>
+      <p class="notfound-text"
+        data-i18n-pt="O link pode estar quebrado ou a página foi movida. Volta pro início e tenta de novo."
+        data-i18n-en="The link may be broken or the page was moved. Head back to the start and try again.">O link pode
+        estar quebrado ou a página foi movida. Volta pro início e tenta de novo.</p>
+      <a href="/" class="btn btn-primary" data-i18n-pt="Voltar ao início" data-i18n-en="Back to home">Voltar ao
+        início</a>
     </div>
   </div>
+  <script>
+    (function () {
+      var SUPPORTED = ["pt", "en"];
+      var lang = localStorage.getItem("lang");
+      if (SUPPORTED.indexOf(lang) === -1) {
+        lang = navigator.language && navigator.language.toLowerCase().indexOf("en") === 0 ? "en" : "pt";
+      }
+
+      function apply() {
+        document.documentElement.setAttribute("lang", lang === "en" ? "en" : "pt-BR");
+        document.querySelectorAll("[data-i18n-pt]").forEach(function (el) {
+          el.textContent = el.getAttribute(lang === "en" ? "data-i18n-en" : "data-i18n-pt");
+        });
+        document.querySelectorAll("[data-lang]").forEach(function (btn) {
+          var active = btn.getAttribute("data-lang") === lang;
+          btn.classList.toggle("is-active", active);
+          btn.setAttribute("aria-pressed", String(active));
+        });
+      }
+
+      document.querySelectorAll("[data-lang]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var next = btn.getAttribute("data-lang");
+          if (SUPPORTED.indexOf(next) === -1 || next === lang) return;
+          lang = next;
+          localStorage.setItem("lang", lang);
+          apply();
+        });
+      });
+
+      apply();
+    })();
+  </script>
 </body>
+
 </html>

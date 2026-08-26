@@ -45,16 +45,16 @@ portfolio/
 
 ## Current Experience feature state
 
-Experience is now implemented end-to-end and confirmed working by the user through iterative testing (public list rendering, admin CRUD, i18n on both) during the 2026-08-26 session:
+Backend, admin CRUD, public rendering, and i18n for Experience are implemented in code. **Not re-verified this session** — see "Repo/chat sync reality" below; treat prior "confirmed working" claims for this feature with caution until re-checked against the real working tree.
 
 - Backend: `backend/app/models/experience.py`, `schemas/experience.py`, `services/experience_service.py`, `api/routes/experiences.py` (public `GET /api/experiences`, admin `GET /api/experiences/admin`, `POST/PUT/DELETE /api/experiences[/{id}]`). Router registered in `main.py`.
-- `logo_url` field (String(500), nullable, validated as http/https like `company_url`) was added to the model and both `ExperienceCreate`/`ExperienceUpdate`/`ExperienceOut` schemas via `ExperienceBase`.
-- **Blocker**: there is no migration system in use (see below). The `logo_url` column must be added manually to the production Neon `experiences` table with `ALTER TABLE experiences ADD COLUMN logo_url VARCHAR(500);` before deploying this backend change — `Base.metadata.create_all()` does not alter existing tables.
-- `frontend/assets/js/admin-api.js` has full Experience CRUD methods (`getAllExperiences`, `createExperience`, `updateExperience`, `deleteExperience`) plus `getMfaStatus`.
-- `frontend/painel-fg-2026x/assets/js/dashboard.js` has full Experience CRUD wiring (list/create/edit/delete, `logo_url` field), `updateStats()`, and `updateMfaStat()`/`renderMfaStat()`.
-- `frontend/painel-fg-2026x/dashboard.html` has the Experience table/modal, including the `experienceLogoUrl` field, and `data-i18n` on all previously-hardcoded PT labels (nav link, section title, button, table headers, loading state).
-- `frontend/assets/js/render-experience.js` renders the public Experience list into `#experienceList` with skeleton/error/empty states, following the current visual spec below.
-- `frontend/assets/js/api.js` is now purely the fetch wrapper (`apiRequest` + `api` object) — a stale, unused `renderExperiences`/`loadExperiences` block that duplicated/conflicted with `render-experience.js` was removed.
+- `logo_url` field (String(500), nullable, http/https validated) exists on the model/schemas.
+- **Still blocked**: no migration system in use. `logo_url` column must be added manually to the production Neon `experiences` table: `ALTER TABLE experiences ADD COLUMN logo_url VARCHAR(500);` — unconfirmed whether this has been run.
+- Admin dashboard now also has a 5th stat card, `statTotalExperiences` (see below) — delivered this session, not confirmed applied.
+
+## Repo/chat sync reality (read before trusting any "confirmed" claim in these docs)
+
+A fresh clone on 2026-08-26 showed `HEAD` (`ebf8eb5`) only differs from an earlier commit (`ed40975`) by documentation files — none of the Experience/CRUD/i18n code described as "delivered" in earlier changelog phases was actually committed. Felipe applies fixes manually to his real working tree, one chat-delivered file at a time, and confirmation only happens when he pastes back the resulting file or reports a symptom. **Do not assume anything in CHANGELOG_AI.md is live in the repo — only what Felipe has explicitly pasted back or confirmed working in this exact conversation is verified.**
 
 ### Current public Experience card layout (as implemented, subject to further design iteration)
 
