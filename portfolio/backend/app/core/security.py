@@ -3,10 +3,11 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import jwt
 import pyotp
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError, VerificationError
-from jose import JWTError, jwt
+from jwt.exceptions import PyJWTError
 
 from app.core.config import get_settings
 
@@ -45,7 +46,7 @@ def decode_access_token(token: str) -> Optional[str]:
         if payload.get("type") != "access":
             return None
         return payload.get("sub")
-    except JWTError:
+    except PyJWTError:
         return None
 
 
@@ -86,7 +87,7 @@ def decode_mfa_pending_token(token: str) -> Optional[str]:
         if payload.get("type") != "mfa_pending":
             return None
         return payload.get("sub")
-    except JWTError:
+    except PyJWTError:
         return None
 
 
