@@ -24,6 +24,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
 limiter = Limiter(key_func=get_remote_address)
 
+
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
     cookie_samesite = "none" if settings.is_production else "strict"
 
@@ -45,6 +46,7 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
         max_age=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
         path="/api/auth",
     )
+
 
 @router.post("/login", response_model=LoginResponse)
 @limiter.limit(settings.RATE_LIMIT_LOGIN)
@@ -71,6 +73,7 @@ async def login(request: Request, response: Response, payload: LoginRequest, db:
     _set_auth_cookies(response, access_token, refresh_token)
     return LoginResponse()
 
+
 @router.post("/mfa/verify", response_model=TokenResponse)
 @limiter.limit(settings.RATE_LIMIT_LOGIN)
 def mfa_verify(request: Request, response: Response, payload: MfaVerifyRequest, db: Session = Depends(get_db)):
@@ -89,6 +92,7 @@ def mfa_verify(request: Request, response: Response, payload: MfaVerifyRequest, 
     refresh_token = refresh_service.issue_refresh_token(db, admin.id)
     _set_auth_cookies(response, access_token, refresh_token)
     return TokenResponse()
+
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(request: Request, response: Response, db: Session = Depends(get_db)):
@@ -109,6 +113,7 @@ def refresh(request: Request, response: Response, db: Session = Depends(get_db))
     _set_auth_cookies(response, new_access_token, new_refresh_token)
     return TokenResponse()
 
+
 @router.post("/logout")
 def logout(request: Request, response: Response, db: Session = Depends(get_db)):
     refresh_token = request.cookies.get("refresh_token")
@@ -118,14 +123,17 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)):
     response.delete_cookie(key="refresh_token", path="/api/auth")
     return {"message": "logout succesfully"}
 
+
 @router.get("/me")
 def me(username: str = Depends(get_current_admin)):
     return {"username": username}
+
 
 @router.get("/mfa/status", response_model=MfaStatusResponse)
 def mfa_status(username: str = Depends(get_current_admin), db: Session = Depends(get_db)):
     admin = get_admin_by_username(db, username)
     return MfaStatusResponse(enabled=bool(admin and admin.mfa_enabled))
+
 
 @router.post("/mfa/setup/init", response_model=MfaSetupInitResponse)
 def mfa_setup_init(username: str = Depends(get_current_admin), db: Session = Depends(get_db)):
@@ -135,9 +143,14 @@ def mfa_setup_init(username: str = Depends(get_current_admin), db: Session = Dep
     data = mfa_service.init_mfa_setup(db, admin)
     return MfaSetupInitResponse(**data)
 
+
 @router.post("/mfa/setup/confirm", response_model=MfaSetupConfirmResponse)
+@limiter.limit(settings.RATE_LIMIT_LOGIN)
 def mfa_setup_confirm(
-    payload: MfaSetupConfirmRequest, username: str = Depends(get_current_admin), db: Session = Depends(get_db)
+    request: Request,
+    payload: MfaSetupConfirmRequest,
+    username: str = Depends(get_current_admin),
+    db: Session = Depends(get_db),
 ):
     admin = get_admin_by_username(db, username)
     if admin is None:
@@ -150,8 +163,12 @@ def mfa_setup_confirm(
 
 
 @router.post("/mfa/disable")
+@limiter.limit(settings.RATE_LIMIT_LOGIN)
 def mfa_disable(
-    payload: MfaDisableRequest, username: str = Depends(get_current_admin), db: Session = Depends(get_db)
+    request: Request,
+    payload: MfaDisableRequest,
+    username: str = Depends(get_current_admin),
+    db: Session = Depends(get_db),
 ):
     admin = get_admin_by_username(db, username)
     if admin is None:
