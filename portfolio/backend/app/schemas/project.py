@@ -1,19 +1,67 @@
-﻿from pydantic import BaseModel, ConfigDict, Field, field_validator
+﻿import ipaddress
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from urllib.parse import urlparse
+
+
+_BLOCKED_NETWORKS = (
+    ipaddress.ip_network("0.0.0.0/8"),
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("100.64.0.0/10"),
+    ipaddress.ip_network("127.0.0.0/8"),
+    ipaddress.ip_network("169.254.0.0/16"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.0.0.0/24"),
+    ipaddress.ip_network("192.0.2.0/24"),
+    ipaddress.ip_network("192.168.0.0/16"),
+    ipaddress.ip_network("198.18.0.0/15"),
+    ipaddress.ip_network("198.51.100.0/24"),
+    ipaddress.ip_network("203.0.113.0/24"),
+    ipaddress.ip_network("224.0.0.0/4"),
+    ipaddress.ip_network("240.0.0.0/4"),
+    ipaddress.ip_network("::/128"),
+    ipaddress.ip_network("::1/128"),
+    ipaddress.ip_network("fc00::/7"),
+    ipaddress.ip_network("fe80::/10"),
+    ipaddress.ip_network("ff00::/8"),
+)
+
+_BLOCKED_HOST_SUFFIXES = (".local", ".localhost", ".internal", ".home.arpa")
+
+
+def _is_blocked_ip(hostname: str) -> bool:
+    try:
+        address = ipaddress.ip_address(hostname)
+    except ValueError:
+        return False
+
+    return (
+        address.is_private
+        or address.is_loopback
+        or address.is_link_local
+        or address.is_multicast
+        or address.is_reserved
+        or address.is_unspecified
+        or any(address in network for network in _BLOCKED_NETWORKS)
+    )
 
 
 def _validate_public_url(value: str | None) -> str | None:
     if value is None or value == "":
         return None
+
     parsed = urlparse(value)
     if parsed.scheme not in ("http", "https"):
         raise ValueError("URL must use http:// or https://")
     if not parsed.netloc:
         raise ValueError("Invalid URL")
-    blocked_hosts = {"localhost", "127.0.0.1", "0.0.0.0", "::1"}
-    hostname = (parsed.hostname or "").lower()
-    if hostname in blocked_hosts or hostname.endswith(".local"):
+
+    hostname = (parsed.hostname or "").lower().rstrip(".")
+    if not hostname:
+        raise ValueError("Invalid URL")
+
+    if hostname.endswith(_BLOCKED_HOST_SUFFIXES) or _is_blocked_ip(hostname):
         raise ValueError("URL points to an internal host, which is not allowed")
+
     if len(value) > 500:
         raise ValueError("URL is too long")
     return value
