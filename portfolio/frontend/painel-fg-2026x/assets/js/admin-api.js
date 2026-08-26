@@ -1,28 +1,30 @@
-﻿async function adminRequest(path, options = {}, isRetry = false) {
+async function adminRequest(path, options = {}, isRetry = false) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     credentials: "include",
   });
 
-  if (response.status === 401 && !isRetry && path !== "/api/auth/login" && path !== "/api/auth/refresh") {
+  if (response.status === 401 && !isRetry && path !== "/api/auth/login" && path !== "/api/auth/mfa/verify" && path !== "/api/auth/refresh") {
     try {
       await adminRequest("/api/auth/refresh", { method: "POST" }, true);
       return adminRequest(path, options, true);
     } catch (_) {
       window.location.href = "login.html";
-      throw new Error("Sessão expirada.");
+      throw new Error("Session expired.");
     }
   }
 
   let data = null;
-  try { data = await response.json(); } catch (_) {}
+  try {
+    data = await response.json();
+  } catch (_) {}
 
   if (!response.ok) {
-    let message = (data && data.detail) || "Não foi possível completar a solicitação.";
+    let message = (data && data.detail) || "Unable to complete the request.";
     if (data && Array.isArray(data.errors) && data.errors.length > 0) {
       const first = data.errors[0];
-      const field = Array.isArray(first.loc) ? first.loc[first.loc.length - 1] : "campo";
+      const field = Array.isArray(first.loc) ? first.loc[first.loc.length - 1] : "field";
       message = `${field}: ${first.msg}`;
     }
     const error = new Error(message);
@@ -39,6 +41,13 @@ const adminApi = {
       method: "POST",
       body: JSON.stringify({ username, password, turnstile_token: turnstileToken }),
     }),
+
+  verifyMfa: (mfaToken, code) =>
+    adminRequest("/api/auth/mfa/verify", {
+      method: "POST",
+      body: JSON.stringify({ mfa_token: mfaToken, code }),
+    }),
+
   logout: () => adminRequest("/api/auth/logout", { method: "POST" }),
   me: () => adminRequest("/api/auth/me"),
 
