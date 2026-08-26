@@ -31,11 +31,14 @@
 
 
 const api = {
-  getSkills: () => apiRequest("/api/skills"),
+  getSkills: () =>
+    apiRequest("/api/skills"),
 
-  getProjects: () => apiRequest("/api/projects"),
+  getProjects: () =>
+    apiRequest("/api/projects"),
 
-  getExperiences: () => apiRequest("/api/experiences"),
+  getExperiences: () =>
+    apiRequest("/api/experiences"),
 
   sendContact: (payload) =>
     apiRequest("/api/contact", {
@@ -45,48 +48,41 @@ const api = {
 };
 
 
-function renderExperiences(experiences) {
-  const section = document.getElementById("experiencia");
+function getExperienceContainer() {
+  const container = document.getElementById("experienceContent");
 
-  if (!section) {
-    return;
+  if (!container) {
+    return null;
   }
 
-  const container = section.querySelector(".container");
+  return container;
+}
+
+
+function renderExperiences(experiences) {
+  const container = getExperienceContainer();
 
   if (!container) {
     return;
   }
 
-  const sectionHead = container.querySelector(".section-head");
+  container.innerHTML = "";
 
-  if (!sectionHead) {
-    return;
-  }
-
-  const existingContent = container.querySelector(
-    ".experience-rendered-content"
-  );
-
-  if (existingContent) {
-    existingContent.remove();
-  }
-
-  const content = document.createElement("div");
-  content.className = "experience-rendered-content";
-
-  if (!Array.isArray(experiences) || experiences.length === 0) {
+  if (
+    !Array.isArray(experiences) ||
+    experiences.length === 0
+  ) {
     const emptyState = document.createElement("div");
     emptyState.className = "empty-state";
 
     const text = document.createElement("span");
     text.className = "empty-state-text";
+    text.dataset.i18n = "experience.empty";
     text.textContent = i18n.t("experience.empty");
 
     emptyState.appendChild(text);
-    content.appendChild(emptyState);
+    container.appendChild(emptyState);
 
-    container.appendChild(content);
     return;
   }
 
@@ -127,7 +123,9 @@ function renderExperiences(experiences) {
       : experience.description;
 
     value.appendChild(company);
-    value.appendChild(document.createTextNode(" — "));
+    value.appendChild(
+      document.createTextNode(" — ")
+    );
     value.appendChild(description);
 
     if (
@@ -146,49 +144,55 @@ function renderExperiences(experiences) {
 
     fact.appendChild(label);
     fact.appendChild(value);
+
     facts.appendChild(fact);
   });
 
-  content.appendChild(facts);
-  container.appendChild(content);
+  container.appendChild(facts);
 }
 
 
-function renderExperienceError() {
-  const section = document.getElementById("experiencia");
-
-  if (!section) {
-    return;
-  }
-
-  const container = section.querySelector(".container");
+function renderExperienceLoading() {
+  const container = getExperienceContainer();
 
   if (!container) {
     return;
   }
 
-  const existingContent = container.querySelector(
-    ".experience-rendered-content"
-  );
+  container.innerHTML = "";
 
-  if (existingContent) {
-    existingContent.remove();
+  const loadingState = document.createElement("div");
+  loadingState.className = "empty-state";
+
+  const text = document.createElement("span");
+  text.className = "empty-state-text";
+  text.dataset.i18n = "experience.loading";
+  text.textContent = i18n.t("experience.loading");
+
+  loadingState.appendChild(text);
+  container.appendChild(loadingState);
+}
+
+
+function renderExperienceError() {
+  const container = getExperienceContainer();
+
+  if (!container) {
+    return;
   }
 
-  const content = document.createElement("div");
-  content.className = "experience-rendered-content";
+  container.innerHTML = "";
 
   const errorState = document.createElement("div");
   errorState.className = "empty-state";
 
   const text = document.createElement("span");
   text.className = "empty-state-text";
+  text.dataset.i18n = "experience.error";
   text.textContent = i18n.t("experience.error");
 
   errorState.appendChild(text);
-  content.appendChild(errorState);
-
-  container.appendChild(content);
+  container.appendChild(errorState);
 }
 
 
@@ -206,20 +210,45 @@ function isSafeHttpUrl(value) {
 }
 
 
-async function loadExperiences() {
-  const section = document.getElementById("experiencia");
+let experiencesCache = [];
 
-  if (!section) {
+
+async function loadExperiences() {
+  const container = getExperienceContainer();
+
+  if (!container) {
     return;
   }
+
+  renderExperienceLoading();
 
   try {
     const experiences = await api.getExperiences();
 
-    renderExperiences(experiences);
-  } catch (_) {
+    experiencesCache = Array.isArray(experiences)
+      ? experiences
+      : [];
+
+    renderExperiences(experiencesCache);
+  } catch (error) {
+    console.error(
+      "Failed to load experiences:",
+      error
+    );
+
+    experiencesCache = [];
+
     renderExperienceError();
   }
+}
+
+
+function rerenderExperiencesForLanguage() {
+  if (!Array.isArray(experiencesCache)) {
+    return;
+  }
+
+  renderExperiences(experiencesCache);
 }
 
 
@@ -230,3 +259,6 @@ document.addEventListener(
 
 
 window.renderExperiences = renderExperiences;
+window.rerenderExperiencesForLanguage =
+  rerenderExperiencesForLanguage;
+window.loadExperiences = loadExperiences;

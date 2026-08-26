@@ -1,47 +1,68 @@
+
+---
+
+## `TODO.md`
+
+```md
 # TODO.md
 
-> Reconstructed from conversation history. Items marked `[confirm]` require verification in the actual repository before taking action.
+> Current project handoff state. Items marked as completed were verified against the inspected repository state. Items marked pending still require implementation or verification in the actual working tree.
 
-## 🔴 Priority 0 — Do this before anything else
+## Completed
 
-* [ ] **Run `git status`/`git diff` and compare against `CHANGELOG_AI.md` Phase 10.** Most of the 2026-08-25 session's visual work (hero flags, skill-tag stagger, scroll bar gradient, project image hover overlay, custom cursor, system-panel typing effect, page fade-in) was very likely never applied to the actual repository — it was only described in chat, not pasted as code. The admin dashboard stats fix (Part B of Phase 10) is more likely applied (full file was pasted) but still unconfirmed. **Do not assume any of this is done. Do not redo it blindly either — check first.**
+- [x] Experience backend model exists.
+- [x] Experience Pydantic schemas exist.
+- [x] Experience service layer exists.
+- [x] Experience FastAPI router exists.
+- [x] Experience model is registered with the application.
+- [x] Experience router is registered with FastAPI.
+- [x] Admin API contains Experience CRUD support.
+- [x] Admin dashboard HTML contains an Experience section.
+- [x] Admin dashboard HTML contains an Experience modal.
+- [x] Public `i18n.js` contains Experience translations.
+- [x] Experience supports Portuguese and English descriptions.
+- [x] Experience supports publication state and display order.
 
-## Pending — explicitly postponed by the user/previous agent
+## Pending
 
-* [ ] **Major dependency updates** (`fastapi`, `starlette`, `uvicorn`, `alembic`, `python-jose`) — deliberately postponed due to risk of breaking changes; only small patches were updated. Do in isolation, not mixed with another task.
-* [ ] **Migrate from `python-jose` to `PyJWT`** — future maintainability improvement, not urgent.
-* [ ] **`description_en` field per project** — implemented, but depends on manual entry. Confirm all registered projects have it filled in.
-* [ ] **Refresh token — no "connected devices"/manual revocation UI** — not implemented; deliberately simplified (single-user system).
+### High Priority
 
-## Bugs / Inconsistencies found during 2026-08-25 code inspection
+- [ ] Verify that the Experience-enabled `dashboard.js` is actually present in the working tree.
+- [ ] Verify admin Experience CRUD end-to-end:
+  - [ ] Create experience.
+  - [ ] List experiences.
+  - [ ] Edit experience.
+  - [ ] Delete experience.
+  - [ ] Publication state.
+  - [ ] Display order.
+- [ ] Implement public Experience rendering in `frontend/assets/js/render-experience.js`.
+- [ ] Verify public Experience API loading.
+- [ ] Verify loading state is cleared on both success and failure.
+- [ ] Verify empty state.
+- [ ] Verify error state.
+- [ ] Verify PT/EN switching for Experience.
 
-* [x] **`TrustedHostMiddleware` is imported in `backend/app/main.py` but never registered** — Fixed 2026-08-25 (session 2): now registered via `app.add_middleware()`, added last (outermost) so it rejects spoofed/invalid `Host` headers before CORS/routing runs. Uses existing `settings.allowed_hosts_list` (`ALLOWED_HOSTS` env var). **⚠️ Action required on Railway:** confirm `ALLOWED_HOSTS` includes the real production backend hostname (e.g. `portfolio-production-fef5.up.railway.app`), not just `localhost,127.0.0.1` — otherwise all production requests will get `400 Invalid host header`.
-* [x] **`CORSMiddleware` registered twice in `main.py`** — Fixed 2026-08-25 (session 2): removed the second, permissive registration (`allow_methods=["*"]`/`allow_headers=["*"]`) that undermined the first. Only the restrictive registration remains (`GET/POST/PUT/DELETE`, `Content-Type`).
-* [ ] **Dead scaffolding for an unbuilt "Experience" feature**: `backend/app/models/experience.py`, `schemas/experience.py`, `api/routes/experiences.py`, `frontend/assets/js/render-experience.js` — all empty (0 bytes), unregistered, unmounted. Decide: implement or delete.
-* [ ] **`backend/app/db/init_db.py` is empty/dead** — `create_all()` is called directly in `main.py` instead. Delete the unused file or wire it up properly.
-* [x] **Portuguese strings remain in user-facing code** — Fixed 2026-08-25 (session 3): all `ValueError` messages in `backend/app/schemas/project.py` translated to English (these surface to the frontend/API consumer via 422 responses — user-facing, not just internal). All PT docstrings/comments in `backend/app/core/security.py` translated. Also stripped a stray UTF-8 BOM at the top of `project.py`.
-* [ ] **Duplicate `README.md`** at repo root and inside `portfolio/` (near-identical, redundant). Consolidate to one.
-* [ ] **Root `README.md` content is just an "in development" badge**, not real project documentation — still needs to be written for real.
+### Medium Priority
 
-## Risks / Technical Cleanup
+- [ ] Verify Experience links and optional company URLs.
+- [ ] Verify responsive layout of Experience section.
+- [ ] Verify browser console for JavaScript errors.
+- [ ] Verify authenticated admin behavior after logout/session expiration.
+- [ ] Run the existing project tests after Experience changes.
 
-* [ ] **Confirm whether the temporary diagnostic log in `app/core/turnstile.py`** (`security_logger.warning("turnstile_verify_failed cloudflare_response=%s", result)`) should be removed — confirmed still present as of 2026-08-25. May log sensitive response data; check Railway's log retention policy.
-* [ ] **Turnstile site key**: confirmed consistent across `frontend/index.html`, `frontend/assets/js/config.js`, `frontend/painel-fg-2026x/login.html` (all `0x4AAAAAAD2-bMzcMMaQWBgk`) as of 2026-08-25. The 4th location (`TURNSTILE_SECRET_KEY` on Railway) is not visible from the repo — confirm manually in the Railway dashboard.
-* [ ] **Admin password backup** — the user entered the admin password in plain text in the chat at least once (accidental GET form submission). Confirm it was changed afterward — not verifiable from code.
-* [ ] **Alembic installed but not used** — schema changes applied via ad-hoc scripts + `create_all()`. Worth migrating to proper versioned migrations if the project grows.
+## Known Issues / Blockers
 
-## Possible Next Steps (not explicitly requested, but natural continuation)
+- The inspected default branch contains an older admin `dashboard.js` without the newer Experience CRUD implementation.
+- `frontend/assets/js/render-experience.js` is empty in the inspected repository.
+- Because the repository state and the code supplied during the conversation may differ, the user's actual working tree must be checked before considering the feature complete.
+- The documentation state should not claim Experience is fully implemented until public rendering and admin CRUD are tested together.
 
-* [ ] Populate `description_en` for all existing projects (if not already done)
-* [ ] Confirm the Turnstile hostname registered in the Cloudflare dashboard includes both `localhost` (dev) and the real Vercel domain (production)
-* [ ] Consider hosting the flag GIFs (Brazil/USA) locally instead of hotlinking from Giphy — same rationale as the project-image migration off Imgur (risk of the link breaking/being blocked). More urgent now if the 2026-08-25 hero-flags redesign (full 50/50 coverage) is applied, since it increases the visible/loaded area of these hotlinked GIFs.
-* [ ] Custom domain — currently on free subdomains (`vercel.app`, `up.railway.app`). If purchased, update: `CORS_ALLOWED_ORIGINS`, `ALLOWED_HOSTS`, Turnstile hostname, and `og:url`/`og:image`/`twitter:image` meta tags in `index.html`
-* [ ] `MISE_PYTHON_GITHUB_ATTESTATIONS=false` on Railway is a workaround for a third-party infra bug — reassess if still necessary
+## Next Logical Task
 
-## Completed in This Development Session (for reference — do not redo)
+Do not add another feature.
 
-See `CHANGELOG_AI.md` for the complete history.
+First verify the actual working tree with:
 
-* **Confirmed complete and stable** (pre-2026-08-25, verified against actual code): public site, admin panel CRUD, MFA, refresh token rotation, PT/EN i18n, Blueprint visual identity, production deployment (Railway + Vercel + Neon).
-* **2026-08-25, Part B (admin stats fix)** — reasonably likely applied to the repo (full file pasted at user's request), not 100% confirmed. See `CHANGELOG_AI.md` Phase 10.
-* **2026-08-25, Part C (visual polish)** — designed in an AI sandbox, almost certainly **not** yet applied to the actual repo (only described in chat). Treat as a spec, not as done. See `CHANGELOG_AI.md` Phase 10 Part C for the exact list.
+```bash
+git status
+git diff

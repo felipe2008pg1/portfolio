@@ -6,6 +6,8 @@ let experiencesCache = [];
 function showGlobalAlert(message, type) {
   const el = document.getElementById("globalAlert");
 
+  if (!el) return;
+
   el.textContent = message;
   el.className = `admin-alert is-visible is-${type}`;
 
@@ -18,97 +20,63 @@ function showGlobalAlert(message, type) {
 function showFormAlert(elId, message) {
   const el = document.getElementById(elId);
 
+  if (!el) return;
+
   el.textContent = message;
   el.className = "admin-alert is-visible is-error";
 }
 
 
 function clearFormAlert(elId) {
-  document.getElementById(elId).className = "admin-alert";
+  const el = document.getElementById(elId);
+
+  if (!el) return;
+
+  el.className = "admin-alert";
 }
 
 
 function openModal(name) {
-  document
-    .getElementById(`${name}ModalOverlay`)
-    .classList.add("is-open");
+  const modal = document.getElementById(
+    `${name}ModalOverlay`
+  );
+
+  if (!modal) return;
+
+  modal.classList.add("is-open");
 }
 
 
 function closeModal(name) {
-  document
-    .getElementById(`${name}ModalOverlay`)
-    .classList.remove("is-open");
-}
-
-
-document.querySelectorAll("[data-close-modal]").forEach((btn) => {
-  btn.addEventListener("click", () =>
-    closeModal(btn.getAttribute("data-close-modal"))
+  const modal = document.getElementById(
+    `${name}ModalOverlay`
   );
-});
 
+  if (!modal) return;
 
-function updateStats() {
-  const totalProjects =
-    document.getElementById("statTotalProjects");
-
-  const published =
-    document.getElementById("statPublished");
-
-  const totalSkills =
-    document.getElementById("statTotalSkills");
-
-  if (totalProjects) {
-    totalProjects.textContent =
-      String(projectsCache.length);
-  }
-
-  if (published) {
-    published.textContent = String(
-      projectsCache.filter(
-        (project) => project.is_published
-      ).length
-    );
-  }
-
-  if (totalSkills) {
-    totalSkills.textContent =
-      String(skillsCache.length);
-  }
+  modal.classList.remove("is-open");
 }
 
 
-async function updateMfaStat() {
-  const mfaStat =
-    document.getElementById("statMfaStatus");
-
-  if (!mfaStat) {
-    return;
-  }
-
-  try {
-    const { enabled } =
-      await adminApi.getMfaStatus();
-
-    mfaStat.textContent = i18n.t(
-      enabled
-        ? "admin.stat.mfaOn"
-        : "admin.stat.mfaOff"
-    );
-  } catch (error) {
-    mfaStat.textContent = "—";
-  }
-}
+document
+  .querySelectorAll("[data-close-modal]")
+  .forEach((btn) => {
+    btn.addEventListener("click", () => {
+      closeModal(
+        btn.getAttribute("data-close-modal")
+      );
+    });
+  });
 
 
-/* =========================
+/* =====================================================
    PROJECTS
-========================= */
+===================================================== */
 
 async function loadProjects() {
-  const tbody =
-    document.getElementById("projectsTableBody");
+  const tbody = document.getElementById(
+    "projectsTableBody"
+  );
 
   try {
     projectsCache =
@@ -125,7 +93,9 @@ async function loadProjects() {
     const cell = document.createElement("td");
     cell.colSpan = 4;
     cell.textContent =
-      "Erro ao carregar projetos.";
+      i18n.t(
+        "admin.dashboard.errorLoadProjects"
+      );
 
     row.appendChild(cell);
     tbody.appendChild(row);
@@ -134,8 +104,9 @@ async function loadProjects() {
 
 
 function renderProjectsTable() {
-  const tbody =
-    document.getElementById("projectsTableBody");
+  const tbody = document.getElementById(
+    "projectsTableBody"
+  );
 
   tbody.innerHTML = "";
 
@@ -146,7 +117,9 @@ function renderProjectsTable() {
     const cell = document.createElement("td");
     cell.colSpan = 4;
     cell.textContent =
-      "Nenhum projeto cadastrado.";
+      i18n.t(
+        "admin.dashboard.noProjects"
+      );
 
     row.appendChild(cell);
     tbody.appendChild(row);
@@ -155,34 +128,30 @@ function renderProjectsTable() {
   }
 
   projectsCache.forEach((project) => {
-    const row =
-      document.createElement("tr");
+    const row = document.createElement("tr");
 
     const titleCell =
       document.createElement("td");
-
-    titleCell.textContent =
-      project.title;
+    titleCell.textContent = project.title;
 
     const stackCell =
       document.createElement("td");
-
-    stackCell.textContent =
-      project.stack;
+    stackCell.textContent = project.stack;
 
     const publishedCell =
       document.createElement("td");
 
     publishedCell.textContent =
       project.is_published
-        ? "Sim"
-        : "Não";
+        ? i18n.t("admin.dashboard.yes")
+        : i18n.t("admin.dashboard.no");
 
     const actionsCell =
       document.createElement("td");
 
     actionsCell.className =
       "col-actions";
+
 
     const editBtn =
       document.createElement("button");
@@ -191,12 +160,13 @@ function renderProjectsTable() {
       "btn btn-outline btn-sm";
 
     editBtn.textContent =
-      "Editar";
+      i18n.t("admin.dashboard.edit");
 
     editBtn.addEventListener(
       "click",
       () => openProjectModal(project)
     );
+
 
     const deleteBtn =
       document.createElement("button");
@@ -205,7 +175,7 @@ function renderProjectsTable() {
       "btn btn-danger btn-sm";
 
     deleteBtn.textContent =
-      "Excluir";
+      i18n.t("admin.dashboard.delete");
 
     deleteBtn.addEventListener(
       "click",
@@ -215,6 +185,7 @@ function renderProjectsTable() {
           project.title
         )
     );
+
 
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(deleteBtn);
@@ -230,7 +201,9 @@ function renderProjectsTable() {
 
 
 function openProjectModal(project) {
-  clearFormAlert("projectFormAlert");
+  clearFormAlert(
+    "projectFormAlert"
+  );
 
   document.getElementById(
     "projectModalTitle"
@@ -263,7 +236,8 @@ function openProjectModal(project) {
   document.getElementById(
     "projectDescriptionEn"
   ).value =
-    project && project.description_en
+    project &&
+    project.description_en
       ? project.description_en
       : "";
 
@@ -276,21 +250,24 @@ function openProjectModal(project) {
   document.getElementById(
     "projectImageUrl"
   ).value =
-    project && project.image_path
+    project &&
+    project.image_path
       ? project.image_path
       : "";
 
   document.getElementById(
     "projectRepoUrl"
   ).value =
-    project && project.repo_url
+    project &&
+    project.repo_url
       ? project.repo_url
       : "";
 
   document.getElementById(
     "projectDemoUrl"
   ).value =
-    project && project.demo_url
+    project &&
+    project.demo_url
       ? project.demo_url
       : "";
 
@@ -307,7 +284,12 @@ function openProjectModal(project) {
 async function deleteProject(id, title) {
   if (
     !window.confirm(
-      `Excluir o projeto "${title}"? Essa ação não pode ser desfeita.`
+      i18n.t(
+        "admin.dashboard.confirmDeleteProject"
+      ).replace(
+        "{name}",
+        title
+      )
     )
   ) {
     return;
@@ -317,15 +299,19 @@ async function deleteProject(id, title) {
     await adminApi.deleteProject(id);
 
     showGlobalAlert(
-      "Projeto excluído.",
+      i18n.t(
+        "admin.dashboard.projectDeleted"
+      ),
       "success"
     );
 
-    loadProjects();
+    await loadProjects();
   } catch (error) {
     showGlobalAlert(
       error.message ||
-        "Erro ao excluir projeto.",
+        i18n.t(
+          "admin.dashboard.errorDeleteProject"
+        ),
       "error"
     );
   }
@@ -347,7 +333,9 @@ document
     async (event) => {
       event.preventDefault();
 
-      clearFormAlert("projectFormAlert");
+      clearFormAlert(
+        "projectFormAlert"
+      );
 
       const id =
         document.getElementById(
@@ -434,16 +422,20 @@ document
         closeModal("project");
 
         showGlobalAlert(
-          "Projeto salvo com sucesso.",
+          i18n.t(
+            "admin.dashboard.projectSaved"
+          ),
           "success"
         );
 
-        loadProjects();
+        await loadProjects();
       } catch (error) {
         showFormAlert(
           "projectFormAlert",
           error.message ||
-            "Erro ao salvar projeto."
+            i18n.t(
+              "admin.dashboard.errorSaveProject"
+            )
         );
       } finally {
         submitBtn.disabled = false;
@@ -452,9 +444,9 @@ document
   );
 
 
-/* =========================
+/* =====================================================
    SKILLS
-========================= */
+===================================================== */
 
 async function loadSkills() {
   const tbody =
@@ -483,7 +475,9 @@ async function loadSkills() {
     cell.colSpan = 4;
 
     cell.textContent =
-      "Erro ao carregar skills.";
+      i18n.t(
+        "admin.dashboard.errorLoadSkills"
+      );
 
     row.appendChild(cell);
     tbody.appendChild(row);
@@ -512,7 +506,9 @@ function renderSkillsTable() {
     cell.colSpan = 4;
 
     cell.textContent =
-      "Nenhuma skill cadastrada.";
+      i18n.t(
+        "admin.dashboard.noSkills"
+      );
 
     row.appendChild(cell);
     tbody.appendChild(row);
@@ -540,13 +536,16 @@ function renderSkillsTable() {
       document.createElement("td");
 
     orderCell.textContent =
-      String(skill.display_order);
+      String(
+        skill.display_order
+      );
 
     const actionsCell =
       document.createElement("td");
 
     actionsCell.className =
       "col-actions";
+
 
     const editBtn =
       document.createElement("button");
@@ -555,12 +554,16 @@ function renderSkillsTable() {
       "btn btn-outline btn-sm";
 
     editBtn.textContent =
-      "Editar";
+      i18n.t(
+        "admin.dashboard.edit"
+      );
 
     editBtn.addEventListener(
       "click",
-      () => openSkillModal(skill)
+      () =>
+        openSkillModal(skill)
     );
+
 
     const deleteBtn =
       document.createElement("button");
@@ -569,7 +572,9 @@ function renderSkillsTable() {
       "btn btn-danger btn-sm";
 
     deleteBtn.textContent =
-      "Excluir";
+      i18n.t(
+        "admin.dashboard.delete"
+      );
 
     deleteBtn.addEventListener(
       "click",
@@ -580,13 +585,30 @@ function renderSkillsTable() {
         )
     );
 
-    actionsCell.appendChild(editBtn);
-    actionsCell.appendChild(deleteBtn);
 
-    row.appendChild(categoryCell);
-    row.appendChild(nameCell);
-    row.appendChild(orderCell);
-    row.appendChild(actionsCell);
+    actionsCell.appendChild(
+      editBtn
+    );
+
+    actionsCell.appendChild(
+      deleteBtn
+    );
+
+    row.appendChild(
+      categoryCell
+    );
+
+    row.appendChild(
+      nameCell
+    );
+
+    row.appendChild(
+      orderCell
+    );
+
+    row.appendChild(
+      actionsCell
+    );
 
     tbody.appendChild(row);
   });
@@ -594,14 +616,19 @@ function renderSkillsTable() {
 
 
 function openSkillModal(skill) {
-  clearFormAlert("skillFormAlert");
+  clearFormAlert(
+    "skillFormAlert"
+  );
 
   document.getElementById(
     "skillModalTitle"
-  ).textContent =
-    skill
-      ? "Editar skill"
-      : "Nova skill";
+  ).textContent = skill
+    ? i18n.t(
+        "admin.dashboard.editSkillModalTitle"
+      )
+    : i18n.t(
+        "admin.dashboard.newSkillModalTitle"
+      );
 
   document.getElementById(
     "skillId"
@@ -634,7 +661,12 @@ function openSkillModal(skill) {
 async function deleteSkill(id, name) {
   if (
     !window.confirm(
-      `Excluir a skill "${name}"?`
+      i18n.t(
+        "admin.dashboard.confirmDeleteSkill"
+      ).replace(
+        "{name}",
+        name
+      )
     )
   ) {
     return;
@@ -644,15 +676,19 @@ async function deleteSkill(id, name) {
     await adminApi.deleteSkill(id);
 
     showGlobalAlert(
-      "Skill excluída.",
+      i18n.t(
+        "admin.dashboard.skillDeleted"
+      ),
       "success"
     );
 
-    loadSkills();
+    await loadSkills();
   } catch (error) {
     showGlobalAlert(
       error.message ||
-        "Erro ao excluir skill.",
+        i18n.t(
+          "admin.dashboard.errorDeleteSkill"
+        ),
       "error"
     );
   }
@@ -729,16 +765,20 @@ document
         closeModal("skill");
 
         showGlobalAlert(
-          "Skill salva com sucesso.",
+          i18n.t(
+            "admin.dashboard.skillSaved"
+          ),
           "success"
         );
 
-        loadSkills();
+        await loadSkills();
       } catch (error) {
         showFormAlert(
           "skillFormAlert",
           error.message ||
-            "Erro ao salvar skill."
+            i18n.t(
+              "admin.dashboard.errorSaveSkill"
+            )
         );
       } finally {
         submitBtn.disabled = false;
@@ -747,9 +787,9 @@ document
   );
 
 
-/* =========================
+/* =====================================================
    EXPERIENCES
-========================= */
+===================================================== */
 
 async function loadExperiences() {
   const tbody =
@@ -757,9 +797,7 @@ async function loadExperiences() {
       "experiencesTableBody"
     );
 
-  if (!tbody) {
-    return;
-  }
+  if (!tbody) return;
 
   try {
     experiencesCache =
@@ -781,7 +819,9 @@ async function loadExperiences() {
     cell.colSpan = 5;
 
     cell.textContent =
-      "Erro ao carregar experiências.";
+      i18n.t(
+        "admin.dashboard.errorLoadExperiences"
+      );
 
     row.appendChild(cell);
     tbody.appendChild(row);
@@ -795,9 +835,13 @@ function renderExperiencesTable() {
       "experiencesTableBody"
     );
 
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
-  if (experiencesCache.length === 0) {
+  if (
+    experiencesCache.length === 0
+  ) {
     const row =
       document.createElement("tr");
 
@@ -810,7 +854,9 @@ function renderExperiencesTable() {
     cell.colSpan = 5;
 
     cell.textContent =
-      "Nenhuma experiência cadastrada.";
+      i18n.t(
+        "admin.dashboard.noExperiences"
+      );
 
     row.appendChild(cell);
     tbody.appendChild(row);
@@ -818,10 +864,12 @@ function renderExperiencesTable() {
     return;
   }
 
+
   experiencesCache.forEach(
     (experience) => {
       const row =
         document.createElement("tr");
+
 
       const companyCell =
         document.createElement("td");
@@ -829,11 +877,13 @@ function renderExperiencesTable() {
       companyCell.textContent =
         experience.company;
 
+
       const roleCell =
         document.createElement("td");
 
       roleCell.textContent =
         experience.role;
+
 
       const periodCell =
         document.createElement("td");
@@ -841,19 +891,26 @@ function renderExperiencesTable() {
       periodCell.textContent =
         experience.period;
 
+
       const publishedCell =
         document.createElement("td");
 
       publishedCell.textContent =
         experience.is_published
-          ? "Sim"
-          : "Não";
+          ? i18n.t(
+              "admin.dashboard.yes"
+            )
+          : i18n.t(
+              "admin.dashboard.no"
+            );
+
 
       const actionsCell =
         document.createElement("td");
 
       actionsCell.className =
         "col-actions";
+
 
       const editBtn =
         document.createElement("button");
@@ -862,7 +919,9 @@ function renderExperiencesTable() {
         "btn btn-outline btn-sm";
 
       editBtn.textContent =
-        "Editar";
+        i18n.t(
+          "admin.dashboard.edit"
+        );
 
       editBtn.addEventListener(
         "click",
@@ -872,6 +931,7 @@ function renderExperiencesTable() {
           )
       );
 
+
       const deleteBtn =
         document.createElement("button");
 
@@ -879,7 +939,9 @@ function renderExperiencesTable() {
         "btn btn-danger btn-sm";
 
       deleteBtn.textContent =
-        "Excluir";
+        i18n.t(
+          "admin.dashboard.delete"
+        );
 
       deleteBtn.addEventListener(
         "click",
@@ -890,6 +952,7 @@ function renderExperiencesTable() {
           )
       );
 
+
       actionsCell.appendChild(
         editBtn
       );
@@ -897,6 +960,7 @@ function renderExperiencesTable() {
       actionsCell.appendChild(
         deleteBtn
       );
+
 
       row.appendChild(
         companyCell
@@ -931,11 +995,17 @@ function openExperienceModal(
     "experienceFormAlert"
   );
 
+
   document.getElementById(
     "experienceModalTitle"
   ).textContent = experience
-    ? "Editar experiência"
-    : "Nova experiência";
+    ? i18n.t(
+        "admin.dashboard.editExperienceModalTitle"
+      )
+    : i18n.t(
+        "admin.dashboard.newExperienceModalTitle"
+      );
+
 
   document.getElementById(
     "experienceId"
@@ -943,11 +1013,13 @@ function openExperienceModal(
     ? experience.id
     : "";
 
+
   document.getElementById(
     "experienceCompany"
   ).value = experience
     ? experience.company
     : "";
+
 
   document.getElementById(
     "experienceRole"
@@ -955,17 +1027,20 @@ function openExperienceModal(
     ? experience.role
     : "";
 
+
   document.getElementById(
     "experiencePeriod"
   ).value = experience
     ? experience.period
     : "";
 
+
   document.getElementById(
     "experienceDescription"
   ).value = experience
     ? experience.description
     : "";
+
 
   document.getElementById(
     "experienceDescriptionEn"
@@ -975,6 +1050,7 @@ function openExperienceModal(
       ? experience.description_en
       : "";
 
+
   document.getElementById(
     "experienceCompanyUrl"
   ).value =
@@ -983,17 +1059,20 @@ function openExperienceModal(
       ? experience.company_url
       : "";
 
-  document.getElementById(
-    "experienceOrder"
-  ).value = experience
-    ? experience.display_order
-    : 0;
 
   document.getElementById(
     "experiencePublished"
   ).checked = experience
     ? experience.is_published
     : true;
+
+
+  document.getElementById(
+    "experienceOrder"
+  ).value = experience
+    ? experience.display_order
+    : 0;
+
 
   openModal("experience");
 }
@@ -1005,25 +1084,35 @@ async function deleteExperience(
 ) {
   if (
     !window.confirm(
-      `Excluir a experiência em "${company}"? Essa ação não pode ser desfeita.`
+      i18n.t(
+        "admin.dashboard.confirmDeleteExperience"
+      ).replace(
+        "{name}",
+        company
+      )
     )
   ) {
     return;
   }
 
+
   try {
     await adminApi.deleteExperience(id);
 
     showGlobalAlert(
-      "Experiência excluída.",
+      i18n.t(
+        "admin.dashboard.experienceDeleted"
+      ),
       "success"
     );
 
-    loadExperiences();
+    await loadExperiences();
   } catch (error) {
     showGlobalAlert(
       error.message ||
-        "Erro ao excluir experiência.",
+        i18n.t(
+          "admin.dashboard.errorDeleteExperience"
+        ),
       "error"
     );
   }
@@ -1054,10 +1143,12 @@ document
         "experienceFormAlert"
       );
 
+
       const id =
         document.getElementById(
           "experienceId"
         ).value;
+
 
       const payload = {
         company:
@@ -1116,12 +1207,14 @@ document
           ) || 0,
       };
 
+
       const submitBtn =
         document.getElementById(
           "experienceSubmitBtn"
         );
 
       submitBtn.disabled = true;
+
 
       try {
         if (id) {
@@ -1135,19 +1228,26 @@ document
           );
         }
 
+
         closeModal("experience");
 
+
         showGlobalAlert(
-          "Experiência salva com sucesso.",
+          i18n.t(
+            "admin.dashboard.experienceSaved"
+          ),
           "success"
         );
 
-        loadExperiences();
+
+        await loadExperiences();
       } catch (error) {
         showFormAlert(
           "experienceFormAlert",
           error.message ||
-            "Erro ao salvar experiência."
+            i18n.t(
+              "admin.dashboard.errorSaveExperience"
+            )
         );
       } finally {
         submitBtn.disabled = false;
@@ -1156,9 +1256,82 @@ document
   );
 
 
-/* =========================
+/* =====================================================
+   STATS
+===================================================== */
+
+function updateStats() {
+  const totalProjects =
+    document.getElementById(
+      "statTotalProjects"
+    );
+
+  const published =
+    document.getElementById(
+      "statPublished"
+    );
+
+  const totalSkills =
+    document.getElementById(
+      "statTotalSkills"
+    );
+
+
+  if (totalProjects) {
+    totalProjects.textContent =
+      String(
+        projectsCache.length
+      );
+  }
+
+
+  if (published) {
+    published.textContent =
+      String(
+        projectsCache.filter(
+          (project) =>
+            project.is_published
+        ).length
+      );
+  }
+
+
+  if (totalSkills) {
+    totalSkills.textContent =
+      String(
+        skillsCache.length
+      );
+  }
+}
+
+
+async function updateMfaStat() {
+  const mfaStat =
+    document.getElementById(
+      "statMfaStatus"
+    );
+
+  if (!mfaStat) return;
+
+  try {
+    const { enabled } =
+      await adminApi.getMfaStatus();
+
+    mfaStat.textContent =
+      i18n.t(
+        enabled
+          ? "admin.stat.mfaOn"
+          : "admin.stat.mfaOff"
+      );
+  } catch (error) {
+    mfaStat.textContent = "—";
+  }
+}
+
+
+/* =====================================================
    LOGOUT
-========================= */
+===================================================== */
 
 document
   .getElementById("logoutBtn")
@@ -1175,9 +1348,9 @@ document
   );
 
 
-/* =========================
-   INIT
-========================= */
+/* =====================================================
+   INITIALIZATION
+===================================================== */
 
 document.addEventListener(
   "DOMContentLoaded",
@@ -1185,13 +1358,11 @@ document.addEventListener(
     const authed =
       await requireAdminSession();
 
-    if (!authed) {
-      return;
-    }
+    if (!authed) return;
 
-    loadProjects();
-    loadSkills();
-    loadExperiences();
-    updateMfaStat();
+    await loadProjects();
+    await loadSkills();
+    await loadExperiences();
+    await updateMfaStat();
   }
 );

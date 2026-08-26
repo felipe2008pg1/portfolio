@@ -1,119 +1,70 @@
-claude.md
+# CLAUDE.md
 
-# CLAUDE.md — Project Continuity Guide
+## Project Context
 
-> **How this file was generated:** reconstructed from the complete history of a conversation between the user (Felipe Gonzalez) and a previous Claude, not through direct inspection of the repository. There is a real risk of drift between what is documented here and the actual state of the files — during development there were multiple instances of desynchronization between code sent in the chat and what was actually pasted/saved locally by the user (beginner with terminal/Git, multiple path errors). **Before blindly trusting this, run the verification commands in the "How to Verify the Real State" section below.**
+This repository is a personal portfolio application for Felipe Gonzalez, a Full Stack Developer.
 
-## What this project is
+The project contains:
+- A public portfolio website.
+- An authenticated administrative dashboard.
+- A FastAPI backend.
+- Database-backed Projects, Skills, and Experiences.
+- PT/EN internationalization.
+- Authentication and MFA-related administration.
 
-Personal full stack portfolio of Felipe Gonzalez (Full Stack developer, Python/JS/HTML/CSS, administrative/accounting background). Public website + authenticated admin panel for managing content (projects and skills) without needing to edit code.
+## Technology Stack
 
-## Stack
+### Backend
+- Python
+- FastAPI
+- SQLAlchemy
+- Pydantic
+- PostgreSQL/Supabase
+- SQLite support where applicable
 
-* **Backend:** FastAPI (Python), SQLAlchemy ORM, PostgreSQL (Neon, managed)
-* **Frontend:** Vanilla HTML/CSS/JS — **no framework, no build step**. Everything is served statically.
-* **Auth:** Short-lived access JWT + refresh token with rotation, optional MFA (TOTP), Argon2id for passwords
-* **Deploy:** Backend on **Railway**, Frontend on **Vercel**, database on **Neon** (serverless Postgres)
-* **Security:** Cloudflare Turnstile (captcha), rate limiting (slowapi), restrictive CORS, security headers
+### Frontend
+- HTML
+- CSS
+- JavaScript
+- Vanilla JavaScript for rendering and administration
+- Existing `i18n.js` localization system
 
-## Folder structure (as reported by the user in the terminal)
+### Infrastructure / Development
+- Git
+- GitHub
+- VS Code
+- REST APIs
 
-```
-C:\Users\FAMILY\Documents\programming_projects\portfolio site\   ← actual root folder on the user's PC
-└── portfolio\                                                     ← Git repository root
-    ├── backend\
-    │   ├── app\
-    │   │   ├── main.py                  # FastAPI entry point
-    │   │   ├── core\                    # config, security, middleware, logging, turnstile
-    │   │   ├── db\                      # declarative base + session
-    │   │   ├── models\                  # SQLAlchemy models
-    │   │   ├── schemas\                 # Pydantic schemas
-    │   │   ├── api\routes\              # auth, projects, skills, contact
-    │   │   └── services\                # business logic isolated from routes
-    │   ├── requirements.txt
-    │   ├── Procfile                     # start command for Railway
-    │   ├── runtime.txt                  # pinned Python version
-    │   ├── seed.py                      # populates initial admin + skills
-    │   ├── add_description_en_column.py # one-off migration (description_en column)
-    │   ├── add_mfa_columns.py           # one-off migration (MFA columns/table)
-    │   └── .env                         # NEVER committed (.gitignore covers it)
-    │
-    └── frontend\
-        ├── index.html                   # public website
-        ├── vercel.json                  # security headers for the static site
-        ├── 404.html                     # custom error page
-        ├── assets\
-        │   ├── css\ (reset, variables, style)
-        │   ├── js\ (config, api, i18n, main, theme, render-skills, render-projects, contact-form)
-        │   └── img\ (favicon*, og-image.png, projects\*.png)
-        └── painel-fg-2026x\             # ⚠️ ADMIN — folder name is deliberately non-obvious (security through obscurity)
-            ├── login.html
-            ├── dashboard.html
-            └── assets\ (css\admin.css, js\admin-api.js, js\login.js, js\dashboard.js)
-```
+## Important Rules
 
-**Important:** the actual admin folder name is `painel-fg-2026x`, not `admin`. This was intentional (security item "admin on a less obvious route"). If you need to reference the admin URL: `https://<domain>/painel-fg-2026x/login.html`.
+- Preserve the existing architecture and conventions when modifying the project.
+- Do not rewrite unrelated components when implementing a feature.
+- Do not invent repository content when the complete source is unavailable.
+- Verify the actual repository state before documenting work as completed.
+- Keep Portuguese and English translations synchronized.
+- Public content should respect publication state.
+- Administrative CRUD operations require authenticated admin access.
+- Prefer the existing API/service/model patterns instead of introducing parallel implementations.
 
-## How to run locally
+## Current Project Context
 
-Backend:
+The portfolio currently has Projects, Skills, and Experience as content resources.
 
-```powershell
-cd portfolio/backend
-.\venv\Scripts\Activate.ps1
-uvicorn app.main:app --reload --reload-exclude "*.db" --reload-exclude "*.db-journal" --reload-exclude "*.db-wal" --reload-exclude "*.db-shm"
-```
+Experience has backend support including:
+- SQLAlchemy model.
+- Pydantic schemas.
+- Service layer.
+- FastAPI router.
+- Model registration.
+- Router registration.
+- Admin API methods.
 
-⚠️ `--reload-exclude` is mandatory — without it, uvicorn enters an infinite reload loop because SQLite/refresh tokens write to the database on every request, and the watcher interprets this as a code change.
+The admin dashboard HTML already contains an Experience section and Experience modal structure.
 
-Frontend: **VS Code Live Server**, serving the `frontend/` folder. Configuration in `.vscode/settings.json` (at the `portfolio/` root, not in `backend/`) restricts the watcher to `/frontend` and ignores `.db`/`backend/` — without this, Live Server reloads the page by itself every time the backend writes to the database.
+The localization file already contains public Experience translations.
 
-## Environment variables (backend/.env)
+An Experience-enabled version of the admin dashboard JavaScript was developed during the current session, but the inspected default repository branch still contains an older dashboard JavaScript version. The working tree is therefore the source of truth for determining whether those changes have actually been applied.
 
-```
-ENVIRONMENT, DATABASE_URL, JWT_SECRET_KEY, JWT_ALGORITHM,
-JWT_ACCESS_TOKEN_EXPIRE_MINUTES, JWT_REFRESH_TOKEN_EXPIRE_DAYS,
-CORS_ALLOWED_ORIGINS, ALLOWED_HOSTS, WHATSAPP_NUMBER,
-ADMIN_USERNAME, ADMIN_PASSWORD, RATE_LIMIT_CONTACT, RATE_LIMIT_LOGIN,
-TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY
-```
+Public Experience rendering is not yet complete because `frontend/assets/js/render-experience.js` was found empty during inspection.
 
-All are validated via Pydantic Settings in `app/core/config.py` — the application **fails to start** (intentionally) if any are missing or invalid.
-
-## Production — Known URLs (according to the last confirmed state in the conversation)
-
-* Frontend: `https://portfoliofelipe2008pg1.vercel.app`
-* Backend: `https://portfolio-production-fef5.up.railway.app`
-* Database: Neon Postgres (host `ep-odd-boat-acmudziu.sa-east-1.aws.neon.tech`)
-
-⚠️ These URLs may have changed since this document was generated — confirm them in the Railway/Vercel dashboards.
-
-## Development Conventions
-
-* All code, comments, commit messages, and documentation: **English**, even though conversations with the user happen in Portuguese.
-* Session preference (2026-08-25): work incrementally, one change at a time, confirm before moving to the next. Keep chat responses concise/token-efficient — code first, minimal explanation, no repeated context, no narrated reasoning.
-* When an AI agent works in a sandboxed/tool-based environment (edits files via internal tools rather than a shared working directory), **those edits do not reach the user's actual project automatically**. Only code explicitly pasted as text in the chat response gets copied into the user's real files, and only if the user actually copies it. See gotcha #9 below — this caused a real incident in the 2026-08-25 session.
-
-## Known Gotchas (do not repeat these mistakes)
-
-1. **Nested folder structure**: the user sometimes opens the terminal in the `portfolio site` folder (root on the PC), and sometimes in `portfolio site\portfolio` (repo root). This caused dozens of "path not found" errors. Always confirm with `pwd` before giving relative path instructions.
-2. **`Set-Content -Encoding UTF8` in PowerShell adds a BOM** — this broke `vercel.json` (Vercel's JSON parser rejects BOM). Use `[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding($false)))` when encoding matters (JSON, YAML).
-3. **SQLite does not preserve timezone** in `DateTime` columns — comparisons between `datetime.now(timezone.utc)` (aware) and values read from the database (naive) generate `TypeError`. There is an `ensure_aware_utc()` helper in `app/core/security.py` — always use it when comparing dates retrieved from the database.
-4. **uvicorn `--reload` + database in the same monitored directory** = infinite restart loop. Always use `--reload-exclude` for `.db*` files.
-5. **Cross-site cookies in production**: since the frontend (Vercel) and backend (Railway) are different domains, session cookies require `SameSite=None` + `Secure=True` in production (`ENVIRONMENT=production`), but `SameSite=Strict` in local development (same origin). This is already conditionally implemented in `_set_auth_cookies()` — do not revert to fixed `Strict`.
-6. **Turnstile requires the exact hostname to be registered in the Cloudflare dashboard.** If local testing fails with "Security verification failed" or the widget does not load, first suspect: (a) test/real key mixed between frontend and backend, (b) hostname not registered, (c) accessing via `127.0.0.1` when only `localhost` was registered (or vice versa).
-7. **Skill categories are entered in Portuguese in the database** (`Linguagens`, `Banco de Dados`, `Dados`, `Framework`, `API`, `Ferramentas`) — PT↔EN translation is automatic via `CATEGORY_TRANSLATIONS_EN` in `i18n.js`. If someone enters the category in English directly in the admin panel, translation breaks (it gets stuck, with no match in the map).
-8. **Project images via external services (Imgur, LinkedIn CDN) frequently return 403** (hotlink protection). The adopted solution was to host images locally in `frontend/assets/img/projects/` and reference them via relative path (`assets/img/projects/name.png`). The backend validates `image_path`, accepting both full URLs (`http://`/`https://`) and relative paths starting with `assets/` (blocking path traversal).
-9. **AI sandbox edits ≠ user's real repository.** During the 2026-08-25 session, an AI agent made a series of file edits (CSS/JS animations, an admin dashboard bug fix) inside its own sandboxed working copy of the repo, and only described the changes in prose in the chat instead of pasting the full code. The user reported the dashboard fix "still not working" — it wasn't broken, it simply had never been copied into the user's actual project. **Lesson: when working with a user who copy-pastes code manually (no shared filesystem/git access), always paste complete, copy-pasteable code for every change, not just a prose summary — otherwise assume nothing reached the real repository.** See `CHANGELOG_AI.md` Phase 10 for exactly which changes from that session are confirmed delivered vs. only designed.
-
-## How to Verify the Real State
-
-Before continuing development, run (from the repo root):
-
-```powershell
-git log --oneline -20
-git status
-git ls-files | Select-String "\.env$|venv/|\.db$"
-```
-
-And compare the folder structure/key files mentioned here with the complete `git ls-files` output. If anything in this document does not match the actual repository, **trust the repository, not this document**.
+Do not consider the Experience feature fully complete until both public rendering and admin CRUD have been verified end-to-end.

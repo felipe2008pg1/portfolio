@@ -1,156 +1,81 @@
+
+---
+
+## `CHANGELOG_AI.md`
+
+```md
 # CHANGELOG_AI.md
 
-> Chronological log reconstructed from the history of a single long and continuous conversation between the user and a previous Claude. There are no actual commit timestamps associated with each item (there was no access to a detailed `git log` throughout the entire session) — the order reflects the order of decisions in the conversation, not necessarily the exact order of Git commits.
+## 2026-08-25 — Experience feature state and documentation handoff
 
-## Phase 1 — Planning and Initial Scaffold
+### Implemented / Confirmed
 
-* Project definition: personal full stack portfolio (not a simple static landing page)
-* Chosen stack: Python/FastAPI on the backend (at the explicit request of the user, who is a Python backend developer), plain HTML/CSS/JS on the frontend (no framework)
-* Initial database: SQLite (later migrated to Postgres/Neon — see Phase 5)
-* Backend scaffold: `core/db/models/schemas/api/services` structure, separation of responsibilities
-* Seed script (`seed.py`) to create initial admin + skills
+- Experience backend implementation exists.
+- SQLAlchemy Experience model exists.
+- Pydantic Experience schemas exist.
+- Experience service layer exists.
+- Experience FastAPI router exists.
+- Experience model and router are registered with the application.
+- Admin API contains Experience CRUD endpoints.
+- Admin dashboard HTML contains an Experience section.
+- Admin dashboard HTML contains an Experience modal.
+- `i18n.js` contains public Experience translations.
 
-## Phase 2 — Public Frontend
+### Changes Developed During This Session
 
-* Static HTML/CSS/JS: hero, about, skills (rendered via API), projects (via API), contact (form → WhatsApp via `wa.me`)
-* Initial design: "system record" concept (graphite/teal/amber palette, terminal-style panel) — **later completely replaced** (see Phase 7)
-* Dark/light theme with persistence in `localStorage`
-* PT/EN internationalization via `data-i18n` + JS dictionary
+A newer Experience-enabled admin dashboard implementation was prepared containing:
 
-## Phase 3 — Admin Panel
+- `experiencesCache`.
+- Experience loading.
+- Experience table rendering.
+- Experience modal handling.
+- Experience creation.
+- Experience editing.
+- Experience deletion.
+- Experience publication state.
+- Experience display order.
+- Experience initialization alongside Projects and Skills.
 
-* Login with JWT in HttpOnly cookie
-* Dashboard with CRUD for projects and skills, form modals
-* Admin route renamed from `/admin` to `/painel-fg-2026x` (security through obscurity)
+A corresponding localization update was prepared with admin Experience translation keys.
 
-## Phase 4 — Security Checklist
+### Technical Decisions
 
-User provided an extensive checklist; agent corrected incorrect markings (several items were already implemented without the user realizing it: parameterized SQLAlchemy, Pydantic, restricted CORS, HttpOnly cookies, SameSite, login lockout, basic logs) and implemented what was missing, in order:
+Experience remains a separate content resource following the existing Projects/Skills architecture.
 
-1. HSTS (already existed, conditional on `ENVIRONMENT=production`)
-2. Admin on a non-obvious route (folder rename)
-3. Short-lived JWT (15 min) + Refresh Token with rotation (`refresh_tokens` table, SHA-256 hash, opaque)
-4. Cloudflare Turnstile on login and contact form
-5. Dependency updates (small patches applied; major versions postponed — see `TODO.md`)
-6. SQLite → PostgreSQL migration (Neon) to enable real backups (SQLite on ephemeral PaaS storage is unreliable)
-7. MFA (TOTP + backup codes) — `mfa_backup_codes` model, QR code generated via `qrcode`+`Pillow`, two-step login flow
+Experience supports:
 
-Bugs found and fixed during this phase:
+- Company.
+- Role.
+- Period.
+- Portuguese description.
+- English description.
+- Optional company URL.
+- Publication state.
+- Display order.
 
-* `TypeError: can't compare offset-naive and offset-aware datetimes` — SQLite does not preserve timezone; fixed with `ensure_aware_utc()` helper
-* Non-serializable exception in `RequestValidationError` (raw `ValueError` object inside Pydantic's `ctx`) breaking the 422 error handler — fixed by filtering only serializable fields
-* Infinite uvicorn reload loop caused by writes to the `.db` being monitored by the watcher — fixed with `--reload-exclude`
-* VS Code Live Server repeatedly reloading the admin page for the same reason — fixed with `.vscode/settings.json` restricting the watcher scope
+The existing PT/EN localization system is reused.
 
-## Phase 5 — Production Deployment
+The existing SQLAlchemy metadata initialization convention is reused instead of introducing a dedicated migration for Experience.
 
-* Backend → Railway (root directory `backend`, `Procfile`, `runtime.txt`)
-* Frontend → Vercel (root directory `frontend`, `vercel.json` with security headers)
-* Database → Neon Postgres (definitively replacing SQLite)
-* Critical post-deployment fix: `SameSite=Strict` cookies were blocking cross-site sessions (frontend and backend on different domains) — fixed to `SameSite=None` conditional on `ENVIRONMENT=production`
-* Turnstile switched from test keys to real keys, with back-and-forth caused by a mismatch between site key/secret key in different places
+### Problems Encountered
 
-## Phase 6 — Internationalization and Dynamic Content
+- The inspected default branch contains an older `frontend/painel-fg-2026x/assets/js/dashboard.js` that only implements Projects and Skills.
+- The newer Experience-enabled dashboard JavaScript prepared during the session was not confirmed to be present in the repository branch.
+- `frontend/assets/js/render-experience.js` was found empty.
+- Therefore public Experience rendering remains unfinished.
+- Repository state and working-tree state may differ, so the working tree must be treated as the final source of truth.
 
-* `description_en` field added to projects (one-off migration `add_description_en_column.py`) to allow translatable project descriptions (unlike the title, which is never translated)
-* Fixed skill categories that had been entered in English by mistake in the admin panel (breaking the `CATEGORY_TRANSLATIONS_EN` translation map)
+### Files / Components Affected or Relevant
 
-## Phase 7 — Complete Visual Redesign ("Blueprint")
-
-User requested a complete change of visual identity (not just refinement). New concept proposed and accepted: deep blue-blueprint + security orange palette, Archivo/Inter/JetBrains Mono typography, technical background grid, status panel styled like a blueprint sheet, project cards with "SHEET XX/XX" numbering.
-
-* Skeleton loading, empty states with SVG icons, contact icons replaced from emoji with SVG
-* Admin panel redesigned: navigation sidebar + topbar + stat cards (project/published/skills/MFA status counts)
-* Enhanced mobile responsiveness (tables become stacked cards, larger touch targets)
-* Micro-interactions: card image zoom on hover, 3D tilt on project cards, staggered list entry animations, scroll progress bar, crosshair following the mouse in the hero, button spinners during loading
-
-## Phase 8 — Brazil/USA Identity
-
-At the user's request ("mixed Brazilian-American style"), color accents were added:
-
-* Green and yellow (Brazil) + red (USA) as secondary colors by section (skills=green, projects=yellow, contact=red)
-* Hero background progressively darkened (`#0F2942` → `#081C30` → `#050F1C`) at the user's request
-* Animated flags in the hero: first version in SVG with CSS `@keyframes` sway animation; **replaced** with real animated GIFs hosted on Giphy (direct hotlink), at the user's explicit request, with increased size
-
-## Phase 9 — Project Image Fixes
-
-* Images hosted on Imgur/LinkedIn CDN returning 403 (hotlink protection / expired token)
-* Solution: host images locally in `frontend/assets/img/projects/`, backend now accepts `image_path` as a relative path (`assets/...`) in addition to full URLs, with anti-path-traversal validation
-
-## Phase 10 — Session 2026-08-25: Context Reconstruction, Admin Stats Fix, Visual Polish
-
-### Part A — Context reconstruction (read-only analysis)
-
-Full static inspection of the repository (no code changes), comparing actual code against `CLAUDE.md`/`ARCHITECTURE.md`/`TODO.md`/`CHANGELOG_AI.md`. Discrepancies found:
-
-* Dead scaffolding: `backend/app/models/experience.py`, `schemas/experience.py`, `api/routes/experiences.py`, `frontend/assets/js/render-experience.js` — all empty, unregistered, never mounted. Not mentioned in any doc.
-* `TrustedHostMiddleware` imported in `main.py` but never registered — `ARCHITECTURE.md` incorrectly listed it as active (now corrected).
-* `CORSMiddleware` registered twice in `main.py` (restrictive, then `allow_methods=["*"]`) — undermines the restrictive intent, not yet fixed.
-* `app/db/init_db.py` is empty/unused; `Base.metadata.create_all()` is called directly in `main.py` instead.
-* Portuguese strings still present in user-facing `ValueError` messages in `backend/app/schemas/project.py`, and in comments/docstrings in `backend/app/core/security.py` — contradicts the "standardized to English" status.
-* Turnstile diagnostic log in `app/core/turnstile.py` (flagged in `TODO.md` for removal) confirmed still present.
-* Turnstile site key confirmed consistent across 3 of 4 locations (`index.html`, `login.html`, `config.js` all use `0x4AAAAAAD2-bMzcMMaQWBgk`); 4th location (Railway env var) not verifiable from the repo.
-* `DECISIONS.md`, referenced by both `CLAUDE.md` and this file, did not exist — created this session.
-* Duplicate, near-identical `README.md` at repo root and inside `portfolio/`.
-* Admin dashboard stat cards (see Part B) found to be non-functional.
-
-### Part B — Admin dashboard stats bug fix
-
-`statTotalProjects`, `statPublished`, `statTotalSkills`, `statMfaStatus` existed in `dashboard.html` but were never populated by any JS (permanently showed `—`). Fixed:
-
-* `adminApi.getMfaStatus()` added to `admin-api.js` (`GET /api/auth/mfa/status`)
-* `updateStats()` added to `dashboard.js` — derives counts from the already-loaded `projectsCache`/`skillsCache`, called after `loadProjects()`/`loadSkills()` succeed
-* `updateMfaStat()` added to `dashboard.js` — calls `getMfaStatus()`, called on `DOMContentLoaded`
-* `admin.stat.mfaOn`/`admin.stat.mfaOff` i18n keys added (PT/EN) to `i18n.js`
-
-**Delivery:** full `dashboard.js` and the `admin-api.js`/`i18n.js` snippets were pasted as complete, copy-pasteable code in the chat, at the user's explicit request. Reasonably confident this reached the real repo, but not confirmed — verify with `git diff`/`git status` before building on top of it.
-
-### Part C — Visual polish (public site) — ⚠️ delivery NOT confirmed
-
-The user asked for visual/animation improvements one at a time. Each was implemented in the AI's sandboxed working copy and only *described* in the chat response (prose summary), not pasted as full code. **This almost certainly means none of the following reached the actual repository** — see gotcha #9 in `CLAUDE.md`, discovered because of this exact issue. Treat all of the below as a spec to re-implement or re-deliver, not as done:
-
-* `index.html`: fixed a pre-existing stray extra `</div>` right after `.hero-flags`. Added `#cursorDot` element. Added `class="fade-init"` to `<body>`. Added `<noscript>` fallback for the fade-in.
-* `style.css`: `.hero-flags`/`.hero-flag` rewritten — each flag now fills 50% width/100% height (was two 480px rectangles), soft gradient blend at the center seam and top/bottom, slow drift animation (`heroFlagDrift`, desynced between the two flags). `.skill-tag` given a `tag-in` fade+scale-in animation, staggered per tag via inline `animationDelay` (set in `render-skills.js`). `.scroll-progress` given an animated flowing gradient (`scroll-progress-flow`) + glow. `.project-card-image` wrapped in a new `.project-card-image-wrap` (required a JS structural change, see below) with a hover depth gradient overlay. New `.cursor-dot` styles (dot + ring, hides on touch devices/`prefers-reduced-motion`). New `.system-panel-value.is-typing::after` blinking caret. New `body.fade-init`/`body.fade-init.is-loaded` fade-in rule — **intentionally scoped to `.fade-init`, not a bare `body` selector**, because an earlier version of this change (bare `body { opacity: 0 }`) would have permanently blanked `404.html`, `painel-fg-2026x/login.html`, and `dashboard.html`, none of which load `main.js` to remove that state. This was caught and fixed within the same session, before ever being described to the user — but it's a concrete example of why full-file review matters before pasting fixes.
-* `render-skills.js`: tags now get `tag.style.animationDelay` based on index (45ms step).
-* `render-projects.js`: image creation changed from `card.appendChild(img)` directly to wrapping in a new `imgWrap` (`.project-card-image-wrap`) div — **structural change, higher risk if applied partially**.
-* `main.js`: added the custom cursor logic (mousemove/mouseover listeners), the system-panel typing effect (runs once on `DOMContentLoaded`, after `i18n.apply()` — relies on script load order: `i18n.js` before `main.js`), and `document.body.classList.add("is-loaded")` as the first line of the `DOMContentLoaded` handler.
-
-### Problems encountered
-
-* Discovered mid-session that AI sandbox tool edits don't sync to the user's real project — the user reported the Part B fix "still not working," which turned out to mean it had simply never been applied yet (see `CLAUDE.md` gotcha #9).
-* Caught and fixed a self-introduced bug (global `body{opacity:0}` breaking pages without `main.js`) before it was ever shipped to the user.
-
-### What remains unfinished
-
-* Everything in Part C — needs re-delivery (full file dumps or clear diffs) or re-implementation, and confirmation that it's actually in the repository.
-* All Part A discrepancies except the admin stats fix (Part B) — still open, see `TODO.md`.
-
-### Recommended next step
-
-Before writing any new code: run `git status` / `git diff` in the actual repository to determine exactly what from this session (Part B and/or Part C) is really there. Do not assume Part C exists. Then either re-request full code for the missing pieces, or continue from whatever is confirmed present.
-
-## Phase 11 — Session 2026-08-25 (2): Middleware Hardening
-
-Picked up TODO.md Priority 0 items (bugs confirmed by Phase 10 Part A inspection, not the unconfirmed Part C visual work).
-
-* `backend/app/main.py`: removed the duplicate, permissive `CORSMiddleware` registration (`allow_methods=["*"]`, `allow_headers=["*"]`) that was undermining the restrictive one. Only the restrictive registration remains.
-* `backend/app/main.py`: registered `TrustedHostMiddleware` (was imported but never added) using the existing `settings.allowed_hosts_list`. Added as the last middleware so it's outermost and validates the `Host` header before CORS/routing — mitigates Host Header Injection (cache poisoning, password-reset-link poisoning via forged `Host`).
-* No functional/behavioral change to CORS policy itself (same origins, now enforced consistently); no schema/API changes; no frontend changes required.
-* Verified: `main.py` parses (`ast.parse`), no other references to the removed middleware block.
-
-**⚠️ Follow-up required (cannot be verified from the repo, needs Railway dashboard access):** confirm the `ALLOWED_HOSTS` env var in production includes the real Railway backend hostname. Default fallback is `localhost,127.0.0.1` only — if `ALLOWED_HOSTS` was never explicitly set on Railway, this change will cause **all production requests to start failing with 400 Invalid host header** immediately on deploy. Set it before/with this deploy, e.g.: `ALLOWED_HOSTS=portfolio-production-fef5.up.railway.app` (confirm exact domain in Railway dashboard first — see gotcha in `CLAUDE.md` about URLs possibly having changed).
-
-## Phase 12 — Session 2026-08-25 (3): Cursor Fix + i18n Cleanup (schemas/security)
-
-* `frontend/assets/css/style.css`: added `html { cursor: none }` scoped to `@media (hover: hover) and (prefers-reduced-motion: no-preference)`, matching the exact condition under which `main.js` activates `.cursor-dot` and the condition under which `.cursor-dot` itself is hidden. Prevents the native OS cursor and the custom cursor-dot from showing at the same time, without leaving touch/reduced-motion users with no cursor at all. No other `cursor:` declarations exist in `style.css`, so nothing conflicts.
-* `backend/app/schemas/project.py`: translated all PT `ValueError` messages to English ("URL inválida" → "Invalid URL", etc.) — these are user-facing (returned in 422 API responses), so this was a real inconsistency, not just an internal comment. Also stripped a leading UTF-8 BOM (harmless to CPython, but inconsistent with the rest of the repo).
-* `backend/app/core/security.py`: translated remaining PT docstrings/comments (`ensure_aware_utc`, `hash_opaque_token`, `create_mfa_pending_token`) to English. No logic changes.
-* Verified: both files still parse (`ast.parse`), no PT characters remain in either file.
-
-### Noted but out of scope for this task (flagged for a future security pass)
-
-* `_validate_public_url()` in `project.py` blocks `localhost`/`127.0.0.1`/`0.0.0.0`/`::1`/`*.local` but not RFC1918 private ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), link-local (`169.254.0.0/16` — includes the cloud metadata IP `169.254.169.254`), or IPv6 unique-local/link-local ranges. **Confirmed low risk today**: grepped the backend for any server-side fetch of `repo_url`/`demo_url`/`image_path` (`requests.`, `httpx.`, `urlopen`) — none exists; these fields are only stored and rendered as `<a href>`/`<img src>` on the client, so there's no SSRF vector currently. Would become a real SSRF risk if a future feature (e.g. link preview/thumbnail generation) ever fetches these URLs server-side — the validator would need a proper private-IP-range check (and DNS-rebinding-safe resolution) before that happens.
-
-## State at the Time This Changelog Was Last Updated (2026-08-25)
-
-Public site and admin panel functional in production, modulo the admin stat cards fix from Phase 10 (delivery unconfirmed) and the visual polish from Phase 10 Part C (delivery almost certainly did NOT happen). `README.md` exists at repo root but is a placeholder "in development" badge, not real documentation. `DECISIONS.md` created in Phase 10.
+```text
+backend/app/models/experience.py
+backend/app/schemas/experience.py
+backend/app/services/experience_service.py
+backend/app/api/routes/experiences.py
+backend/app/models/__init__.py
+backend/app/main.py
+frontend/assets/js/admin-api.js
+frontend/assets/js/i18n.js
+frontend/assets/js/render-experience.js
+frontend/painel-fg-2026x/dashboard.html
+frontend/painel-fg-2026x/assets/js/dashboard.js

@@ -97,19 +97,20 @@ const TRANSLATIONS = {
 
     "admin.nav.dashboard": "Dashboard",
     "admin.nav.projects": "Projetos",
+    "admin.nav.experience": "Experiência",
     "admin.nav.skills": "Skills",
     "admin.nav.security": "Segurança",
 
     "admin.stat.projects": "Projetos",
     "admin.stat.published": "Publicados",
     "admin.stat.skills": "Skills",
+    "admin.stat.experience": "Experiências",
     "admin.stat.mfa": "MFA",
-    "admin.stat.mfaOn": "Ativo",
-    "admin.stat.mfaOff": "Inativo",
     "admin.stat.mfaOn": "Ativo",
     "admin.stat.mfaOff": "Inativo",
 
     "admin.dashboard.logout": "Sair",
+
     "admin.dashboard.projectsTitle": "Projetos",
     "admin.dashboard.newProject": "+ Novo projeto",
     "admin.dashboard.colTitle": "Título",
@@ -117,44 +118,87 @@ const TRANSLATIONS = {
     "admin.dashboard.colPublished": "Publicado",
     "admin.dashboard.colActions": "Ações",
     "admin.dashboard.loading": "Carregando…",
+
     "admin.dashboard.skillsTitle": "Skills",
     "admin.dashboard.newSkill": "+ Nova skill",
     "admin.dashboard.colCategory": "Categoria",
     "admin.dashboard.colName": "Nome",
     "admin.dashboard.colOrder": "Ordem",
+
+    "admin.dashboard.experienceTitle": "Experiência",
+    "admin.dashboard.newExperience": "+ Nova experiência",
+    "admin.dashboard.colCompany": "Empresa",
+    "admin.dashboard.colRole": "Cargo",
+    "admin.dashboard.colPeriod": "Período",
+    "admin.dashboard.colPublished": "Publicado",
+    "admin.dashboard.colActions": "Ações",
+
     "admin.dashboard.edit": "Editar",
     "admin.dashboard.delete": "Excluir",
     "admin.dashboard.yes": "Sim",
     "admin.dashboard.no": "Não",
+
     "admin.dashboard.noProjects": "Nenhum projeto cadastrado.",
     "admin.dashboard.noSkills": "Nenhuma skill cadastrada.",
+    "admin.dashboard.noExperiences": "Nenhuma experiência cadastrada.",
+
     "admin.dashboard.errorLoadProjects": "Erro ao carregar projetos.",
     "admin.dashboard.errorLoadSkills": "Erro ao carregar skills.",
+    "admin.dashboard.errorLoadExperiences": "Erro ao carregar experiências.",
+
     "admin.dashboard.newProjectModalTitle": "Novo projeto",
     "admin.dashboard.editProjectModalTitle": "Editar projeto",
+
     "admin.dashboard.newSkillModalTitle": "Nova skill",
     "admin.dashboard.editSkillModalTitle": "Editar skill",
+
+    "admin.dashboard.newExperienceModalTitle": "Nova experiência",
+    "admin.dashboard.editExperienceModalTitle": "Editar experiência",
+
     "admin.dashboard.fieldTitle": "Título",
     "admin.dashboard.fieldDescription": "Descrição",
+    "admin.dashboard.fieldDescriptionEn": "Descrição em inglês",
     "admin.dashboard.fieldStack": "Stack (separada por vírgula)",
     "admin.dashboard.fieldRepoUrl": "URL do repositório (opcional)",
     "admin.dashboard.fieldDemoUrl": "URL da demo (opcional)",
+    "admin.dashboard.fieldImageUrl": "URL da imagem (opcional)",
     "admin.dashboard.fieldPublished": "Publicado (visível no site)",
+
     "admin.dashboard.fieldCategory": "Categoria",
     "admin.dashboard.fieldName": "Nome",
     "admin.dashboard.fieldOrder": "Ordem de exibição",
+
+    "admin.dashboard.fieldCompany": "Empresa",
+    "admin.dashboard.fieldRole": "Cargo",
+    "admin.dashboard.fieldPeriod": "Período",
+    "admin.dashboard.fieldExperienceDescription": "Descrição",
+    "admin.dashboard.fieldExperienceDescriptionEn": "Descrição em inglês",
+    "admin.dashboard.fieldCompanyUrl": "URL da empresa (opcional)",
+
     "admin.dashboard.cancel": "Cancelar",
     "admin.dashboard.save": "Salvar",
+
     "admin.dashboard.confirmDeleteProject": "Excluir o projeto \"{name}\"? Essa ação não pode ser desfeita.",
     "admin.dashboard.confirmDeleteSkill": "Excluir a skill \"{name}\"?",
+    "admin.dashboard.confirmDeleteExperience": "Excluir a experiência de \"{name}\"? Essa ação não pode ser desfeita.",
+
     "admin.dashboard.projectSaved": "Projeto salvo com sucesso.",
     "admin.dashboard.projectDeleted": "Projeto excluído.",
+
     "admin.dashboard.skillSaved": "Skill salva com sucesso.",
     "admin.dashboard.skillDeleted": "Skill excluída.",
+
+    "admin.dashboard.experienceSaved": "Experiência salva com sucesso.",
+    "admin.dashboard.experienceDeleted": "Experiência excluída.",
+
     "admin.dashboard.errorSaveProject": "Erro ao salvar projeto.",
     "admin.dashboard.errorDeleteProject": "Erro ao excluir projeto.",
+
     "admin.dashboard.errorSaveSkill": "Erro ao salvar skill.",
     "admin.dashboard.errorDeleteSkill": "Erro ao excluir skill.",
+
+    "admin.dashboard.errorSaveExperience": "Erro ao salvar experiência.",
+    "admin.dashboard.errorDeleteExperience": "Erro ao excluir experiência.",
 
     "admin.security.title": "Segurança",
     "admin.security.mfaLabel": "Autenticação em duas etapas (MFA)",
@@ -164,6 +208,7 @@ const TRANSLATIONS = {
     "admin.security.checkError": "Não foi possível verificar o status do MFA.",
     "admin.security.enableBtn": "Ativar MFA",
     "admin.security.disableBtn": "Desativar MFA",
+
     "footer.builtIn": "Feito no Brasil, para o mundo",
   },
 
@@ -265,19 +310,20 @@ const TRANSLATIONS = {
 
     "admin.nav.dashboard": "Dashboard",
     "admin.nav.projects": "Projects",
+    "admin.nav.experience": "Experience",
     "admin.nav.skills": "Skills",
     "admin.nav.security": "Security",
 
     "admin.stat.projects": "Projects",
     "admin.stat.published": "Published",
     "admin.stat.skills": "Skills",
+    "admin.stat.experience": "Experiences",
     "admin.stat.mfa": "MFA",
-    "admin.stat.mfaOn": "Active",
-    "admin.stat.mfaOff": "Inactive",
     "admin.stat.mfaOn": "Active",
     "admin.stat.mfaOff": "Inactive",
 
     "admin.dashboard.logout": "Sign out",
+
     "admin.dashboard.projectsTitle": "Projects",
     "admin.dashboard.newProject": "+ New project",
     "admin.dashboard.colTitle": "Title",
@@ -285,44 +331,87 @@ const TRANSLATIONS = {
     "admin.dashboard.colPublished": "Published",
     "admin.dashboard.colActions": "Actions",
     "admin.dashboard.loading": "Loading…",
+
     "admin.dashboard.skillsTitle": "Skills",
     "admin.dashboard.newSkill": "+ New skill",
     "admin.dashboard.colCategory": "Category",
     "admin.dashboard.colName": "Name",
     "admin.dashboard.colOrder": "Order",
+
+    "admin.dashboard.experienceTitle": "Experience",
+    "admin.dashboard.newExperience": "+ New experience",
+    "admin.dashboard.colCompany": "Company",
+    "admin.dashboard.colRole": "Role",
+    "admin.dashboard.colPeriod": "Period",
+    "admin.dashboard.colPublished": "Published",
+    "admin.dashboard.colActions": "Actions",
+
     "admin.dashboard.edit": "Edit",
     "admin.dashboard.delete": "Delete",
     "admin.dashboard.yes": "Yes",
     "admin.dashboard.no": "No",
+
     "admin.dashboard.noProjects": "No projects yet.",
     "admin.dashboard.noSkills": "No skills yet.",
+    "admin.dashboard.noExperiences": "No experiences yet.",
+
     "admin.dashboard.errorLoadProjects": "Error loading projects.",
     "admin.dashboard.errorLoadSkills": "Error loading skills.",
+    "admin.dashboard.errorLoadExperiences": "Error loading experiences.",
+
     "admin.dashboard.newProjectModalTitle": "New project",
     "admin.dashboard.editProjectModalTitle": "Edit project",
+
     "admin.dashboard.newSkillModalTitle": "New skill",
     "admin.dashboard.editSkillModalTitle": "Edit skill",
+
+    "admin.dashboard.newExperienceModalTitle": "New experience",
+    "admin.dashboard.editExperienceModalTitle": "Edit experience",
+
     "admin.dashboard.fieldTitle": "Title",
     "admin.dashboard.fieldDescription": "Description",
+    "admin.dashboard.fieldDescriptionEn": "English description",
     "admin.dashboard.fieldStack": "Stack (comma-separated)",
     "admin.dashboard.fieldRepoUrl": "Repository URL (optional)",
     "admin.dashboard.fieldDemoUrl": "Demo URL (optional)",
+    "admin.dashboard.fieldImageUrl": "Image URL (optional)",
     "admin.dashboard.fieldPublished": "Published (visible on site)",
+
     "admin.dashboard.fieldCategory": "Category",
     "admin.dashboard.fieldName": "Name",
     "admin.dashboard.fieldOrder": "Display order",
+
+    "admin.dashboard.fieldCompany": "Company",
+    "admin.dashboard.fieldRole": "Role",
+    "admin.dashboard.fieldPeriod": "Period",
+    "admin.dashboard.fieldExperienceDescription": "Description",
+    "admin.dashboard.fieldExperienceDescriptionEn": "English description",
+    "admin.dashboard.fieldCompanyUrl": "Company URL (optional)",
+
     "admin.dashboard.cancel": "Cancel",
     "admin.dashboard.save": "Save",
+
     "admin.dashboard.confirmDeleteProject": "Delete the project \"{name}\"? This cannot be undone.",
     "admin.dashboard.confirmDeleteSkill": "Delete the skill \"{name}\"?",
+    "admin.dashboard.confirmDeleteExperience": "Delete the experience at \"{name}\"? This cannot be undone.",
+
     "admin.dashboard.projectSaved": "Project saved successfully.",
     "admin.dashboard.projectDeleted": "Project deleted.",
+
     "admin.dashboard.skillSaved": "Skill saved successfully.",
     "admin.dashboard.skillDeleted": "Skill deleted.",
+
+    "admin.dashboard.experienceSaved": "Experience saved successfully.",
+    "admin.dashboard.experienceDeleted": "Experience deleted.",
+
     "admin.dashboard.errorSaveProject": "Error saving project.",
     "admin.dashboard.errorDeleteProject": "Error deleting project.",
+
     "admin.dashboard.errorSaveSkill": "Error saving skill.",
     "admin.dashboard.errorDeleteSkill": "Error deleting skill.",
+
+    "admin.dashboard.errorSaveExperience": "Error saving experience.",
+    "admin.dashboard.errorDeleteExperience": "Error deleting experience.",
 
     "admin.security.title": "Security",
     "admin.security.mfaLabel": "Two-factor authentication (MFA)",
@@ -332,9 +421,11 @@ const TRANSLATIONS = {
     "admin.security.checkError": "Couldn't check MFA status.",
     "admin.security.enableBtn": "Enable MFA",
     "admin.security.disableBtn": "Disable MFA",
+
     "footer.builtIn": "Built in Brazil, shipped worldwide",
   },
 };
+
 
 const CATEGORY_TRANSLATIONS_EN = {
   "Linguagens": "Languages",
@@ -345,72 +436,348 @@ const CATEGORY_TRANSLATIONS_EN = {
   "Ferramentas": "Tools",
 };
 
+
 const i18n = (() => {
   const SUPPORTED = ["pt", "en"];
-  let currentLang = localStorage.getItem("lang");
+
+  let currentLang =
+    localStorage.getItem("lang");
+
   if (!SUPPORTED.includes(currentLang)) {
-    currentLang = navigator.language && navigator.language.toLowerCase().startsWith("en") ? "en" : "pt";
+    currentLang =
+      navigator.language &&
+      navigator.language
+        .toLowerCase()
+        .startsWith("en")
+        ? "en"
+        : "pt";
   }
+
 
   function t(key) {
-    return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || key;
+    return (
+      TRANSLATIONS[currentLang] &&
+      TRANSLATIONS[currentLang][key]
+    ) || key;
   }
+
 
   function translateCategory(category) {
-    if (currentLang !== "en") return category;
-    return CATEGORY_TRANSLATIONS_EN[category] || category;
+    if (currentLang !== "en") {
+      return category;
+    }
+
+    return (
+      CATEGORY_TRANSLATIONS_EN[
+        category
+      ] || category
+    );
   }
+
 
   function updateToggleUI() {
-    document.querySelectorAll("[data-lang]").forEach((btn) => {
-      btn.classList.toggle("is-active", btn.getAttribute("data-lang") === currentLang);
-      btn.setAttribute("aria-pressed", String(btn.getAttribute("data-lang") === currentLang));
-    });
+    document
+      .querySelectorAll("[data-lang]")
+      .forEach((btn) => {
+        const isActive =
+          btn.getAttribute(
+            "data-lang"
+          ) === currentLang;
+
+        btn.classList.toggle(
+          "is-active",
+          isActive
+        );
+
+        btn.setAttribute(
+          "aria-pressed",
+          String(isActive)
+        );
+      });
   }
 
+
   function apply() {
-    document.documentElement.setAttribute("lang", currentLang === "en" ? "en" : "pt-BR");
+    document.documentElement.setAttribute(
+      "lang",
+      currentLang === "en"
+        ? "en"
+        : "pt-BR"
+    );
 
-    document.querySelectorAll("[data-i18n]").forEach((el) => {
-      el.textContent = t(el.getAttribute("data-i18n"));
-    });
 
-    document.querySelectorAll("[data-i18n-html]").forEach((el) => {
-      el.innerHTML = t(el.getAttribute("data-i18n-html"));
-    });
+    document
+      .querySelectorAll("[data-i18n]")
+      .forEach((el) => {
+        el.textContent = t(
+          el.getAttribute(
+            "data-i18n"
+          )
+        );
+      });
 
-    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
-      el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
-    });
 
-    document.title = t("meta.title");
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute("content", t("meta.description"));
+    document
+      .querySelectorAll("[data-i18n-html]")
+      .forEach((el) => {
+        el.innerHTML = t(
+          el.getAttribute(
+            "data-i18n-html"
+          )
+        );
+      });
+
+
+    document
+      .querySelectorAll(
+        "[data-i18n-placeholder]"
+      )
+      .forEach((el) => {
+        el.setAttribute(
+          "placeholder",
+          t(
+            el.getAttribute(
+              "data-i18n-placeholder"
+            )
+          )
+        );
+      });
+
+
+    document.title =
+      t("meta.title");
+
+
+    const metaDesc =
+      document.querySelector(
+        'meta[name="description"]'
+      );
+
+
+    if (metaDesc) {
+      metaDesc.setAttribute(
+        "content",
+        t("meta.description")
+      );
+    }
+
 
     updateToggleUI();
 
-    if (typeof window.renderSkillsTable === "function") window.renderSkillsTable();
-    if (typeof window.renderProjectsGrid === "function") window.renderProjectsGrid();
-    if (typeof window.renderExperienceList === "function") window.renderExperienceList();
+
+    if (
+      typeof window.renderSkillsTable ===
+      "function"
+    ) {
+      window.renderSkillsTable();
+    }
+
+
+    if (
+      typeof window.renderProjectsGrid ===
+      "function"
+    ) {
+      window.renderProjectsGrid();
+    }
+
+
+    if (
+      typeof window.renderExperienceList ===
+      "function"
+    ) {
+      window.renderExperienceList();
+    }
+
+
+    /*
+     * O dashboard usa funções locais,
+     * portanto também atualizamos as
+     * tabelas administrativas quando
+     * o idioma muda.
+     */
+
+    if (
+      typeof window.renderProjectsTable ===
+      "function"
+    ) {
+      window.renderProjectsTable();
+    }
+
+
+    if (
+      typeof window.renderSkillsTable ===
+      "function"
+    ) {
+      window.renderSkillsTable();
+    }
+
+
+    if (
+      typeof window.renderExperiencesTable ===
+      "function"
+    ) {
+      window.renderExperiencesTable();
+    }
+
+
+    /*
+     * Atualiza títulos dos modais caso
+     * estejam abertos durante a troca
+     * de idioma.
+     */
+
+    const projectId =
+      document.getElementById(
+        "projectId"
+      );
+
+    if (projectId) {
+      const projectModalTitle =
+        document.getElementById(
+          "projectModalTitle"
+        );
+
+      if (
+        projectModalTitle &&
+        document
+          .getElementById(
+            "projectModalOverlay"
+          )
+          ?.classList.contains(
+            "is-open"
+          )
+      ) {
+        projectModalTitle.textContent =
+          projectId.value
+            ? t(
+                "admin.dashboard.editProjectModalTitle"
+              )
+            : t(
+                "admin.dashboard.newProjectModalTitle"
+              );
+      }
+    }
+
+
+    const skillId =
+      document.getElementById(
+        "skillId"
+      );
+
+    if (skillId) {
+      const skillModalTitle =
+        document.getElementById(
+          "skillModalTitle"
+        );
+
+      if (
+        skillModalTitle &&
+        document
+          .getElementById(
+            "skillModalOverlay"
+          )
+          ?.classList.contains(
+            "is-open"
+          )
+      ) {
+        skillModalTitle.textContent =
+          skillId.value
+            ? t(
+                "admin.dashboard.editSkillModalTitle"
+              )
+            : t(
+                "admin.dashboard.newSkillModalTitle"
+              );
+      }
+    }
+
+
+    const experienceId =
+      document.getElementById(
+        "experienceId"
+      );
+
+    if (experienceId) {
+      const experienceModalTitle =
+        document.getElementById(
+          "experienceModalTitle"
+        );
+
+      if (
+        experienceModalTitle &&
+        document
+          .getElementById(
+            "experienceModalOverlay"
+          )
+          ?.classList.contains(
+            "is-open"
+          )
+      ) {
+        experienceModalTitle.textContent =
+          experienceId.value
+            ? t(
+                "admin.dashboard.editExperienceModalTitle"
+              )
+            : t(
+                "admin.dashboard.newExperienceModalTitle"
+              );
+      }
+    }
   }
 
+
   function setLang(lang) {
-    if (!SUPPORTED.includes(lang) || lang === currentLang) return;
+    if (
+      !SUPPORTED.includes(lang) ||
+      lang === currentLang
+    ) {
+      return;
+    }
+
     currentLang = lang;
-    localStorage.setItem("lang", lang);
+
+    localStorage.setItem(
+      "lang",
+      lang
+    );
+
     apply();
   }
+
 
   function getLang() {
     return currentLang;
   }
 
-  return { t, translateCategory, apply, setLang, getLang };
+
+  return {
+    t,
+    translateCategory,
+    apply,
+    setLang,
+    getLang,
+  };
 })();
 
-document.addEventListener("DOMContentLoaded", () => {
-  i18n.apply();
-  document.querySelectorAll("[data-lang]").forEach((btn) => {
-    btn.addEventListener("click", () => i18n.setLang(btn.getAttribute("data-lang")));
-  });
-});
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    i18n.apply();
+
+
+    document
+      .querySelectorAll("[data-lang]")
+      .forEach((btn) => {
+        btn.addEventListener(
+          "click",
+          () =>
+            i18n.setLang(
+              btn.getAttribute(
+                "data-lang"
+              )
+            )
+        );
+      });
+  }
+);

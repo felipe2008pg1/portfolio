@@ -1,111 +1,102 @@
-Architecture
-
 # ARCHITECTURE.md
-
-> Reconstructed from conversation history — see reliability notice in `CLAUDE.md`.
 
 ## Overview
 
-Architecture of two decoupled applications, communicating via REST API:
+The portfolio is organized as a frontend/backend web application.
 
-```
-┌─────────────────────┐         HTTPS/JSON        ┌──────────────────────┐
-│  Frontend (Vercel)   │ ─────────────────────────>│  Backend (Railway)    │
-│  Static HTML/CSS/JS │ <───────────────────────── │  FastAPI + SQLAlchemy │
-└─────────────────────┘                            └──────────┬───────────┘
-                                                                │
-                                                                v
-                                                     ┌──────────────────────┐
-                                                     │ PostgreSQL (Neon)     │
-                                                     └──────────────────────┘
-```
+The frontend contains:
+- Public portfolio pages.
+- Administrative dashboard.
+- JavaScript modules for API access, rendering, localization, and administration.
 
-There is no SSR, no build step on the frontend (no bundler/transpiler) — HTML/CSS/JS files are served as-is.
+The backend contains:
+- FastAPI application.
+- SQLAlchemy models.
+- Pydantic schemas.
+- Service/business logic.
+- API routers.
+- Authentication-related functionality.
 
-## Backend
+## Content Architecture
 
-### Layers (separation of responsibilities)
+The main content resources are:
 
-```
-api/routes/*.py   → input validation (via Depends), call services, never contain business logic
-services/*.py     → business logic, only layer that talks to the database via db.query/db.scalars
-schemas/*.py      → Pydantic — validation/serialization, never touch the database
-models/*.py       → SQLAlchemy ORM — table definitions
-core/*.py         → config (env vars), security (hash/JWT/TOTP), middleware (headers), turnstile, logging
-```
+1. Projects
+2. Skills
+3. Experiences
 
-### Known routes (prefix `/api`)
+### Projects
 
-* `POST /api/auth/login` — authenticates; if MFA is active, returns `mfa_required: true` + temporary `mfa_token` (5 min) instead of logging in directly
-* `POST /api/auth/mfa/verify` — second login step (TOTP code or backup code)
-* `POST /api/auth/refresh` — refresh token rotation (automatically used by the frontend on 401)
-* `POST /api/auth/logout`
-* `GET /api/auth/me` — valid session check
-* `GET/POST /api/auth/mfa/status`, `/mfa/setup/init`, `/mfa/setup/confirm`, `/mfa/disable`
-* `GET /api/projects` — public, published only
-* `GET /api/projects/admin` — protected, all (including unpublished)
-* `POST/PUT/DELETE /api/projects[/{id}]` — protected
-* `GET /api/skills`, `POST/PUT/DELETE /api/skills[/{id}]` — GET public, mutations protected
-* `POST /api/contact` — public, rate limited, requires `turnstile_token`
-* `GET /api/health` — health check
+Projects contain portfolio work displayed publicly when published.
 
-### Authentication — complete flow
+The admin dashboard supports:
+- Listing projects.
+- Creating projects.
+- Editing projects.
+- Deleting projects.
+- Publication state.
+- Stack information.
+- Repository URL.
+- Demo URL.
+- Image path.
+- Portuguese and English descriptions.
 
-1. Login with username/password (+ mandatory Turnstile) → if password is correct and MFA is disabled, sets `access_token` (JWT, 15 min) and `refresh_token` (opaque, 7 days, SHA-256 hash in database) cookies
-2. If MFA is active → returns an intermediate `mfa_pending` token (own JWT, 5 min) → second `/mfa/verify` call with TOTP code or backup code completes the login
-3. Subsequent requests use the `access_token` cookie. If it expires (401), the frontend (`admin-api.js`) automatically calls `/api/auth/refresh` once and retries the original request
-4. Refresh token has **rotation**: each use invalidates the old token and issues a new one — mitigates replay of a stolen token
-5. Lockout: 5 incorrect password attempts → 15-minute lockout (fields `failed_login_attempts`/`locked_until` in `admin_users`)
+### Skills
 
-### Database — known tables
+Skills contain technical technologies grouped by category.
 
-* `admin_users` (id, username, hashed_password, failed_login_attempts, locked_until, mfa_secret, mfa_enabled, created_at)
-* `projects` (id, title, description, description_en, stack, repo_url, demo_url, image_path, is_published, display_order, created_at)
-* `skills` (id, category, name, display_order)
-* `contact_messages` (id, name, email, subject, message, ip_address, created_at) — audit log, not exposed via API
-* `refresh_tokens` (id, admin_id FK, token_hash, expires_at, revoked_at, created_at)
-* `mfa_backup_codes` (id, admin_id FK, code_hash, used_at, created_at)
+The admin dashboard supports:
+- Listing skills.
+- Creating skills.
+- Editing skills.
+- Deleting skills.
+- Category.
+- Name.
+- Display order.
 
-Migrations do not use Alembic despite it being in `requirements.txt` — in practice, schema changes were applied via ad-hoc scripts (`add_description_en_column.py`, `add_mfa_columns.py`) that perform conditional `ALTER TABLE`, and `Base.metadata.create_all()` runs on app startup (only creates tables that do not exist, never modifies existing ones).
+### Experiences
 
-### Implemented security (see complete list in `DECISIONS.md`)
+Experience is implemented as a separate content resource.
 
-Argon2id, short-lived JWT + refresh rotation, MFA/TOTP, rate limiting (slowapi), Cloudflare Turnstile, CORS whitelist, CSP, HSTS (production), conditional HttpOnly+Secure+SameSite cookies, honeypot in the contact form, URL validation (blocks dangerous schemes and internal hosts), path traversal blocked in `image_path`.
+The backend includes:
 
-⚠️ `TrustedHostMiddleware` is **imported** in `app/main.py` but never actually registered via `app.add_middleware()` — it is not active despite being imported. Also, `CORSMiddleware` is registered **twice** in `main.py` (once restrictive, once with `allow_methods=["*"]`/`allow_headers=["*"]`), which undermines the restrictive intent. Both confirmed by direct code inspection on 2026-08-25; not yet fixed — see `TODO.md`.
+- `backend/app/models/experience.py`
+- `backend/app/schemas/experience.py`
+- `backend/app/services/experience_service.py`
+- `backend/app/api/routes/experiences.py`
 
-## Frontend
+The model supports:
 
-### No framework — manual patterns
+- `company`
+- `role`
+- `period`
+- `description`
+- `description_en`
+- `company_url`
+- `is_published`
+- `display_order`
 
-* **i18n**: `assets/js/i18n.js` — `TRANSLATIONS` object with `pt`/`en` keys, applied via `data-i18n` (textContent), `data-i18n-html` (innerHTML, only for trusted static content), and `data-i18n-placeholder` attributes. Preference saved in `localStorage`. Skill categories translated via a separate map (`CATEGORY_TRANSLATIONS_EN`) because they come from the database in Portuguese.
-* **Dark/light theme**: `assets/js/theme.js` — applies `data-theme` to `<html>` before the first paint (prevents flash), persists in `localStorage`.
-* **Dynamic rendering**: `render-skills.js` and `render-projects.js` fetch the API and build the DOM via `createElement`/`textContent` (never `innerHTML` with API data — XSS mitigation). Projects use local cache (`cachedProjects`) to allow re-rendering when changing language without a new fetch.
-* **API wrapper**: `api.js` (public site, `credentials: "omit"`) and `admin-api.js` (admin panel, `credentials: "include"`, with automatic retry logic on 401 via refresh token).
+The model is registered through the existing model initialization mechanism.
 
-### Design system ("Blueprint")
+The Experience router is registered in the FastAPI application.
 
-Main palette defined in `variables.css` as custom properties, with a complete override in `[data-theme="dark"]`. Visual concept: deep-blue engineering blueprint-style background, fine-line grid, orange as the action accent (`--color-accent`), with additional Brazil colors (green `--color-brasil-green`, yellow `--color-brasil-yellow`) and USA (red `--color-usa-red`) used selectively by section (skills=green, projects=yellow, contact=red) and in the animated GIF flags in the hero.
+The frontend/admin API contains Experience CRUD methods.
 
-Typography: Archivo (display/headings), Inter (body), JetBrains Mono (technical data/labels).
+## Public Data Flow
 
-### Admin (`painel-fg-2026x/`)
+Public portfolio content follows the general flow:
 
-Layout: navigation sidebar (Projects/Skills/Security) + topbar (theme/language/logout) + statistic cards (total projects, published, total skills, MFA status) + CRUD tables with modals.
-
-⚠️ Until 2026-08-25, the four stat card values (`statTotalProjects`, `statPublished`, `statTotalSkills`, `statMfaStatus`) were dead — the DOM elements existed in `dashboard.html` but no JS ever populated them (permanently showed `—`). Fixed in that session by adding `updateStats()` (derives counts from the already-fetched `projectsCache`/`skillsCache`) and `updateMfaStat()` (calls the new `adminApi.getMfaStatus()` → `GET /api/auth/mfa/status`) to `dashboard.js`, plus `admin.stat.mfaOn`/`admin.stat.mfaOff` i18n keys. **Delivery status uncertain** — see `CHANGELOG_AI.md` Phase 10 and `TODO.md` before assuming this is live in the actual repository.
-
-## Deploy
-
-* **Backend → Railway**: root directory `portfolio/backend`, `Procfile` defines start command (`uvicorn app.main:app --host 0.0.0.0 --port $PORT`), `runtime.txt` pins Python 3.12.8. Environment variables configured manually in the Railway dashboard (not loaded from `.env`, which is not committed).
-* **Frontend → Vercel**: root directory `portfolio/frontend`, no build step (framework preset "Other"), `vercel.json` defines security headers.
-* **Database → Neon**: serverless Postgres, connection string with `sslmode=require`, `psycopg2` driver (`postgresql+psycopg2://`).
-
-## What does NOT exist in this architecture
-
-* No automated tests (they were never mentioned/created at any point in the conversation)
-* No CI/CD beyond the native automatic deployment from Railway/Vercel on push to `main` (Dependabot is configured for weekly dependency PRs, but that's not CI)
-* No actual file upload (project images are only URL/path references, not uploaded via a form)
-* No multi-admin user system (single-user by design)
-* No Alembic in active use despite being installed
-* No "Experience"/work-history feature — despite `backend/app/models/experience.py`, `backend/app/schemas/experience.py`, `backend/app/api/routes/experiences.py`, and `frontend/assets/js/render-experience.js` existing as files, **all four are empty (0 bytes)**, unregistered in `app/models/__init__.py`, and never mounted in `main.py` or referenced in `index.html`. Confirmed by direct inspection on 2026-08-25 — this is dead scaffolding for a feature that was never built, not a regression.
+```text
+Browser
+  ↓
+Frontend JavaScript
+  ↓
+Public API
+  ↓
+FastAPI Router
+  ↓
+Service Layer
+  ↓
+SQLAlchemy Model
+  ↓
+Database
