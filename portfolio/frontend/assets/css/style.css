@@ -1602,10 +1602,8 @@ h1, h2, h3 {
 }
 .eyebrow.c-red { color: var(--color-usa-red); }
 
-.admin-stat-card:nth-child(1)::before { background: var(--color-accent); }
-.admin-stat-card:nth-child(2)::before { background: var(--color-brasil-green); }
-.admin-stat-card:nth-child(3)::before { background: var(--color-brasil-yellow); }
-.admin-stat-card:nth-child(4)::before { background: var(--color-usa-red); }
+/* Replaced by the spinning BR/USA gradient ring in admin.css — nth-child
+   accent bars removed, all cards now share the same animated border. */
 
 .project-card {
   border-top: 3px solid var(--color-accent);

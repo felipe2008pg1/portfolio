@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicon-16x16.png">
@@ -12,7 +13,9 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Admin — Login</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" crossorigin>
 
   <link rel="stylesheet" href="../assets/css/reset.css">
   <link rel="stylesheet" href="../assets/css/variables.css">
@@ -22,10 +25,23 @@
   <script src="../assets/js/theme.js"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
+
 <body>
   <div class="cursor-dot" id="cursorDot"></div>
 
   <div class="login-shell">
+    <div class="hero-flags login-flags">
+      <div class="hero-flag flag-brazil">
+        <img
+          src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bIqdxoOVJ2oak/giphy.gif"
+          alt="" loading="lazy">
+      </div>
+      <div class="hero-flag flag-usa">
+        <img
+          src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/sFMDqop2ku4M0/giphy.gif"
+          alt="" loading="lazy">
+      </div>
+    </div>
     <div class="login-topbar">
       <div class="lang-toggle" role="group" aria-label="Idioma / Language">
         <button type="button" data-lang="pt">PT</button>
@@ -61,7 +77,8 @@
       <form id="mfaForm" novalidate style="display:none;">
         <div class="form-field">
           <label for="mfaCode">Código do autenticador (ou código de backup)</label>
-          <input type="text" id="mfaCode" name="mfaCode" required maxlength="20" autocomplete="one-time-code" placeholder="123456">
+          <input type="text" id="mfaCode" name="mfaCode" required maxlength="20" autocomplete="one-time-code"
+            placeholder="123456">
         </div>
 
         <button type="submit" class="btn btn-primary" id="mfaSubmit">Verificar</button>
@@ -75,4 +92,5 @@
   <script src="assets/js/login.js"></script>
   <script src="../assets/js/custom-cursor.js"></script>
 </body>
+
 </html>
