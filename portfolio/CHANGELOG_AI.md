@@ -283,3 +283,19 @@ Added i18n keys (PT+EN): `admin.security.enabled`, `disabled`, `checkError`, `sc
 ### Recommended next step
 
 Fresh clone + diff against these docs before trusting anything is live (see TODO.md Priority 0). MFA flow already confirmed — get Felipe's confirmation on the `logo_url` Neon column next.
+### 5. `resetDirty` ReferenceError fix + mobile spacing pass (2026-08-28)
+
+**Bug:** `frontend/painel-fg-2026x/assets/js/dashboard.js` called `resetDirty()` at lines 154/286/663 (project/skill/experience forms) but never defined it — copy-paste gap vs. the older `frontend/assets/js/dashboard.js`, which has the real dirty-tracking implementation. Threw `Uncaught ReferenceError: resetDirty is not defined` on every `openProjectModal` call. Fixed by adding `dirtyForms`, `setupDirtyTracking()`, `resetDirty()` and wiring `setupDirtyTracking("project"|"skill"|"experience", formId)` right after `openModal`/`closeModal`.
+
+**Mobile spacing/"zoom" fix**, admin dashboard + public site:
+- Root cause of the admin dashboard "zoomed/missing content" complaint: the 3 `.admin-table` elements (Projects/Skills/Experience) had no scroll wrapper, so on mobile the table forced page width past the viewport and the browser auto-zoomed-out to fit, making everything look shrunk/cut off. Fixed by wrapping each `<table class="admin-table">` in `<div class="admin-table-wrap">` (`overflow-x: auto`) in `dashboard.html`, plus a new `.admin-table-wrap` rule in `admin.css`.
+- Added `@media (max-width: 640px)` block to `admin.css`: loosens `.admin-main` padding, `.admin-stats` grid, `.admin-topbar`, `.admin-modal`, and makes `.form-row` stack instead of squeeze side-by-side.
+- Added `@media (max-width: 640px)` block to `frontend/assets/css/style.css` (public site): more `.container` side padding, bigger gaps in `.about-grid`/`.contact-grid`/`.about-facts`/`.projects-grid`/`.social-links`, more spacing between stacked `.experience-item`s. Purely additive — no existing desktop rule touched.
+
+### Files touched this phase
+
+`frontend/painel-fg-2026x/assets/js/dashboard.js`, `frontend/painel-fg-2026x/dashboard.html`, `frontend/assets/css/admin.css`, `frontend/assets/css/style.css`.
+
+### Unresolved / unconfirmed
+
+- None of this is confirmed applied to Felipe's real working tree yet — delivered as find/replace blocks in chat this session, not committed. Same caveat as always: verify via fresh clone/diff, not by trusting this changelog (see TODO.md Priority 0).

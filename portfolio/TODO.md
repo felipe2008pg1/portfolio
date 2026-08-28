@@ -16,6 +16,10 @@
   - `backend/app/schemas/experience.py`
   - `backend/app/core/turnstile.py` (diagnostic log fix)
   - `.github/dependabot.yml`
+  - `frontend/painel-fg-2026x/assets/js/dashboard.js` (`resetDirty` fix — 2026-08-28)
+  - `frontend/painel-fg-2026x/dashboard.html` (`.admin-table-wrap` — 2026-08-28)
+  - `frontend/assets/css/admin.css` (mobile spacing — 2026-08-28)
+  - `frontend/assets/css/style.css` (mobile spacing — 2026-08-28)
 - [ ] **Backend blocker (unresolved, carried over)**: `logo_url` column does not exist in the production Neon `experiences` table yet. Must be added manually: `ALTER TABLE experiences ADD COLUMN logo_url VARCHAR(500);`. No migration system in active use.
 
 ## Priority 1 — Experience feature: functionally complete, visually still moving
@@ -34,6 +38,12 @@
 ## Priority 1b — Security panel (MFA), delivered and confirmed 2026-08-27
 
 - [x] `dashboard.js`/`admin-api.js`/`dashboard.html`/`i18n.js` changes wiring up MFA enable/disable/status in the Security card, including the QR `src` double-prefix fix, applied and tested end-to-end by Felipe (enable → scan QR → confirm code → backup codes shown → disable with code). Confirmed working.
+
+## Priority 1c — resetDirty fix + mobile spacing pass (2026-08-28, unconfirmed)
+
+- [ ] `resetDirty` ReferenceError in admin dashboard.js — fix delivered in chat, not yet confirmed applied/tested by Felipe.
+- [ ] Admin table horizontal-overflow "zoom" fix (`.admin-table-wrap`) — delivered, not yet confirmed on a real mobile device.
+- [ ] Public site + admin mobile spacing pass (`style.css`/`admin.css`) — delivered, not yet confirmed visually by Felipe.
 
 ## Pending maintenance
 
