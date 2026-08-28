@@ -18,6 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (typeof showLegalPopup === "function") {
+      await showLegalPopup();
+    }
+
     const formData = new FormData(form);
     const turnstileToken = window.turnstile ? window.turnstile.getResponse() : "";
 

@@ -1,11 +1,21 @@
 ﻿let projectsCache = [];
 let skillsCache = [];
 
+let globalAlertHideTimer = null;
+
 function showGlobalAlert(message, type) {
   const el = document.getElementById("globalAlert");
+  clearTimeout(globalAlertHideTimer);
+
   el.textContent = message;
-  el.className = `admin-alert is-visible is-${type}`;
-  setTimeout(() => el.classList.remove("is-visible"), 4000);
+  el.className = `admin-alert admin-toast is-${type}`;
+  // Força reflow para reiniciar a animação de entrada em toasts consecutivos
+  void el.offsetWidth;
+  el.classList.add("is-visible");
+
+  globalAlertHideTimer = setTimeout(() => {
+    el.classList.remove("is-visible");
+  }, 4000);
 }
 
 function showFormAlert(elId, message) {
@@ -18,8 +28,58 @@ function clearFormAlert(elId) {
   document.getElementById(elId).className = "admin-alert";
 }
 
+function renderTableSkeleton(tbody, colSpan, rows = 4) {
+  tbody.innerHTML = "";
+  for (let i = 0; i < rows; i++) {
+    const row = document.createElement("tr");
+    row.className = "admin-skeleton-row";
+    const cell = document.createElement("td");
+    cell.colSpan = colSpan;
+    const bar = document.createElement("div");
+    bar.className = "skeleton skeleton-line";
+    bar.style.width = `${70 - i * 8}%`;
+    cell.appendChild(bar);
+    row.appendChild(cell);
+    tbody.appendChild(row);
+  }
+}
+
 function openModal(name) { document.getElementById(`${name}ModalOverlay`).classList.add("is-open"); }
 function closeModal(name) { document.getElementById(`${name}ModalOverlay`).classList.remove("is-open"); }
+
+function confirmAction(message, options = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById("confirmModalOverlay");
+    const titleEl = document.getElementById("confirmModalTitle");
+    const messageEl = document.getElementById("confirmModalMessage");
+    const cancelBtn = document.getElementById("confirmModalCancel");
+    const confirmBtn = document.getElementById("confirmModalConfirm");
+
+    titleEl.textContent = options.title || i18n.t("admin.confirm.title");
+    cancelBtn.textContent = i18n.t("admin.confirm.cancel");
+    confirmBtn.textContent = options.confirmLabel || i18n.t("admin.confirm.delete");
+    messageEl.textContent = message;
+    openModal("confirm");
+
+    function cleanup(result) {
+      overlay.classList.remove("is-open");
+      cancelBtn.removeEventListener("click", onCancel);
+      confirmBtn.removeEventListener("click", onConfirm);
+      overlay.removeEventListener("click", onOverlayClick);
+      resolve(result);
+    }
+
+    function onCancel() { cleanup(false); }
+    function onConfirm() { cleanup(true); }
+    function onOverlayClick(event) {
+      if (event.target === overlay) cleanup(false);
+    }
+
+    cancelBtn.addEventListener("click", onCancel);
+    confirmBtn.addEventListener("click", onConfirm);
+    overlay.addEventListener("click", onOverlayClick);
+  });
+}
 
 document.querySelectorAll("[data-close-modal]").forEach((btn) => {
   btn.addEventListener("click", () => closeModal(btn.getAttribute("data-close-modal")));
@@ -27,6 +87,7 @@ document.querySelectorAll("[data-close-modal]").forEach((btn) => {
 
 async function loadProjects() {
   const tbody = document.getElementById("projectsTableBody");
+  renderTableSkeleton(tbody, 4);
   try {
     projectsCache = await adminApi.getAllProjects();
     renderProjectsTable();
@@ -90,6 +151,7 @@ function renderProjectsTable() {
 }
 
 function openProjectModal(project) {
+  resetDirty("project");
   clearFormAlert("projectFormAlert");
   document.getElementById("projectModalTitle").textContent = project
     ? i18n.t("admin.dashboard.editProjectModalTitle")
@@ -107,7 +169,7 @@ function openProjectModal(project) {
 }
 
 async function deleteProject(id, title) {
-  if (!window.confirm(`Excluir o projeto "${title}"? Essa ação não pode ser desfeita.`)) return;
+  if (!(await confirmAction(i18n.t("admin.confirm.deleteProject").replace("{name}", title)))) return;
   try {
     await adminApi.deleteProject(id);
     showGlobalAlert("Projeto excluído.", "success");
@@ -157,6 +219,7 @@ document.getElementById("projectForm").addEventListener("submit", async (event) 
 
 async function loadSkills() {
   const tbody = document.getElementById("skillsTableBody");
+  renderTableSkeleton(tbody, 4);
   try {
     skillsCache = await adminApi.getSkills();
     renderSkillsTable();
@@ -220,6 +283,7 @@ function renderSkillsTable() {
 }
 
 function openSkillModal(skill) {
+  resetDirty("skill");
   clearFormAlert("skillFormAlert");
   document.getElementById("skillModalTitle").textContent = skill ? "Editar skill" : "Nova skill";
   document.getElementById("skillId").value = skill ? skill.id : "";
@@ -230,7 +294,7 @@ function openSkillModal(skill) {
 }
 
 async function deleteSkill(id, name) {
-  if (!window.confirm(`Excluir a skill "${name}"?`)) return;
+  if (!(await confirmAction(i18n.t("admin.confirm.deleteSkill").replace("{name}", name)))) return;
   try {
     await adminApi.deleteSkill(id);
     showGlobalAlert("Skill excluída.", "success");
@@ -302,14 +366,33 @@ async function updateMfaStat() {
 
 function renderMfaStat() {
   const mfaStatusEl = document.getElementById("statMfaStatus");
-  if (!mfaStatusEl) return;
+  const badge = document.getElementById("topbarMfaBadge");
+  const badgeText = document.getElementById("topbarMfaBadgeText");
 
-  if (mfaStatusCache === "on") {
-    mfaStatusEl.textContent = i18n.t("admin.stat.mfaOn");
-  } else if (mfaStatusCache === "off") {
-    mfaStatusEl.textContent = i18n.t("admin.stat.mfaOff");
-  } else if (mfaStatusCache === "error") {
-    mfaStatusEl.textContent = "—";
+  if (mfaStatusEl) {
+    if (mfaStatusCache === "on") {
+      mfaStatusEl.textContent = i18n.t("admin.stat.mfaOn");
+    } else if (mfaStatusCache === "off") {
+      mfaStatusEl.textContent = i18n.t("admin.stat.mfaOff");
+    } else if (mfaStatusCache === "error") {
+      mfaStatusEl.textContent = "—";
+    }
+  }
+
+  if (badge && badgeText) {
+    if (mfaStatusCache === "on") {
+      badge.className = "admin-mfa-badge is-on";
+      badge.title = i18n.t("admin.stat.mfaOn");
+      badgeText.textContent = "MFA";
+    } else if (mfaStatusCache === "off") {
+      badge.className = "admin-mfa-badge is-off";
+      badge.title = i18n.t("admin.stat.mfaOff");
+      badgeText.textContent = "MFA";
+    } else {
+      badge.className = "admin-mfa-badge is-off";
+      badge.title = "—";
+      badgeText.textContent = "MFA";
+    }
   }
 }
 
@@ -510,6 +593,7 @@ let experiencesCache = [];
 
 async function loadExperiences() {
   const tbody = document.getElementById("experiencesTableBody");
+  renderTableSkeleton(tbody, 5);
   try {
     experiencesCache = await adminApi.getAllExperiences();
     renderExperiencesTable();
@@ -576,6 +660,7 @@ function renderExperiencesTable() {
 }
 
 function openExperienceModal(experience) {
+  resetDirty("experience");
   clearFormAlert("experienceFormAlert");
   document.getElementById("experienceModalTitle").textContent = experience
     ? i18n.t("admin.dashboard.editExperienceModalTitle")
@@ -594,7 +679,7 @@ function openExperienceModal(experience) {
 }
 
 async function deleteExperience(id, company) {
-  if (!window.confirm(`Excluir a experiência "${company}"? Essa ação não pode ser desfeita.`)) return;
+  if (!(await confirmAction(i18n.t("admin.confirm.deleteExperience").replace("{name}", company)))) return;
   try {
     await adminApi.deleteExperience(id);
     showGlobalAlert("Experiência excluída.", "success");

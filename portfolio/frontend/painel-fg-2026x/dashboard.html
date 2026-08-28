@@ -108,6 +108,11 @@
           </div>
 
 
+          <span class="admin-mfa-badge" id="topbarMfaBadge" title="">
+            <span class="admin-mfa-badge-dot" aria-hidden="true"></span>
+            <span id="topbarMfaBadgeText"></span>
+          </span>
+
           <button type="button" class="theme-toggle" id="themeToggle" aria-label="Alternar tema" aria-pressed="false">
             <span class="theme-toggle-icon" aria-hidden="true">
               ☾
@@ -527,6 +532,8 @@
           Novo projeto
         </h3>
 
+        <span class="admin-modal-dirty-dot" id="projectDirtyDot" title="Alterações não salvas"></span>
+
         <button class="admin-modal-close" data-close-modal="project">
           &times;
         </button>
@@ -670,6 +677,8 @@
           Nova skill
         </h3>
 
+        <span class="admin-modal-dirty-dot" id="skillDirtyDot" title="Alterações não salvas"></span>
+
         <button class="admin-modal-close" data-close-modal="skill">
           &times;
         </button>
@@ -751,6 +760,8 @@
         <h3 id="experienceModalTitle">
           Nova experiência
         </h3>
+
+        <span class="admin-modal-dirty-dot" id="experienceDirtyDot" title="Alterações não salvas"></span>
 
         <button class="admin-modal-close" data-close-modal="experience">
           &times;
@@ -912,6 +923,36 @@
 
 
       <div id="mfaModalBody"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       CONFIRM MODAL
+  ========================== -->
+
+  <div class="admin-modal-overlay" id="confirmModalOverlay">
+
+    <div class="admin-modal admin-modal-confirm">
+
+      <div class="admin-modal-head">
+
+        <h3 id="confirmModalTitle">Confirmar ação</h3>
+
+        <button class="admin-modal-close" data-close-modal="confirm">
+          &times;
+        </button>
+
+      </div>
+
+      <p id="confirmModalMessage"></p>
+
+      <div class="admin-modal-confirm-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="confirmModalCancel">Cancelar</button>
+        <button type="button" class="btn btn-danger btn-sm" id="confirmModalConfirm">Excluir</button>
+      </div>
 
     </div>
 

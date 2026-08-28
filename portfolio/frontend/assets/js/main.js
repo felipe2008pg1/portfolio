@@ -112,6 +112,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }, true);
   }
 
+  // Título dinâmico da aba: chama a atenção quando o usuário sai pra outra aba
+  (function () {
+    let storedTitle = document.title;
+    let timeoutId = null;
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        storedTitle = document.title;
+        const lang = typeof i18n !== "undefined" && typeof i18n.getLang === "function" ? i18n.getLang() : "pt";
+        document.title = lang === "en" ? "👋 Come back!" : "👋 Volta aqui!";
+        if (timeoutId) clearTimeout(timeoutId);
+      } else {
+        document.title = storedTitle;
+      }
+    });
+  })();
+
   // Custom cursor (desktop only)
   const cursorDot = document.getElementById("cursorDot");
   if (cursorDot && window.matchMedia("(hover: hover)").matches) {
