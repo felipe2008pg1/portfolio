@@ -41,9 +41,17 @@
 
 ## Priority 1c — resetDirty fix + mobile spacing pass (2026-08-28, unconfirmed)
 
-- [ ] `resetDirty` ReferenceError in admin dashboard.js — fix delivered in chat, not yet confirmed applied/tested by Felipe.
+- [x] `resetDirty` ReferenceError in admin dashboard.js — fixed, confirmed applied and tested by Felipe (full CRUD flow working again).
 - [ ] Admin table horizontal-overflow "zoom" fix (`.admin-table-wrap`) — delivered, not yet confirmed on a real mobile device.
 - [ ] Public site + admin mobile spacing pass (`style.css`/`admin.css`) — delivered, not yet confirmed visually by Felipe.
+
+
+## Priority 1d — Decorative pass + admin UX pass (2026-08-28, unconfirmed)
+
+- [ ] Public contact form legal warning popup (`legal-popup.js`) — delivered, not yet confirmed showing correctly in both PT/EN on a live deploy.
+- [ ] Admin toast, table skeletons, MFA topbar badge, in-app delete-confirm modal, "unsaved changes" dirty-dot indicator — all delivered together with the `resetDirty` fix, not individually re-confirmed since (only the CRUD flow itself was retested).
+- [ ] Login page flag/grid background and spinning BR/USA stat-card border — visual-only, not yet confirmed on a live deploy.
+- [ ] Dedupe check: confirm `admin.stat.mfaOn`/`mfaOff` duplicate i18n keys (flagged earlier in Pending maintenance) weren't reintroduced while adding the new `admin.confirm.*`/`admin.dashboard.confirmDelete*` keys this phase.
 
 ## Pending maintenance
 

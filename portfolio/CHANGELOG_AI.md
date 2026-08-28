@@ -299,3 +299,40 @@ Fresh clone + diff against these docs before trusting anything is live (see TODO
 ### Unresolved / unconfirmed
 
 - None of this is confirmed applied to Felipe's real working tree yet — delivered as find/replace blocks in chat this session, not committed. Same caveat as always: verify via fresh clone/diff, not by trusting this changelog (see TODO.md Priority 0).
+
+
+## Phase 16 — Session 2026-08-28: Site-wide decorative pass + admin UX pass (toast, skeleton, confirm modal, dirty tracking, legal popup)
+
+Delivered as a long sequence of copy-paste find/replace blocks in chat, one item at a time per Felipe's request. Confirmed-working status varies per item — see below.
+
+### Public site decorative pass
+- Project cards: 3D mouse-follow tilt on hover (`main.js`, `pointer: hover` gated).
+- Scroll progress bar: added a pulsing "sonar" blip + expanding ring at the bar's leading edge (`style.css`, `::before`/`::after` on `.scroll-progress`, respects `prefers-reduced-motion`).
+- Footer: added the same blueprint grid background used by the hero, anchored `center bottom` instead of `center top`.
+- Tab title changes to "👋 Volta aqui!"/"👋 Come back!" on `visibilitychange` when the tab is hidden, restored exactly on return (`main.js`). **Bug found and fixed same session:** first version read `window.i18n`, which is `undefined` (`i18n.js` declares `const i18n` at top level of a classic script — `const`/`let` never attach to `window`, unlike `var`). Fixed to reference the bare `i18n` identifier.
+- Login page (`login.html`): background changed to the same blueprint-grid + split BR/USA flag GIFs as the public hero, reusing the existing `.hero-flags`/`.hero-flag` classes with `.login-flags` on top, `.login-card`/`.login-topbar` at `z-index: 1`.
+- Admin dashboard stat cards: static colored top bar replaced with a spinning BR/USA `conic-gradient` ring (oversized rotating plate behind an inset `::after` matching the card background — same technique reused for the new legal popup border on the public site). Added `--color-usa-blue` token to `variables.css`.
+- Public contact form: new legal warning popup (`legal-popup.js`, new file) shown after client-side validation passes and before the WhatsApp submit proceeds — black background, glowing white justified body text, red "AVISO"/"WARNING" title, spinning BR/USA border (same conic-gradient technique as the stat cards, keyframe duplicated into `style.css` since `admin.css` isn't loaded on the public site), orange pill "Ok!" button. Text is pulled from `i18n.t("legal.warning")` at popup-open time, so it always matches whichever language button (PT/EN) the person last clicked. Mentions both legal action and permanent IP ban, per Felipe's spec.
+
+### Admin dashboard UX pass
+- `showGlobalAlert()` converted from a static top-of-page banner to a fixed-position corner toast (`.admin-toast`, slide+fade, auto-dismiss unchanged at 4s, `clearTimeout` guards against overlapping toasts).
+- Added `renderTableSkeleton()`, called at the start of `loadProjects`/`loadSkills`/`loadExperiences` — tables now show pulsing skeleton rows instead of a blank body while the API call is in flight.
+- Added a permanent MFA badge in the topbar (`#topbarMfaBadge`), updated by the same `updateMfaStat()`/`renderMfaStat()` pair that already drove the stat card — no duplicate fetch logic.
+- Replaced all three native `window.confirm()` delete dialogs with a shared in-app `confirmAction()` modal (`#confirmModalOverlay`), fully i18n'd (new `admin.confirm.*` keys) — resolves a bug Felipe found where the delete confirmation text stayed Portuguese-only in EN mode.
+- Added "unsaved changes" tracking (`dirtyForms`, `setupDirtyTracking()`, `resetDirty()`) per form (project/skill/experience): an orange dot appears next to the modal title on first edit, and closing the modal (× button) while dirty routes through `confirmAction()` instead of closing immediately.
+
+### Bug found and fixed during delivery: `resetDirty is not defined`
+First draft of the dirty-tracking block was handed over in a partial/out-of-order state relative to Felipe's actual file (which uses different function names than an earlier, unrelated `frontend/assets/js/dashboard.js` file this AI mistakenly cross-referenced from — see "orphan dashboard.js" note in Pending maintenance below). Root cause and full corrected file were only found after Felipe pasted his actual `dashboard.js`/`dashboard.html` back verbatim. **Lesson applied going forward: when a Find/Replace anchor repeatedly fails to match, stop guessing and request the real file content instead of re-issuing revised guesses.**
+
+### Files touched this phase
+
+`frontend/assets/js/main.js`, `frontend/assets/css/style.css`, `frontend/assets/css/variables.css`, `frontend/index.html`, `frontend/assets/js/legal-popup.js` (new), `frontend/painel-fg-2026x/login.html`, `frontend/painel-fg-2026x/assets/css/admin.css`, `frontend/painel-fg-2026x/dashboard.html`, `frontend/painel-fg-2026x/assets/js/dashboard.js`, `frontend/assets/js/i18n.js`.
+
+### Confirmed vs. unconfirmed
+
+- **Confirmed by Felipe, tested end-to-end**: the `resetDirty` fix and the full admin CRUD flow (create/edit/delete for project/skill/experience) after the corrected `dashboard.js` was applied.
+- **Not explicitly re-confirmed after this phase's full decorative pass**: the legal popup on the public contact form, the login page flag background, the spinning stat-card border, the toast/skeleton/MFA-badge/confirm-modal visuals. Functionally wired and internally consistent, but get a live confirmation before assuming they're deployed correctly — same standing caveat as every prior phase (see TODO.md Priority 0).
+
+### Recommended next step
+
+Get Felipe's confirmation that this phase's files are pushed and live (frontend is static, so a Vercel deploy is the only requirement — no backend/DB changes this phase). Then return to the still-open Priority 0 items (Neon `logo_url` column, Railway `ALLOWED_HOSTS`/Turnstile confirmation).
