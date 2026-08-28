@@ -39,6 +39,11 @@ const adminApi = {
       method: "POST",
       body: JSON.stringify({ username, password, turnstile_token: turnstileToken }),
     }),
+  mfaVerify: (mfaToken, code) =>
+    adminRequest("/api/auth/mfa/verify", {
+      method: "POST",
+      body: JSON.stringify({ mfa_token: mfaToken, code }),
+    }),
   logout: () => adminRequest("/api/auth/logout", { method: "POST" }),
   me: () => adminRequest("/api/auth/me"),
 

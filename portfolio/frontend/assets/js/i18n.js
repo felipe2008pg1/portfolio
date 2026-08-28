@@ -109,8 +109,6 @@ const TRANSLATIONS = {
     "admin.stat.experiences": "Experiências",
     "admin.stat.mfaOn": "Ativo",
     "admin.stat.mfaOff": "Inativo",
-    "admin.stat.mfaOn": "Ativo",
-    "admin.stat.mfaOff": "Inativo",
 
     "admin.dashboard.logout": "Sair",
     "admin.dashboard.projectsTitle": "Projetos",
@@ -303,8 +301,6 @@ const TRANSLATIONS = {
     "admin.stat.skills": "Skills",
     "admin.stat.mfa": "MFA",
     "admin.stat.experiences": "Experience",
-    "admin.stat.mfaOn": "Active",
-    "admin.stat.mfaOff": "Inactive",
     "admin.stat.mfaOn": "Active",
     "admin.stat.mfaOff": "Inactive",
 

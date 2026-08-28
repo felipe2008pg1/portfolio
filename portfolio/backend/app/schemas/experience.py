@@ -1,18 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-def _validate_company_url(value: str | None) -> str | None:
-    if value is None or value == "":
-        return None
-
-    value = value.strip()
-
-    if not value.startswith(("http://", "https://")):
-        raise ValueError("URL must use http:// or https://")
-
-    if len(value) > 500:
-        raise ValueError("URL is too long")
-
-    return value
+from app.core.validators import validate_public_url as _validate_company_url
 
 class ExperienceBase(BaseModel):
     company: str = Field(min_length=1, max_length=120)

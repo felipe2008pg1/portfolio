@@ -1,8 +1,7 @@
 ﻿from ipaddress import ip_address
 from urllib.parse import urlparse
-
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-
+from app.core.validators import validate_public_url as _validate_public_url
 
 def _validate_public_url(value: str | None) -> str | None:
     if value is None or value == "":
