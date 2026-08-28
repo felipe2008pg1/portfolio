@@ -1084,6 +1084,46 @@ h3 {
   }
 }
 
+/* ===== MOBILE BREATHING ROOM (mais espaço, menos "apertado") ===== */
+@media (max-width: 640px) {
+  .container {
+    padding-inline: var(--space-5);
+  }
+
+  .section-head {
+    margin-bottom: var(--space-6);
+  }
+
+  .about-grid,
+  .contact-grid {
+    gap: var(--space-8);
+  }
+
+  .about-facts {
+    gap: var(--space-5);
+  }
+
+  .skills-row + .skills-row {
+    margin-top: 0;
+  }
+
+  .experience-item + .experience-item {
+    margin-top: var(--space-5);
+  }
+
+  .projects-grid {
+    gap: var(--space-6);
+  }
+
+  .social-links {
+    gap: var(--space-3);
+  }
+
+  .form-field {
+    margin-bottom: var(--space-6);
+  }
+}
+
 /* Comfortable touch: minimum 44px target for navigation buttons/links on mobile */
 @media (max-width: 720px) {
   .nav-links a {

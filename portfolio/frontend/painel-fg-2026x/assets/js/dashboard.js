@@ -47,6 +47,32 @@ function renderTableSkeleton(tbody, colSpan, rows = 4) {
 function openModal(name) { document.getElementById(`${name}ModalOverlay`).classList.add("is-open"); }
 function closeModal(name) { document.getElementById(`${name}ModalOverlay`).classList.remove("is-open"); }
 
+const dirtyForms = {};
+
+function setupDirtyTracking(name, formId) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+  dirtyForms[name] = false;
+
+  form.addEventListener("input", () => {
+    dirtyForms[name] = true;
+    const dot = document.getElementById(`${name}DirtyDot`);
+    if (dot) dot.classList.add("is-visible");
+  });
+
+  form.addEventListener("submit", () => resetDirty(name));
+}
+
+function resetDirty(name) {
+  dirtyForms[name] = false;
+  const dot = document.getElementById(`${name}DirtyDot`);
+  if (dot) dot.classList.remove("is-visible");
+}
+
+setupDirtyTracking("project", "projectForm");
+setupDirtyTracking("skill", "skillForm");
+setupDirtyTracking("experience", "experienceForm");
+
 function confirmAction(message, options = {}) {
   return new Promise((resolve) => {
     const overlay = document.getElementById("confirmModalOverlay");
