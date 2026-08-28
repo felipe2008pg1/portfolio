@@ -228,3 +228,58 @@ Second occurrence: the MFA status stat card ("Inactive/Inativo") had the same bu
 ### Recommended next step
 
 See "Next logical step" section at the bottom of TODO.md: confirm deployment (Vercel + Railway + Neon column) before doing any further feature work, then test `logo_url` end-to-end, then check with Felipe whether the current card visual design is final.
+
+
+
+## Phase 15 — Session 2026-08-27: GitGuard security triage, 404 page polish, dashboard Experience stat card, MFA Security panel wired end-to-end
+
+Continuation session, sandbox re-cloned fresh at start (`HEAD` = `ebf8eb5`, confirmed to only differ from `ed40975` by doc files — no Phase 13/14 code was actually committed to the repo despite prior changelog claiming it was delivered/confirmed). All fixes below were handed to Felipe as copy-paste file/section diffs, one at a time, per his explicit workflow request this session.
+
+### 1. GitGuard security scan triage (10 findings, scan `cmt9kzdzp02ld10d7xlx25zsa`, commit `ed4097538f50`)
+
+Cross-checked every finding against actual current code rather than applying blind fixes:
+
+- `python-jose` CRITICAL/MEDIUM CVEs: **false positive** — package not in `requirements.txt` (already on `PyJWT`). No action.
+- `avoid-sqlalchemy-text` HIGH: **false positive** — only `text()` usage is in `backend/add_description_en_column.py`/`add_mfa_columns.py`, one-off migration scripts with fully literal SQL (no interpolated user input). No action.
+- DOM XSS x2 HIGH (njsscan): **false positive** — every `innerHTML` assignment in the frontend is either `= ""` (clear) or a hardcoded literal (SVG icon, i18n dict entry via `data-i18n-html` in `index.html`, not API/DB data). No action.
+- `missing-integrity` x3 MEDIUM: SRI (`integrity=`) is not applicable to Google Fonts CSS (payload varies by User-Agent) or Cloudflare Turnstile's script (rotated server-side) — both vendors advise against it. Added `crossorigin` (the real applicable mitigation) to the Google Fonts `<link>` in `index.html`, `frontend/404.html`, `painel-fg-2026x/dashboard.html`, `painel-fg-2026x/login.html`.
+- `dependabot-missing-cooldown` x2 MEDIUM: real, fixed — added `cooldown: { default-days: 7, semver-major-days: 14 }` to both ecosystems (`pip`, `github-actions`) in `.github/dependabot.yml`.
+- Follow-up ad-hoc audit (not part of the GitGuard report) of `main.py`, `config.py`, `security.py`, `auth.py`, `turnstile.py`, `project.py`, `.env.example`: no new critical issues. One real fix applied — `turnstile.py`'s failure log was dumping the full Cloudflare `siteverify` response (`hostname`/`action`/`cdata`, not the secret); reduced to `error-codes` only.
+
+### 2. `frontend/404.html` — brought to parity with the rest of the site
+
+Built incrementally per Felipe's live feedback in one thread:
+- Added the PT/EN lang-toggle button (self-contained inline script, does **not** load `i18n.js` — avoids `i18n.js`'s `apply()` unconditionally overwriting `document.title`/meta description with the homepage's, which would have broken the "404" page title). Persists to the same `localStorage.getItem("lang")` key as the rest of the site.
+- Fixed `custom-cursor.js` script `src`: was `../assets/js/custom-cursor.js`, which from `frontend/404.html` escapes the `frontend/` directory entirely (silent 404). Corrected to `assets/js/custom-cursor.js`. This bug was invisible on `index.html` because `main.js` has the same cursor logic duplicated inline there — 404.html has no `main.js`, so it was the only page where the cursor was actually broken.
+- Styled the lang-toggle buttons with a spinning rainbow ring (`conic-gradient` + `mask` XOR technique, `@property --notfound-angle` for smooth animation), transparent background/no border on both the wrapper and buttons per Felipe's spec.
+- Darkened `.notfound-shell` background (`color-mix(in srgb, var(--color-blueprint) 80%, black)`) and added a glow/blur (`text-shadow` + slight `filter: blur()`) to `.notfound-code` (the "// ERRO 404" line), scoped via inline `<style>` in `404.html` only — none of this touches shared `style.css`.
+
+### 3. Admin dashboard: 5th stat card for Experience count
+
+`statTotalExperiences` added alongside the existing 4 (`statTotalProjects`/`statPublished`/`statTotalSkills`/`statMfaStatus`) in `dashboard.html`, wired in `updateStats()` (`dashboard.js`), and `loadExperiences()` now also calls `updateStats()` directly (it previously only updated `experiencesCache` and re-rendered the table — since it runs in parallel with `loadProjects()`/`loadSkills()` on `DOMContentLoaded`, the Experience count could sit blank until one of the other two loads finished and called `updateStats()` for it by coincidence). Added `admin.stat.experiences` i18n key (PT: "Experiências", EN: "Experience").
+
+### 4. Admin dashboard: MFA "Security" panel wired end-to-end (was fully dead markup)
+
+Felipe reported `#mfaStatusText` stuck permanently on "Checking status…" and the stat card showing "inactive" regardless of real state. Root cause: `dashboard.html` had complete markup for the Security card and MFA modal (`mfaStatusText`, `mfaEnableBtn`, `mfaDisableBtn`, `#mfaModalOverlay`/`Title`/`Body`/`Alert`) with **zero JS wiring** — only the stat card (`statMfaStatus`) was ever connected, via `updateMfaStat()`/`renderMfaStat()`. The backend (`GET /api/auth/mfa/status`) was never the problem.
+
+Added to `admin-api.js`: `mfaSetupInit`, `mfaSetupConfirm`, `mfaDisable` (mirroring the existing `getMfaStatus` pattern, hitting `POST /api/auth/mfa/setup/init`, `POST /api/auth/mfa/setup/confirm`, `POST /api/auth/mfa/disable`).
+
+Added to `dashboard.js`: `renderSecurityPanel()` (pure re-render from `mfaStatusCache`, follows the established split-fetch/render i18n convention, registered in `i18n.apply()`), `startMfaSetup()` (fetches QR/secret, builds the modal body via `document.createElement`/`textContent` — not `innerHTML` — for all server-supplied values, consistent with the project's no-innerHTML-for-API-data rule), `renderMfaBackupCodes()`, `startMfaDisable()`. `updateMfaStat()` now also calls `renderSecurityPanel()`.
+
+**Bug found and fixed during this same delivery, before Felipe applied anything further**: the QR `<img>` `src` was set to `` `data:image/png;base64,${data.qr_code_base64}` ``, but the backend's `qr_code_base64` field already includes the full `data:image/png;base64,` prefix (`backend/app/services/mfa_service.py`) — this doubled the prefix, producing an invalid `data:` URL (`ERR_INVALID_URL` in console, generic broken-image icon shown). Fixed to `qr.src = data.qr_code_base64` directly. **Confirmed by Felipe after the fix: full flow (enable → scan → confirm → backup codes → disable) tested and working.**
+
+Added i18n keys (PT+EN): `admin.security.enabled`, `disabled`, `checkError`, `scanQr`, `secretLabel`, `codePlaceholder`, `confirmBtn`, `backupCodesTitle`, `backupCodesDesc`, `doneBtn`, `disableCodePlaceholder`.
+
+### Files touched this phase
+
+`.github/dependabot.yml`, `frontend/index.html`, `frontend/404.html`, `frontend/painel-fg-2026x/dashboard.html`, `frontend/painel-fg-2026x/login.html`, `frontend/assets/js/i18n.js`, `frontend/painel-fg-2026x/assets/js/dashboard.js`, `frontend/painel-fg-2026x/assets/js/admin-api.js`, `backend/app/core/turnstile.py`.
+
+### Unresolved / unconfirmed
+
+- MFA flow confirmed working end-to-end by Felipe.
+- As with every prior session, nothing here is confirmed applied to Felipe's real working tree until he pastes back a file or reports the symptom resolved — this session's own fresh clone proved that assumption has failed before.
+- `logo_url` Neon column blocker (Phase 14) remains open and unconfirmed.
+
+### Recommended next step
+
+Fresh clone + diff against these docs before trusting anything is live (see TODO.md Priority 0). MFA flow already confirmed — get Felipe's confirmation on the `logo_url` Neon column next.

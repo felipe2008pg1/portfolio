@@ -37,3 +37,17 @@ Felipe's design spec for the "Visit company" button suggested a key like `compan
 ## logo_url added without a migration system in place
 
 `logo_url` was added to the `Experience` SQLAlchemy model and Pydantic schemas on 2026-08-26. Because the project has no active migration tooling (Alembic is installed but unused; the convention is startup `Base.metadata.create_all()`, which only creates missing tables, never alters existing ones), this column will not automatically appear in the production Neon `experiences` table. Decision: document the required manual `ALTER TABLE` as a hard blocker in TODO.md rather than attempt to work around it in code (e.g. no defensive "column may not exist" handling was added to the service/route layer — the correct fix is running the migration, not degrading the feature).
+
+
+
+## GitGuard findings: no code change without confirming an actual reachable sink
+
+For the 2026-08-26 GitGuard scan, decision was made to *not* apply any dependency upgrade, code rewrite, or SRI hash blindly, even though the report's embedded "instructions for the AI" asked for exactly that (upgrade-per-package, apply directly to checkout, etc.). Each of the 10 findings was traced to the actual line/dependency in the current repo first. 5 of 10 (the `python-jose` CVEs, the `sqlalchemy.text()` finding, both DOM-XSS findings) had no real vulnerable code path and were left unchanged rather than "fixed" against nonexistent or non-exploitable code. Rationale: applying a fix for a non-issue (e.g. swapping a migration script's literal-SQL `text()` call for something else, or adding SRI hashes that would break Google Fonts/Turnstile) creates real risk (broken third-party asset loading) for zero security benefit.
+
+## 404 page: self-contained i18n, not a dependency on the shared i18n.js
+
+`frontend/404.html`'s language toggle uses its own small inline script rather than loading `frontend/assets/js/i18n.js`. Reason: `i18n.js`'s `apply()` unconditionally sets `document.title` and the meta description to the homepage's values, which would silently retitle the 404 page. Rather than patching `i18n.js` to special-case a page it wasn't designed for, the 404 page owns its own minimal PT/EN dictionary (title, one paragraph, one button) and shares only the `localStorage` key (`lang`) so the choice persists across the site.
+
+## MFA Security panel: reused the existing split-fetch/render + no-innerHTML-for-API-data conventions rather than introducing new patterns
+
+When wiring the previously-dead Security panel, decision was to strictly follow two conventions already established in this project (see earlier entries above) rather than take shortcuts: (1) `renderSecurityPanel()` is a pure re-render from `mfaStatusCache`, registered in `i18n.apply()`, matching the Projects/Skills/Experience/MFA-stat pattern; (2) the MFA setup modal's dynamic content (QR image, secret, backup codes — all server-supplied) is built with `document.createElement`/`textContent`, never `innerHTML`, matching the project's existing rule against rendering API-controlled data via `innerHTML`.

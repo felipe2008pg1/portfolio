@@ -36,7 +36,7 @@ Routes validate input through Pydantic schemas and dependencies; service modules
 - `DELETE /api/experiences/{id}` — authenticated experience deletion
 - `POST /api/contact` — public, rate-limited contact form
 
-Authentication also exposes login, MFA, refresh, logout, session, and MFA-management endpoints under `/api/auth`.
+Authentication also exposes login, MFA, refresh, logout, session, and MFA-management endpoints under `/api/auth`: `POST /api/auth/mfa/setup/init`, `POST /api/auth/mfa/setup/confirm`, `POST /api/auth/mfa/disable`, `GET /api/auth/mfa/status`. All confirmed present in `backend/app/api/routes/auth.py`.
 
 ### Experience feature
 
@@ -66,7 +66,7 @@ The public frontend uses vanilla HTML/CSS/JS. `i18n.js` maintains PT/EN translat
 
 The public Experience section is implemented in `frontend/assets/js/render-experience.js`, rendering into `#experienceList` with skeleton/empty/error states, matching the `render-skills.js`/`render-projects.js` pattern.
 
-**i18n reactivity convention**: any function that renders translated dynamic content must split fetching (cache raw data) from rendering (pure re-render from cache via `i18n.t()`), and register the render function on `window` so `i18n.apply()` can call it on language switch. Public hooks: `renderSkillsTable`, `renderProjectsGrid`, `renderExperienceList`. Admin hooks: `renderProjectsTable`, `renderExperiencesTable`, `renderMfaStat` (admin `renderSkillsTable` reuses the public name by coincidence and works). This was a recurring bug source (found/fixed 3 times in one session) — see CLAUDE.md.
+**i18n reactivity convention**: any function that renders translated dynamic content must split fetching (cache raw data) from rendering (pure re-render from cache via `i18n.t()`), and register the render function on `window` so `i18n.apply()` can call it on language switch. Public hooks: `renderSkillsTable`, `renderProjectsGrid`, `renderExperienceList`. Admin hooks: `renderProjectsTable`, `renderExperiencesTable`, `renderMfaStat`, `renderSecurityPanel` (admin `renderSkillsTable` reuses the public name by coincidence and works). This was a recurring bug source — see CLAUDE.md.
 
 **CSP note**: `frontend/vercel.json` sets a `connect-src` CSP directive that hardcodes the backend hostname. It must be kept in sync with `frontend/assets/js/config.js`'s `API_BASE_URL` — a mismatch silently blocks every API call client-side (misleadingly looks like a CORS or backend-down error in devtools). CSP is an HTTP header; changes require a Vercel redeploy to take effect.
 
@@ -74,9 +74,19 @@ The public Experience section is implemented in `frontend/assets/js/render-exper
 
 The admin panel lives under `frontend/painel-fg-2026x/`.
 
-It contains CRUD interfaces for Projects, Skills, and Experience (list/create/edit/delete, `is_published`, `display_order`, `logo_url`). `admin-api.js` exposes the Experience endpoints (`getAllExperiences`, `createExperience`, `updateExperience`, `deleteExperience`) plus `getMfaStatus`. `dashboard.js` contains the corresponding table rendering, modal population, form handlers, and an `updateStats()`/`updateMfaStat()`/`renderMfaStat()` set that populates the dashboard's stat cards (`statTotalProjects`, `statPublished`, `statTotalSkills`, `statMfaStatus`).
+It contains CRUD interfaces for Projects, Skills, and Experience (list/create/edit/delete, `is_published`, `display_order`, `logo_url`). `admin-api.js` exposes the Experience endpoints (`getAllExperiences`, `createExperience`, `updateExperience`, `deleteExperience`) plus MFA endpoints (`getMfaStatus`, `mfaSetupInit`, `mfaSetupConfirm`, `mfaDisable`). `dashboard.js` contains the corresponding table rendering, modal population, form handlers, and an `updateStats()`/`updateMfaStat()`/`renderMfaStat()` set that populates the dashboard's stat cards (`statTotalProjects`, `statPublished`, `statTotalSkills`, `statMfaStatus`, `statTotalExperiences`).
 
-All Experience-related admin UI text (nav link, section title, table headers, buttons, empty/error/loading states) uses `data-i18n`/`i18n.t()` — this was not the case before the 2026-08-26 session, when the Experience section markup existed but was entirely hardcoded in Portuguese.
+All Experience-related admin UI text (nav link, section title, table headers, buttons, empty/error/loading states) uses `data-i18n`/`i18n.t()`.
+
+### Security panel (MFA enable/disable)
+
+`dashboard.html`'s "Security" card (`mfaStatusText`, `mfaEnableBtn`, `mfaDisableBtn`, `#mfaModalOverlay`/`#mfaModalTitle`/`#mfaModalBody`/`#mfaModalAlert`) was previously dead markup with no JS wiring (always stuck on "Checking status…"). Now wired end-to-end in `dashboard.js`:
+
+- `renderSecurityPanel()` — reads `mfaStatusCache` (populated by `updateMfaStat()`), toggles status text and which of `mfaEnableBtn`/`mfaDisableBtn` is visible. Registered as an i18n reactivity hook (see below).
+- `startMfaSetup()` — calls `adminApi.mfaSetupInit()`, builds the modal body via DOM APIs (QR `<img>`, secret as `textContent`, 6-digit code form), opens `#mfaModalOverlay`. On confirm, calls `adminApi.mfaSetupConfirm(code)`, then `renderMfaBackupCodes()`, then `updateMfaStat()`.
+- `startMfaDisable()` — builds a code-entry form, calls `adminApi.mfaDisable(code)` on submit, closes the modal and refreshes status.
+- The QR image src is used as-is from the backend (`data:image/png;base64,...` — backend already includes the data-URI prefix; do not prepend it again client-side, this was a bug fixed 2026-08-27).
+- Modal body content built via `document.createElement`/`textContent`, not `innerHTML`, for any server-supplied value (secret, backup codes) — consistent with the project's no-`innerHTML`-for-API-data convention.
 
 ## Deployment
 
