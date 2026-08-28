@@ -4,28 +4,6 @@ let experiencesCache = [];
 let mfaEnabledCache = null;
 
 /* =====================================================
-   HELPERS
-===================================================== */
-
-function on(id, event, handler) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener(event, handler);
-  } else {
-    console.warn(`Element #${id} not found; listener not attached.`);
-  }
-  return el;
-}
-
-function interpolate(template, replacements) {
-  let result = template;
-  for (const [key, value] of Object.entries(replacements)) {
-    result = result.split(`{${key}}`).join(String(value));
-  }
-  return result;
-}
-
-/* =====================================================
    ALERTS / TOAST
 ===================================================== */
 
@@ -113,12 +91,6 @@ function confirmAction(message, options = {}) {
     const cancelBtn = document.getElementById("confirmModalCancel");
     const confirmBtn = document.getElementById("confirmModalConfirm");
 
-    if (!overlay || !titleEl || !messageEl || !cancelBtn || !confirmBtn) {
-      console.error("Confirm modal elements missing from DOM.");
-      resolve(false);
-      return;
-    }
-
     titleEl.textContent = options.title || i18n.t("admin.confirm.title");
     cancelBtn.textContent = i18n.t("admin.confirm.cancel");
     confirmBtn.textContent = options.confirmLabel || i18n.t("admin.confirm.delete");
@@ -180,24 +152,12 @@ function renderTableSkeleton(tbody, colSpan, rows = 4) {
   }
 }
 
-function renderEmptyRow(tbody, colSpan, message) {
-  tbody.innerHTML = "";
-  const row = document.createElement("tr");
-  row.className = "admin-empty-row";
-  const cell = document.createElement("td");
-  cell.colSpan = colSpan;
-  cell.textContent = message;
-  row.appendChild(cell);
-  tbody.appendChild(row);
-}
-
 /* =====================================================
    PROJECTS
 ===================================================== */
 
 async function loadProjects() {
   const tbody = document.getElementById("projectsTableBody");
-  if (!tbody) return;
   renderTableSkeleton(tbody, 4);
 
   try {
@@ -205,17 +165,29 @@ async function loadProjects() {
     renderProjectsTable();
     updateStats();
   } catch (error) {
-    renderEmptyRow(tbody, 4, i18n.t("admin.dashboard.errorLoadProjects"));
+    tbody.innerHTML = "";
+    const row = document.createElement("tr");
+    row.className = "admin-empty-row";
+    const cell = document.createElement("td");
+    cell.colSpan = 4;
+    cell.textContent = i18n.t("admin.dashboard.errorLoadProjects");
+    row.appendChild(cell);
+    tbody.appendChild(row);
   }
 }
 
 function renderProjectsTable() {
   const tbody = document.getElementById("projectsTableBody");
-  if (!tbody) return;
   tbody.innerHTML = "";
 
   if (projectsCache.length === 0) {
-    renderEmptyRow(tbody, 4, i18n.t("admin.dashboard.noProjects"));
+    const row = document.createElement("tr");
+    row.className = "admin-empty-row";
+    const cell = document.createElement("td");
+    cell.colSpan = 4;
+    cell.textContent = i18n.t("admin.dashboard.noProjects");
+    row.appendChild(cell);
+    tbody.appendChild(row);
     return;
   }
 
@@ -244,7 +216,7 @@ function renderProjectsTable() {
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "btn btn-danger btn-sm";
     deleteBtn.textContent = i18n.t("admin.dashboard.delete");
-    deleteBtn.addEventListener("click", () => deleteProject(project.id, project.title, deleteBtn));
+    deleteBtn.addEventListener("click", () => deleteProject(project.id, project.title));
 
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(deleteBtn);
@@ -279,11 +251,9 @@ function openProjectModal(project) {
   openModal("project");
 }
 
-async function deleteProject(id, title, triggerBtn) {
-  const message = interpolate(i18n.t("admin.dashboard.confirmDeleteProject"), { name: title });
+async function deleteProject(id, title) {
+  const message = i18n.t("admin.dashboard.confirmDeleteProject").replace("{name}", title);
   if (!(await confirmAction(message))) return;
-
-  if (triggerBtn) triggerBtn.disabled = true;
 
   try {
     await adminApi.deleteProject(id);
@@ -291,13 +261,12 @@ async function deleteProject(id, title, triggerBtn) {
     await loadProjects();
   } catch (error) {
     showGlobalAlert(error.message || i18n.t("admin.dashboard.errorDeleteProject"), "error");
-    if (triggerBtn) triggerBtn.disabled = false;
   }
 }
 
-on("newProjectBtn", "click", () => openProjectModal(null));
+document.getElementById("newProjectBtn").addEventListener("click", () => openProjectModal(null));
 
-on("projectForm", "submit", async (event) => {
+document.getElementById("projectForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   clearFormAlert("projectFormAlert");
 
@@ -315,7 +284,7 @@ on("projectForm", "submit", async (event) => {
   };
 
   const submitBtn = document.getElementById("projectSubmitBtn");
-  if (submitBtn) submitBtn.disabled = true;
+  submitBtn.disabled = true;
 
   try {
     if (id) {
@@ -329,7 +298,7 @@ on("projectForm", "submit", async (event) => {
   } catch (error) {
     showFormAlert("projectFormAlert", error.message || i18n.t("admin.dashboard.errorSaveProject"));
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    submitBtn.disabled = false;
   }
 });
 
@@ -339,7 +308,6 @@ on("projectForm", "submit", async (event) => {
 
 async function loadSkills() {
   const tbody = document.getElementById("skillsTableBody");
-  if (!tbody) return;
   renderTableSkeleton(tbody, 4);
 
   try {
@@ -347,17 +315,29 @@ async function loadSkills() {
     renderSkillsTable();
     updateStats();
   } catch (error) {
-    renderEmptyRow(tbody, 4, i18n.t("admin.dashboard.errorLoadSkills"));
+    tbody.innerHTML = "";
+    const row = document.createElement("tr");
+    row.className = "admin-empty-row";
+    const cell = document.createElement("td");
+    cell.colSpan = 4;
+    cell.textContent = i18n.t("admin.dashboard.errorLoadSkills");
+    row.appendChild(cell);
+    tbody.appendChild(row);
   }
 }
 
 function renderSkillsTable() {
   const tbody = document.getElementById("skillsTableBody");
-  if (!tbody) return;
   tbody.innerHTML = "";
 
   if (skillsCache.length === 0) {
-    renderEmptyRow(tbody, 4, i18n.t("admin.dashboard.noSkills"));
+    const row = document.createElement("tr");
+    row.className = "admin-empty-row";
+    const cell = document.createElement("td");
+    cell.colSpan = 4;
+    cell.textContent = i18n.t("admin.dashboard.noSkills");
+    row.appendChild(cell);
+    tbody.appendChild(row);
     return;
   }
 
@@ -384,7 +364,7 @@ function renderSkillsTable() {
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "btn btn-danger btn-sm";
     deleteBtn.textContent = i18n.t("admin.dashboard.delete");
-    deleteBtn.addEventListener("click", () => deleteSkill(skill.id, skill.name, deleteBtn));
+    deleteBtn.addEventListener("click", () => deleteSkill(skill.id, skill.name));
 
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(deleteBtn);
@@ -414,11 +394,9 @@ function openSkillModal(skill) {
   openModal("skill");
 }
 
-async function deleteSkill(id, name, triggerBtn) {
-  const message = interpolate(i18n.t("admin.dashboard.confirmDeleteSkill"), { name });
+async function deleteSkill(id, name) {
+  const message = i18n.t("admin.dashboard.confirmDeleteSkill").replace("{name}", name);
   if (!(await confirmAction(message))) return;
-
-  if (triggerBtn) triggerBtn.disabled = true;
 
   try {
     await adminApi.deleteSkill(id);
@@ -426,13 +404,12 @@ async function deleteSkill(id, name, triggerBtn) {
     await loadSkills();
   } catch (error) {
     showGlobalAlert(error.message || i18n.t("admin.dashboard.errorDeleteSkill"), "error");
-    if (triggerBtn) triggerBtn.disabled = false;
   }
 }
 
-on("newSkillBtn", "click", () => openSkillModal(null));
+document.getElementById("newSkillBtn").addEventListener("click", () => openSkillModal(null));
 
-on("skillForm", "submit", async (event) => {
+document.getElementById("skillForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   clearFormAlert("skillFormAlert");
 
@@ -444,7 +421,7 @@ on("skillForm", "submit", async (event) => {
   };
 
   const submitBtn = document.getElementById("skillSubmitBtn");
-  if (submitBtn) submitBtn.disabled = true;
+  submitBtn.disabled = true;
 
   try {
     if (id) {
@@ -458,7 +435,7 @@ on("skillForm", "submit", async (event) => {
   } catch (error) {
     showFormAlert("skillFormAlert", error.message || i18n.t("admin.dashboard.errorSaveSkill"));
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    submitBtn.disabled = false;
   }
 });
 
@@ -476,7 +453,14 @@ async function loadExperiences() {
     renderExperiencesTable();
     updateStats();
   } catch (error) {
-    renderEmptyRow(tbody, 5, i18n.t("admin.dashboard.errorLoadingExperiences"));
+    tbody.innerHTML = "";
+    const row = document.createElement("tr");
+    row.className = "admin-empty-row";
+    const cell = document.createElement("td");
+    cell.colSpan = 5;
+    cell.textContent = i18n.t("admin.dashboard.errorLoadingExperiences");
+    row.appendChild(cell);
+    tbody.appendChild(row);
   }
 }
 
@@ -486,7 +470,13 @@ function renderExperiencesTable() {
   tbody.innerHTML = "";
 
   if (experiencesCache.length === 0) {
-    renderEmptyRow(tbody, 5, i18n.t("admin.dashboard.noExperiences"));
+    const row = document.createElement("tr");
+    row.className = "admin-empty-row";
+    const cell = document.createElement("td");
+    cell.colSpan = 5;
+    cell.textContent = i18n.t("admin.dashboard.noExperiences");
+    row.appendChild(cell);
+    tbody.appendChild(row);
     return;
   }
 
@@ -518,7 +508,7 @@ function renderExperiencesTable() {
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "btn btn-danger btn-sm";
     deleteBtn.textContent = i18n.t("admin.dashboard.delete");
-    deleteBtn.addEventListener("click", () => deleteExperience(experience.id, experience.company, deleteBtn));
+    deleteBtn.addEventListener("click", () => deleteExperience(experience.id, experience.company));
 
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(deleteBtn);
@@ -555,11 +545,9 @@ function openExperienceModal(experience) {
   openModal("experience");
 }
 
-async function deleteExperience(id, company, triggerBtn) {
-  const message = interpolate(i18n.t("admin.dashboard.confirmDeleteExperience"), { name: company });
+async function deleteExperience(id, company) {
+  const message = i18n.t("admin.dashboard.confirmDeleteExperience").replace("{name}", company);
   if (!(await confirmAction(message))) return;
-
-  if (triggerBtn) triggerBtn.disabled = true;
 
   try {
     await adminApi.deleteExperience(id);
@@ -567,13 +555,12 @@ async function deleteExperience(id, company, triggerBtn) {
     await loadExperiences();
   } catch (error) {
     showGlobalAlert(error.message || i18n.t("admin.dashboard.errorDeleteExperience"), "error");
-    if (triggerBtn) triggerBtn.disabled = false;
   }
 }
 
-on("newExperienceBtn", "click", () => openExperienceModal(null));
+document.getElementById("newExperienceBtn").addEventListener("click", () => openExperienceModal(null));
 
-on("experienceForm", "submit", async (event) => {
+document.getElementById("experienceForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   clearFormAlert("experienceFormAlert");
 
@@ -591,7 +578,7 @@ on("experienceForm", "submit", async (event) => {
   };
 
   const submitBtn = document.getElementById("experienceSubmitBtn");
-  if (submitBtn) submitBtn.disabled = true;
+  submitBtn.disabled = true;
 
   try {
     if (id) {
@@ -605,7 +592,7 @@ on("experienceForm", "submit", async (event) => {
   } catch (error) {
     showFormAlert("experienceFormAlert", error.message || i18n.t("admin.dashboard.errorSaveExperience"));
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    submitBtn.disabled = false;
   }
 });
 
@@ -661,7 +648,7 @@ window.renderMfaStat = renderMfaStat;
    LOGOUT
 ===================================================== */
 
-on("logoutBtn", "click", async () => {
+document.getElementById("logoutBtn").addEventListener("click", async () => {
   try {
     await adminApi.logout();
   } finally {
@@ -677,14 +664,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authed = await requireAdminSession();
   if (!authed) return;
 
-  const results = await Promise.allSettled([
-    loadProjects(),
-    loadSkills(),
-    loadExperiences(),
-    updateMfaStat(),
-  ]);
-
-  results.forEach((r) => {
-    if (r.status === "rejected") console.error("Init task failed:", r.reason);
-  });
+  await loadProjects();
+  await loadSkills();
+  await loadExperiences();
+  await updateMfaStat();
 });
