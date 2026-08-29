@@ -12,14 +12,13 @@
 
 <br>
 
-<table align="center" cellpadding="0" cellspacing="0" border="0">
+<table align="center" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 850px;">
   <tr>
-    <td width="130" align="center">
-      <!-- Fused logo: half Brazil, half USA, no space between them, same height -->
-      <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bIqdxoOVJ2oak/giphy.gif" width="65" height="65"/><img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/sFMDqop2ku4M0/giphy.gif" width="65" height="65"/>
+    <td width="180" align="center" valign="middle" style="padding: 0; margin: 0; line-height: 0;">
+      <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExemJtZ2NzbXAzYjN4bWo5b3JqaHhsZDc4ZzBjanoxdWc3czF1Yjk2NCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/XwvM7wpU6EDyl5O9FV/giphy.gif" style="width: 100%; height: auto; display: block; object-fit: cover;" alt="Presentation GIF"/>
     </td>
-    <td align="left" valign="middle" style="padding-left:16px;">
-      <p align="justify">
+    <td align="left" valign="middle" style="padding: 18px 24px;">
+      <p align="justify" style="font-size: 1.15em; line-height: 1.6; margin: 0;">
         A <b>bilingual (PT/EN) portfolio and client quote-request site</b> with a fully custom
         <b>authenticated admin panel</b>, built to showcase Full Stack Python development in
         production: <b>FastAPI backend</b>, <b>vanilla JS frontend</b>, no frameworks, no
@@ -126,15 +125,20 @@ portfolio/
     ├── 404.html
     └── assets/              # CSS, JS, i18n, images
 ```
-
 *(the authenticated admin panel lives under its own private route — intentionally not linked from the public site)*
 
 ---
 
-<table align="center" border="0">
+<table align="center" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
   <tr>
-    <td align="right"><img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bIqdxoOVJ2oak/giphy.gif" width="55" height="38" alt="Made in Brazil"/></td>
-    <td align="center"><b>Built in Brazil</b> &nbsp;·&nbsp; <b>Shipped Worldwide</b></td>
-    <td align="left"><img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJpODczb3EwNzA1bzlpdGx4eWF1eTZqbTk4bHFjb3N0MTJmcHBsdyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/mf8UbIDew7e8g/giphy.gif" width="55" height="38" alt="Worldwide"/></td>
+    <td width="85" align="center" valign="middle" style="padding: 0; margin: 0; line-height: 0;">
+      <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bIqdxoOVJ2oak/giphy.gif" style="width: 100%; height: 100%; display: block; object-fit: cover;" alt="Made in Brazil"/>
+    </td>
+    <td align="center" valign="middle" style="padding: 0 16px;">
+      <b>Built in Brazil</b> &nbsp;·&nbsp; <b>Shipped Worldwide</b>
+    </td>
+    <td width="110" align="center" valign="middle" style="padding: 0; margin: 0; line-height: 0;">
+      <img src="https://i.giphy.com/WlBUAWG03Zic8.gif" style="width: 100%; height: 100%; display: block; object-fit: cover;" alt="Worldwide Globe"/>
+    </td>
   </tr>
 </table>
