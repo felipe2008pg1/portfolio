@@ -14,18 +14,9 @@
 
 <table align="center" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td width="140" align="center" style="padding:0;">
-      <!-- Logo fundida: metade Brasil, metade EUA, coladas sem espaço -->
-      <table cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td style="padding:0; line-height:0;">
-            <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bIqdxoOVJ2oak/giphy.gif" width="45" height="65" alt="Brazil"/>
-          </td>
-          <td style="padding:0; line-height:0;">
-            <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExd3g0bDJmdnpzbWc5emh3YXM1eXl4M2Q4aG83bzBueW9hZHhjdjQxOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/sFMDqop2ku4M0/giphy.gif" width="45" height="65" alt="USA"/>
-          </td>
-        </tr>
-      </table>
+    <td width="130" align="center">
+      <!-- Fused logo: half Brazil, half USA, no space between them, same height -->
+      <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bIqdxoOVJ2oak/giphy.gif" width="65" height="65"/><img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/sFMDqop2ku4M0/giphy.gif" width="65" height="65"/>
     </td>
     <td align="left" valign="middle" style="padding-left:16px;">
       <p align="justify">
@@ -140,8 +131,10 @@ portfolio/
 
 ---
 
-<p align="center">
-  <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bIqdxoOVJ2oak/giphy.gif" width="55" height="38" align="left" alt="Made in Brazil"/>
-  <b>Built in Brazil</b> &nbsp;·&nbsp; <b>Shipped Worldwide</b>
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJpODczb3EwNzA1bzlpdGx4eWF1eTZqbTk4bHFjb3N0MTJmcHBsdyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/mf8UbIDew7e8g/giphy.gif" width="55" height="38" align="right" alt="Worldwide"/>
-</p>
+<table align="center" border="0">
+  <tr>
+    <td align="right"><img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjk4dmV2aG50aG1meWE0YTJjcXA4cmV2d2RmeTV2dmg3cWNtb2F4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bIqdxoOVJ2oak/giphy.gif" width="55" height="38" alt="Made in Brazil"/></td>
+    <td align="center"><b>Built in Brazil</b> &nbsp;·&nbsp; <b>Shipped Worldwide</b></td>
+    <td align="left"><img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXJpODczb3EwNzA1bzlpdGx4eWF1eTZqbTk4bHFjb3N0MTJmcHBsdyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/mf8UbIDew7e8g/giphy.gif" width="55" height="38" alt="Worldwide"/></td>
+  </tr>
+</table>
