@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from app import models  # noqa: F401 (registers models in Base.metadata)
-from app.api.routes import auth, contact, experiences, projects, skills
+from app.api.routes import auth, contact, experiences, projects, skills, support
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.core.middleware import SecurityHeadersMiddleware
@@ -42,7 +42,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Content-Type"],
 )
 
@@ -105,6 +105,7 @@ app.include_router(projects.router)
 app.include_router(skills.router)
 app.include_router(experiences.router)
 app.include_router(contact.router)
+app.include_router(support.router)
 
 @app.get("/api/health")
 def health_check():

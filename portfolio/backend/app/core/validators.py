@@ -1,6 +1,15 @@
 """Shared input validators used across Pydantic schemas."""
+import re
 from ipaddress import ip_address
 from urllib.parse import urlparse
+
+_CONTROL_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+
+def sanitize_text(value: str) -> str:
+    """Strip control characters and surrounding whitespace from user text
+    before it is stored or rendered. Shared by contact and support schemas.
+    """
+    return _CONTROL_CHARS_RE.sub("", value).strip()
 
 BLOCKED_HOSTNAMES = {
     "localhost",

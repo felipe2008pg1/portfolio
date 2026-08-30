@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str
     ADMIN_PASSWORD: str
     RATE_LIMIT_CONTACT: str = "5/hour"
+    RATE_LIMIT_SUPPORT_START: str = "10/hour"
     RATE_LIMIT_LOGIN: str = "5/minute"
     TURNSTILE_SITE_KEY: str
     TURNSTILE_SECRET_KEY: str

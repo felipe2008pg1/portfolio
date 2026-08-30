@@ -1,6 +1,6 @@
 from typing import Generator
 from fastapi import Depends
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, Request, WebSocket, status
 from app.core.security import decode_access_token
 from app.db.session import SessionLocal
 
@@ -34,3 +34,15 @@ def get_current_admin(request: Request) -> str:
         )
 
     return username
+
+def get_current_admin_ws(websocket: WebSocket) -> str | None:
+    """Same cookie-based check as get_current_admin, adapted for the
+    WebSocket handshake (no Request object available). Returns None
+    instead of raising — caller is responsible for closing the socket.
+    """
+    token = websocket.cookies.get("access_token")
+
+    if not token:
+        return None
+
+    return decode_access_token(token)

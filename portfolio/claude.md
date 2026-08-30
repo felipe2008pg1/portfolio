@@ -2,7 +2,7 @@
 
 ## What this project is
 
-Personal full stack portfolio for Felipe Gonzalez: public portfolio website plus authenticated admin panel for managing Projects, Skills, and Experience content without editing code.
+Personal full stack portfolio for Felipe Gonzalez: public portfolio website plus authenticated admin panel for managing Projects, Skills, Experience content, and (in progress) a live support chat, without editing code.
 
 ## Stack
 
@@ -27,7 +27,7 @@ Personal full stack portfolio for Felipe Gonzalez: public portfolio website plus
 portfolio/
 ├── backend/
 │   ├── app/
-│   │   ├── api/routes/       # auth, contact, projects, skills, experiences
+│   │   ├── api/routes/       # auth, contact, projects, skills, experiences, support
 │   │   ├── core/             # config, security, middleware, Turnstile, logging
 │   │   ├── db/               # Base and session
 │   │   ├── models/           # SQLAlchemy models
@@ -64,7 +64,22 @@ Two-column card, `grid-template-columns: 22% 1fr`:
 
 This has changed several times this session per user feedback — re-verify against the user's latest description before assuming it's final if a future session touches this component.
 
-## i18n state
+## Current Support Chat feature state (IN PROGRESS — backend only, session paused mid-feature 2026-08-29)
+
+Public support chat: visitor chats from `index.html`, admin sees/replies to all conversations from `dashboard.html`. **Backend delivered this session as copy-pasteable files, NOT confirmed applied to Felipe's real working tree, NOT deployed, NOT tested. Frontend (widget on index.html + admin dashboard section) NOT YET STARTED — pick up there next session.**
+
+- Two new tables: `support_conversations` (`id`, `visitor_token` unique, `status`: open/blocked/closed, `created_at`, `last_message_at`, `last_visitor_message_at`, `last_read_by_admin_at`), `support_messages` (`id`, `conversation_id` FK cascade-delete, `sender`: visitor/admin, `content`, `created_at`). Models: `backend/app/models/support_conversation.py`, `support_message.py`, registered in `models/__init__.py`. No manual migration needed — new tables, `create_all()` on startup handles it (unlike the `logo_url` case).
+- Schemas: `backend/app/schemas/support.py`.
+- Service (business rules live here, not in routes): `backend/app/services/support_service.py` — get-or-create by `visitor_token`, 3-second visitor message cooldown enforced server-side (`VISITOR_MESSAGE_COOLDOWN`, raises `RateLimitedError` with `retry_after_seconds` for the frontend countdown), blocked-conversation rejection (`ConversationBlockedError`), unread detection, admin list/status/delete.
+- Routes: `backend/app/api/routes/support.py`, prefix `/api/support`. Public: `POST /conversations` (Turnstile-gated, rate-limited `RATE_LIMIT_SUPPORT_START`, config in `config.py`), `GET /conversations/{visitor_token}`, `POST /conversations/{visitor_token}/messages`, `WS /ws/conversations/{visitor_token}`. Admin (all behind `get_current_admin`): `GET /admin/conversations`, `GET/POST /admin/conversations/{id}/messages`, `PATCH /admin/conversations/{id}` (status), `DELETE /admin/conversations/{id}`, `WS /ws/admin`.
+- Realtime: WebSocket chosen over polling (Felipe's call, "melhor opção") — Railway runs a persistent process so this is viable. **Design decision**: sockets are push-only notification channels; all reads/writes still go through REST, which is the single place validating cooldown/blocking/Turnstile. Don't add write-handling to the WS endpoints later without a good reason — it would create a second, easy-to-forget validation path. In-memory `SupportWSManager` (`backend/app/core/ws_manager.py`) — single-process only, see Architecture.md if this ever needs to scale past one Railway instance.
+- Admin WS auth: new `get_current_admin_ws()` in `backend/app/api/deps.py` reads the same `access_token` cookie as `get_current_admin`, adapted for the WebSocket handshake (no `Request` object there). Relies on the existing `SameSite=None` cross-origin cookie config already working for REST.
+- Turnstile required only on conversation creation (first message), not every message — same one-shot-verification pattern as the contact form. Subsequent spam is bounded by the cooldown + blocking instead.
+- `sanitize_text()` was extracted from `contact.py`'s schema into `backend/app/core/validators.py` and both schemas now import it from there — avoid re-duplicating this if touched again.
+- **Known limitation, told to Felipe directly**: blocking only targets the `visitor_token` (stored in the visitor's `localStorage`). Anonymous, so a visitor who clears storage gets a new token and is unblocked. No stronger identity exists without adding real visitor accounts, which was explicitly out of scope for this feature.
+- **Not yet built**: `frontend/assets/js/support-chat.js` (public widget), its `index.html` markup + CSS, `frontend/painel-fg-2026x` admin dashboard section (conversation list, message view, block/delete UI), `admin-api.js` additions, WS client code on both sides.
+
+
 
 `frontend/assets/js/i18n.js` has PT/EN keys for: the public Experience section (`experience.*`, including `experience.visitCompany`), all admin nav/dashboard labels (`admin.nav.experience`, `admin.dashboard.experienceTitle`, `newExperience`, `colCompany`, `colRole`, `colPeriod`, `newExperienceModalTitle`, `editExperienceModalTitle`), and previously-missing dynamic admin table text (`admin.dashboard.yes`/`no`, `edit`/`delete`, `noProjects`/`noSkills`/`noExperiences`, `errorLoadingProjects`/`Skills`/`Experiences`).
 

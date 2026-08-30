@@ -5,3 +5,5 @@ from app.models.skill import Skill  # noqa: F401
 from app.models.refresh_token import RefreshToken  # noqa: F401
 from app.models.mfa_backup_code import MfaBackupCode  # noqa: F401
 from app.models.experience import Experience  # noqa: F401
+from app.models.support_conversation import SupportConversation  # noqa: F401
+from app.models.support_message import SupportMessage  # noqa: F401
