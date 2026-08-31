@@ -64,20 +64,21 @@ Two-column card, `grid-template-columns: 22% 1fr`:
 
 This has changed several times this session per user feedback — re-verify against the user's latest description before assuming it's final if a future session touches this component.
 
-## Current Support Chat feature state (IN PROGRESS — backend only, session paused mid-feature 2026-08-29)
+## Chat feature state — SUPERSEDED SECTION, kept only as history
 
-Public support chat: visitor chats from `index.html`, admin sees/replies to all conversations from `dashboard.html`. **Backend delivered this session as copy-pasteable files, NOT confirmed applied to Felipe's real working tree, NOT deployed, NOT tested. Frontend (widget on index.html + admin dashboard section) NOT YET STARTED — pick up there next session.**
+An earlier design pass (2026-08-29) planned a WebSocket-based `support_conversations`/`support_messages`/`support.py` implementation. **That design was abandoned before being built** — see DECISIONS.md ("Chat widget: polling instead of WebSocket"). The tables, routes, and `SupportWSManager` described in that pass never shipped. Do not resurrect `support_service.py`/`ws_manager.py` references from old context — the actual implementation is `chat_service.py` / `chat.py` / `conversations` / `chat_messages`, described below and in Architecture.md.
 
-- Two new tables: `support_conversations` (`id`, `visitor_token` unique, `status`: open/blocked/closed, `created_at`, `last_message_at`, `last_visitor_message_at`, `last_read_by_admin_at`), `support_messages` (`id`, `conversation_id` FK cascade-delete, `sender`: visitor/admin, `content`, `created_at`). Models: `backend/app/models/support_conversation.py`, `support_message.py`, registered in `models/__init__.py`. No manual migration needed — new tables, `create_all()` on startup handles it (unlike the `logo_url` case).
-- Schemas: `backend/app/schemas/support.py`.
-- Service (business rules live here, not in routes): `backend/app/services/support_service.py` — get-or-create by `visitor_token`, 3-second visitor message cooldown enforced server-side (`VISITOR_MESSAGE_COOLDOWN`, raises `RateLimitedError` with `retry_after_seconds` for the frontend countdown), blocked-conversation rejection (`ConversationBlockedError`), unread detection, admin list/status/delete.
-- Routes: `backend/app/api/routes/support.py`, prefix `/api/support`. Public: `POST /conversations` (Turnstile-gated, rate-limited `RATE_LIMIT_SUPPORT_START`, config in `config.py`), `GET /conversations/{visitor_token}`, `POST /conversations/{visitor_token}/messages`, `WS /ws/conversations/{visitor_token}`. Admin (all behind `get_current_admin`): `GET /admin/conversations`, `GET/POST /admin/conversations/{id}/messages`, `PATCH /admin/conversations/{id}` (status), `DELETE /admin/conversations/{id}`, `WS /ws/admin`.
-- Realtime: WebSocket chosen over polling (Felipe's call, "melhor opção") — Railway runs a persistent process so this is viable. **Design decision**: sockets are push-only notification channels; all reads/writes still go through REST, which is the single place validating cooldown/blocking/Turnstile. Don't add write-handling to the WS endpoints later without a good reason — it would create a second, easy-to-forget validation path. In-memory `SupportWSManager` (`backend/app/core/ws_manager.py`) — single-process only, see Architecture.md if this ever needs to scale past one Railway instance.
-- Admin WS auth: new `get_current_admin_ws()` in `backend/app/api/deps.py` reads the same `access_token` cookie as `get_current_admin`, adapted for the WebSocket handshake (no `Request` object there). Relies on the existing `SameSite=None` cross-origin cookie config already working for REST.
-- Turnstile required only on conversation creation (first message), not every message — same one-shot-verification pattern as the contact form. Subsequent spam is bounded by the cooldown + blocking instead.
-- `sanitize_text()` was extracted from `contact.py`'s schema into `backend/app/core/validators.py` and both schemas now import it from there — avoid re-duplicating this if touched again.
-- **Known limitation, told to Felipe directly**: blocking only targets the `visitor_token` (stored in the visitor's `localStorage`). Anonymous, so a visitor who clears storage gets a new token and is unblocked. No stronger identity exists without adding real visitor accounts, which was explicitly out of scope for this feature.
-- **Not yet built**: `frontend/assets/js/support-chat.js` (public widget), its `index.html` markup + CSS, `frontend/painel-fg-2026x` admin dashboard section (conversation list, message view, block/delete UI), `admin-api.js` additions, WS client code on both sides.
+## Current Chat feature state — IMPLEMENTED (backend + both frontends), 2026-08-31
+
+Public support chat is code-complete: visitor widget on `index.html`/`404.html` (`frontend/assets/js/chat-widget.js`), admin conversation panel on `dashboard.html` (`frontend/painel-fg-2026x/assets/js/dashboard.js`, "Chat" nav section). Backend previously validated end-to-end with a real SQLite boot + 16 functional assertions (see CHANGELOG_AI.md, Phase "2026-08-30"). **Frontend has not been confirmed live/deployed by Felipe** — same standing caveat as everything else, see "Repo/chat sync reality" above.
+
+- Tables: `conversations` (`id`, `token_hash`, `status`: open/blocked/closed, `created_at`, `last_message_at`, `last_visitor_message_at`), `chat_messages` (`id`, `conversation_id` FK cascade-delete, `sender`: visitor/admin, `content`, `created_at`). No manual migration needed — new tables, `create_all()` on startup handles it.
+- Realtime = **polling**, not WebSocket (visitor 4s / admin 5s) — see DECISIONS.md for why.
+- Visitor identity: opaque `secrets.token_urlsafe(32)` token, hashed at rest (`token_hash`), sent via `X-Visitor-Token` header, persisted client-side in `localStorage`. See DECISIONS.md for the accepted trade-off (clearing storage = new anonymous visitor).
+- Routes (`backend/app/api/routes/chat.py`, prefix `/api/chat`): public `POST /conversations` (Turnstile-gated), `GET /conversations/me/messages`, `POST /conversations/me/messages`; admin (behind `get_current_admin`, same cookie-JWT as every other admin route) `GET /admin/conversations`, `GET/POST /admin/conversations/{id}/messages`, `PATCH /admin/conversations/{id}/status`, `DELETE /admin/conversations/{id}`.
+- Server-side 3s cooldown + 500-message-per-conversation cap enforced in `chat_service.py`, independent of any client-side timer.
+- Frontend files: `frontend/assets/js/chat-widget.js` (public widget — single `DOMContentLoaded` init, guarded by an `opened` flag so `setInterval(poll, 4000)` is only ever registered once), `frontend/painel-fg-2026x/assets/js/dashboard.js` (admin "Chat" section — conversation list + thread view + reply form + block/close/reopen/delete), `frontend/painel-fg-2026x/assets/js/admin-api.js` (`getConversations`, `getConversationMessages`, `sendConversationMessage`, `updateConversationStatus`, `deleteConversation`).
+- **Bug found and fixed 2026-08-31**: `painel-fg-2026x/assets/js/dashboard.js` had its final ~19 lines (a `logoutBtn` click handler + the `DOMContentLoaded` block that calls `loadChatConversations()` and starts both poll intervals) duplicated verbatim at the end of the file. Effect: two independent `setInterval(pollActiveChatConversation, 5000)` timers ran concurrently against the same shared `chatLastMessageId`, racing each other. When the admin sent a reply, the submit handler rendered it once immediately, and both duplicate poll timers then also fetched and rendered the same just-sent message on their next tick — 1 (own submit) + 2 (duplicate polls) = **the admin's own message appearing 3×**, while the backend and the visitor's view (single poll timer, no duplication) correctly showed it once. Root cause confirmed by inspection (two identical `DOMContentLoaded` blocks in the same file, lines ~756–774 and ~974–992 of the pre-fix version), not by guessing. **Fix**: delete the second, duplicate block — file goes from 992 to 972 lines. Delivered as an instruction (exact block to delete), not yet confirmed applied/tested by Felipe against his real working tree.
 
 
 
@@ -95,16 +96,6 @@ Public support chat: visitor chats from `index.html`, admin sees/replies to all 
 - Do not use `innerHTML` with API-controlled data; use DOM creation and `textContent`.
 - `frontend/vercel.json`'s CSP `connect-src` directive hardcodes the backend hostname. If the Railway backend URL ever changes, both `frontend/assets/js/config.js` (`API_BASE_URL`) and this CSP directive must be updated together — a mismatch here silently blocks every fetch in the browser (looks like "backend is down"/CORS in devtools, but is neither; it's the CSP). This exact bug occurred and was fixed 2026-08-26 (stale hostname `portfolio-api-production` vs actual `portfolio-production-fef5`). CSP is an HTTP header set by Vercel, so a redeploy is required after editing `vercel.json` — CDN cache does not pick it up automatically.
 
-## Chat feature (2026-08-30)
-
-Public visitor chat + admin reply panel. Backend fully implemented and tested; frontend in progress.
-
-- Visitor identity: opaque token (`secrets.token_urlsafe(32)`) hashed at rest, sent via `X-Visitor-Token` header, stored client-side in `localStorage` — no real auth, see DECISIONS.md for the accepted trade-off.
-- Real-time = polling (4s visitor / 5s admin), not WebSocket — see DECISIONS.md.
-- Turnstile required only to open a conversation, never per message. Message cooldown (3s) and per-conversation message cap are enforced **server-side** in `chat_service.py`, not just client-side.
-- Public endpoints live under `/api/chat/conversations*`, admin under `/api/chat/admin/conversations*` (reuses the existing `get_current_admin` cookie-JWT dependency — same auth as every other admin route).
-- New tables (`conversations`, `chat_messages`) need no manual migration — unlike `experiences.logo_url`, they're created automatically by `Base.metadata.create_all()` on startup since they're new tables, not new columns on an existing one.
-
 ## Current known cleanup
 
 - ~~`backend/app/db/init_db.py` is empty/unused.~~ File no longer exists in the repo — this note was stale, removed 2026-08-30.
@@ -113,6 +104,8 @@ Public visitor chat + admin reply panel. Backend fully implemented and tested; f
 - Production `ALLOWED_HOSTS` must be confirmed after TrustedHostMiddleware was enabled.
 - Turnstile diagnostic logging still needs review.
 - Major dependency updates and `python-jose` → `PyJWT` migration remain intentionally postponed.
+- **`frontend/assets/js/dashboard.js` (the orphan, distinct from `frontend/painel-fg-2026x/assets/js/dashboard.js`) is still present in the repo as of the 2026-08-31 clone**, despite CHANGELOG_AI.md (Phase "2026-08-30") recording it as deleted. Re-confirmed unreferenced by any `.html` file via `grep` this session — genuinely dead, safe to delete. Likely explanation: the deletion was delivered to Felipe as an instruction but never actually applied/committed to his working tree — consistent with the "Repo/chat sync reality" note above. Don't assume it's gone until Felipe confirms he removed it.
+- **Repo history was squashed**: the 2026-08-31 clone has a single commit (`Bugs fixed`, `0060043`). None of the phase-by-phase commit history CHANGELOG_AI.md implicitly assumes is retrievable via `git log` — treat CHANGELOG_AI.md as the only remaining record of *intent*, not as something you can `git blame`/diff against for what actually shipped when.
 
 ## Verification commands
 

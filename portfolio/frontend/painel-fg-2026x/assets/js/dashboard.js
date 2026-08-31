@@ -970,23 +970,3 @@ document.getElementById("chatDeleteBtn").addEventListener("click", async () => {
     alert(error.message || i18n.t("admin.dashboard.chatErrorDelete"));
   }
 });
-
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  try {
-    await adminApi.logout();
-  } finally {
-    window.location.href = "login.html";
-  }
-});
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const authed = await requireAdminSession();
-  if (!authed) return;
-  loadProjects();
-  loadSkills();
-  loadExperiences();
-  updateMfaStat();
-  loadChatConversations();
-  setInterval(loadChatConversations, 6000);
-  chatPollTimer = setInterval(pollActiveChatConversation, 5000);
-});

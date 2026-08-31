@@ -78,6 +78,10 @@ It contains CRUD interfaces for Projects, Skills, and Experience (list/create/ed
 
 All Experience-related admin UI text (nav link, section title, table headers, buttons, empty/error/loading states) uses `data-i18n`/`i18n.t()`.
 
+### Chat panel (admin side)
+
+`dashboard.html`'s "Chat" section renders a conversation list (`#chatConversationList`) and a thread view (`#chatThreadMessages`) with a reply form and block/close/reopen/delete actions. State lives in module-level variables in `dashboard.js`: `chatConversationsCache`, `chatActiveConversationId`, `chatLastMessageId`, `chatPollTimer`. Two intervals are started once, from the single `DOMContentLoaded` handler: `loadChatConversations` every 6s (refreshes the list) and `pollActiveChatConversation` every 5s (appends new messages in the open thread, using `chatLastMessageId` as a cursor). **This file previously had its final `DOMContentLoaded`/`logoutBtn` block duplicated verbatim, which registered both intervals twice and caused the admin's own sent messages to render 3× (see claude.md, "Bug found and fixed 2026-08-31"). Fixed by deleting the duplicate block — if this file is ever edited again, verify there is exactly one `DOMContentLoaded` listener before adding new setup code to it, rather than appending a new block at the end.**
+
 ### Security panel (MFA enable/disable)
 
 `dashboard.html`'s "Security" card (`mfaStatusText`, `mfaEnableBtn`, `mfaDisableBtn`, `#mfaModalOverlay`/`#mfaModalTitle`/`#mfaModalBody`/`#mfaModalAlert`) was previously dead markup with no JS wiring (always stuck on "Checking status…"). Now wired end-to-end in `dashboard.js`:
@@ -100,3 +104,4 @@ All Experience-related admin UI text (nav link, section title, table headers, bu
 - Alembic is installed but not actively used.
 - Duplicate/placeholder README files remain.
 - Turnstile diagnostic logging and production `ALLOWED_HOSTS` configuration still require review.
+- `frontend/assets/js/dashboard.js` (orphan, unreferenced by any HTML page — not to be confused with `frontend/painel-fg-2026x/assets/js/dashboard.js`, which is the real one) is still present as of 2026-08-31 despite being recorded as deleted in CHANGELOG_AI.md. See claude.md "Current known cleanup" for detail.

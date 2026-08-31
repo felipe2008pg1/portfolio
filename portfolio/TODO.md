@@ -2,6 +2,10 @@
 
 ## Priority 0 — Delivery verification (still the top risk)
 
+- [ ] **New, 2026-08-31**: Apply the chat triplicate-message fix to the real working tree. `painel-fg-2026x/assets/js/dashboard.js` had a duplicated final `DOMContentLoaded`/`logoutBtn` block causing two concurrent `pollActiveChatConversation` intervals, which made the admin's own sent messages render 3× in the thread view (visitor side was unaffected — single poll timer there). Fix delivered as "delete the duplicate block" instruction, not yet confirmed applied/tested by Felipe. See claude.md and DECISIONS.md for full root-cause detail.
+- [ ] **New, 2026-08-31**: Delete `frontend/assets/js/dashboard.js` (orphan, unreferenced). Re-confirmed dead this session (previously flagged in Priority-unlabeled "Pending maintenance" below, and DECISIONS.md records it as already deleted once — but it's still in the repo). Do not confuse with the real `frontend/painel-fg-2026x/assets/js/dashboard.js`.
+- [ ] **New, 2026-08-31**: Repo history is now a single squashed commit (`0060043`, "Bugs fixed"). CHANGELOG_AI.md's phase-by-phase narrative can no longer be verified against `git log`/`git blame` — treat it as a log of intent only, re-verify current state against the actual files on every session start, same as the standing Priority 0 rule below.
+
 - [ ] **Confirm every file delivered across the 2026-08-26 and 2026-08-27 sessions is actually applied in Felipe's real working tree and deployed.** A fresh clone on 2026-08-26 showed the repo `HEAD` had NONE of the previously "confirmed" Experience code committed — only docs had changed. Do not trust prior changelog "confirmed working" claims without Felipe re-pasting the file or reporting the symptom fixed in this exact conversation. Files touched across both sessions (verify each is current):
   - `frontend/vercel.json` (CSP fix — **requires a Vercel redeploy**)
   - `frontend/assets/js/i18n.js`

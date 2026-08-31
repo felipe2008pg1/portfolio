@@ -369,3 +369,22 @@ Get Felipe's confirmation that this phase's files are pushed and live (frontend 
 - `frontend/assets/js/admin-api.js`, `dashboard.js`, `login.js`, `frontend/assets/css/admin.css` — pre-`/painel-fg-2026x` rename leftovers. Current admin pages load their own local copies under `painel-fg-2026x/assets/`, which are newer (have MFA support; the old `login.js` even contained a broken, half-commented dead block).
 
 **Files affected**: `backend/app/models/{conversation,chat_message,__init__}.py`, `backend/app/schemas/chat.py`, `backend/app/services/chat_service.py`, `backend/app/api/routes/chat.py`, `backend/app/core/config.py`, `backend/app/main.py`, `frontend/index.html`, 4 deleted files.
+
+## 2026-08-31 — Chat admin panel: fixed triplicate own-message rendering + deep doc audit
+
+**Fixed**
+- `frontend/painel-fg-2026x/assets/js/dashboard.js`: removed a verbatim-duplicate block at the end of the file (a second `logoutBtn` click listener + a second `DOMContentLoaded` handler). The duplicate `DOMContentLoaded` block re-registered `setInterval(pollActiveChatConversation, 5000)`, so two independent polling loops ran concurrently against the shared `chatLastMessageId` cursor. Symptom reported by Felipe: his own outgoing chat messages appeared 3× in the admin thread view (screenshot: "bom dia" sent once, rendered 3 orange bubbles), while the visitor's own view and the backend both correctly had exactly one message. Root cause: 1 immediate render from the submit handler + 2 duplicate renders from the two racing poll timers = 3. File went from 992 to 972 lines. See DECISIONS.md for the new "exactly one `DOMContentLoaded` listener" convention this established.
+- Confirmed (by code inspection, not by guessing) that `frontend/assets/js/chat-widget.js` (visitor side) does **not** have this bug — single `DOMContentLoaded` init, single poll timer guarded by an `opened` flag.
+- Confirmed `backend/app/api/routes/chat.py` / `chat_service.py` insert exactly one row per send — the bug was purely a frontend rendering issue, no backend or data-integrity impact.
+
+**Documentation audit (claude.md, Architecture.md, DECISIONS.md, TODO.md updated; README intentionally left untouched per Felipe's request)**
+- Removed the stale, contradictory "Current Support Chat feature state" section from claude.md (WebSocket-based `support_conversations`/`support_service.py`/`ws_manager.py` design from 2026-08-29) — that design was superseded by the actual polling-based `conversations`/`chat_service.py` implementation before ever being built, and having both descriptions in the same file was actively confusing. Kept a one-line pointer to DECISIONS.md for why WebSocket was dropped.
+- Updated claude.md/Architecture.md to reflect that the chat feature is now code-complete on **both** frontends (visitor widget + admin panel), not "backend only" — `dashboard.html`'s Chat nav section, `dashboard.js` chat logic, and `admin-api.js` chat methods all exist and match the backend routes.
+- Flagged a doc/reality mismatch: CHANGELOG_AI.md's 2026-08-30 entry records `frontend/assets/js/dashboard.js` (the pre-rename orphan file) as deleted, but it's still present and still unreferenced in the 2026-08-31 clone — the deletion was apparently delivered as an instruction but never actually applied to Felipe's working tree. Logged in DECISIONS.md, claude.md, and TODO.md; not deleted on Felipe's behalf without confirmation.
+- Noted that the repo's git history is now a single squashed commit (`0060043`, "Bugs fixed") — CHANGELOG_AI.md's phase narrative can no longer be cross-checked against `git log`.
+
+**Not done**
+- Did not touch `README.md` or `backend/README.md` — explicitly out of scope per Felipe's request.
+- Did not delete the orphan `frontend/assets/js/dashboard.js` — flagged for Felipe to confirm/delete himself, per the project rule of not assuming sandbox edits reach his real working tree.
+
+**Files affected**: `frontend/painel-fg-2026x/assets/js/dashboard.js` (fix delivered as an instruction, not yet applied by Felipe), `claude.md`, `Architecture.md`, `DECISIONS.md`, `TODO.md`.

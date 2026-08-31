@@ -35,3 +35,15 @@
 **Reason:** Confirmed via `grep` across every `.html` file that nothing references these paths anymore; `painel-fg-2026x/dashboard.html` and `login.html` load their own local copies (`painel-fg-2026x/assets/js/*`), which are the current versions (they include MFA support the deleted ones lack). Leftover from the `/admin` → `/painel-fg-2026x` rename recorded in an earlier CHANGELOG_AI.md entry.
 
 **Consequences:** None expected — verified zero references before deleting. If something breaks, `git revert` the deletion commit.
+
+**Update 2026-08-31**: `frontend/assets/js/dashboard.js` was found still present in a fresh clone, unreferenced by any HTML file (re-confirmed via `grep`). The deletion described above was apparently never actually applied to Felipe's real working tree/repo, only delivered as an instruction — same "docs vs. real tree" gap called out in claude.md's "Repo/chat sync reality" section. The decision itself stands (delete it); it just hasn't landed yet.
+
+---
+
+## Admin dashboard.js: exactly one `DOMContentLoaded` listener
+
+**Decision:** All admin dashboard startup code (initial data loads, interval registration, one-time event bindings tied to page load) must live in a single `document.addEventListener("DOMContentLoaded", ...)` block per file, not appended as a second block later in the file.
+
+**Reason:** `painel-fg-2026x/assets/js/dashboard.js` had accumulated a second, verbatim-duplicate `DOMContentLoaded` block (plus a duplicate `logoutBtn` listener) at the end of the file — almost certainly from a copy/paste of an earlier version of the file's tail being appended instead of replacing it. Because the block called `setInterval(pollActiveChatConversation, 5000)`, this silently started two competing polling loops sharing the same `chatLastMessageId` cursor, which caused the admin's own outgoing chat messages to render three times (one immediate render from the submit handler, plus one duplicate render from each of the two poll timers racing to fetch the same new message). Found by inspection — two identical blocks are trivial to spot with `grep -n "DOMContentLoaded"` once suspected, but there's no automated check for it today.
+
+**Consequences:** Fixed by deleting the duplicate block (file: 992 → 972 lines). No test currently guards against this regressing. Consider it whenever `dashboard.js` grows a new "add setup code at the end of the file" edit — check `grep -c "DOMContentLoaded" dashboard.js` returns `1` before shipping.
