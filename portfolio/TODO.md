@@ -62,6 +62,13 @@
 - [ ] Login page flag/grid background and spinning BR/USA stat-card border — visual-only, not yet confirmed on a live deploy.
 - [ ] Dedupe check: confirm `admin.stat.mfaOn`/`mfaOff` duplicate i18n keys (flagged earlier in Pending maintenance) weren't reintroduced while adding the new `admin.confirm.*`/`admin.dashboard.confirmDelete*` keys this phase.
 
+## Pending verification — Session 2026-08-31 (3) deliveries
+
+- [ ] Confirm `.admin-table-wrap { overflow-x: auto }` and the `@media (max-width: 640px)` block actually landed in `admin.css` — this exact fix was "delivered" once before (Phase 15) and never applied; verify with `grep -c "admin-table-wrap" admin.css` before trusting CHANGELOG_AI.md Phase 18.
+- [ ] Confirm 404/termos visual changes (darker backgrounds, pulsing `.notfound-code`, `.chat-antifraud-badge`) are live after a Vercel redeploy.
+- [ ] Confirm `chat-widget.js`'s `warningText.innerHTML` change didn't break on any browser/locale edge case (static string, low risk, but not yet visually confirmed).
+- [ ] If more skill categories are added in the admin panel, remember to add the matching key to `CATEGORY_TRANSLATIONS_EN` in `i18n.js` — there is no fallback translation, only the raw PT string.
+
 ## Pending maintenance
 
 - [ ] Major dependency updates (`fastapi`, `starlette`, `uvicorn`, `alembic`, `python-jose`) remain postponed due to breaking-change risk.

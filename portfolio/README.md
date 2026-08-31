@@ -60,6 +60,8 @@ Everything here — backend, frontend, security, deployment — was designed and
 | 💬 | **"Request a Quote" contact form** — messages are delivered straight to WhatsApp, shielded by Cloudflare Turnstile and rate limiting. |
 | 📄 | **Custom 404 page** with its own lightweight language toggle. |
 | 🎨 | Small, deliberate motion design throughout: 3D tilt on project cards, an animated scroll-progress "radar", scroll-triggered reveals. |
+| 💬 | **Live support chat widget** — visitor-side floating chat (Turnstile-gated, polling-based) with anonymous session tokens, cooldown, and an anti-fraud notice; fully managed from the admin dashboard (reply, block IP, close/reopen, delete). |
+| 🧭 | **Professional Experience timeline** — company logo, role, period, and description, rendered from the same admin-managed content model as Projects/Skills. |
 
 ### 🔐 Admin dashboard
 | | |
@@ -68,6 +70,8 @@ Everything here — backend, frontend, security, deployment — was designed and
 | 🗂️ | **Full CRUD** for Projects, Skills, and Experience — content updates with zero deploys. |
 | 📊 | Live stats: project/skill/experience counts, publish status, MFA status — at a glance. |
 | 🌍 | Fully bilingual admin UI, matching the public site 1:1. |
+| 💬 | **Chat inbox** — conversation list, threaded replies, and per-visitor IP blocking, all from the dashboard. |
+| 📱 | **Mobile-optimized layout** — responsive tables, stat cards, and navigation tuned for phone-sized screens. |
 
 ---
 

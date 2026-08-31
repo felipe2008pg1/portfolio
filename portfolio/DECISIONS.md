@@ -55,3 +55,11 @@
 **Reason:** Admin cookies use `SameSite=None` in production (required — frontend/Vercel and backend/Railway are different origins), which disables the browser-native CSRF mitigation. `SameSite=None` + credentialed CORS with a fixed origin allowlist reduces but doesn't eliminate CSRF (XSS on any allowed origin, subdomain takeover, misconfigured proxy could still forge a request). Double-submit is the standard fallback when `SameSite` can't be relied on.
 
 **Consequences:** One more cookie + header on every admin mutating request; `admin-api.js` must read `csrf_token` via `document.cookie` (must stay non-HttpOnly) and attach it manually. GET routes unaffected. Not yet implemented — tracked in TODO.md Security follow-up.
+
+## Chat warning text: scoped exception to the no-innerHTML rule
+
+**Decision:** `chat-widget.js` now sets `refs.warningText.innerHTML = t("chat.warningText")` instead of `textContent`, because the PT/EN strings in `i18n.js` include a hardcoded `<span class="chat-antifraud-badge">...</span>` for visual styling.
+
+**Reason:** The project convention ("no `innerHTML` for API/DB data") exists to prevent rendering untrusted, user/visitor-controlled content. `chat.warningText` is a static string defined in `i18n.js` and never contains visitor input — it is not different in kind from `data-i18n-html` keys already used elsewhere (e.g. `consent.text`, `hero.title.html`).
+
+**Consequences:** Safe as long as `chat.warningText` stays a developer-authored constant. If this field is ever made admin-editable (e.g. a CMS field for the warning message), it must go back to `textContent` or be sanitized before using `innerHTML`.

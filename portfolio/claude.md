@@ -95,6 +95,9 @@ Public support chat is code-complete: visitor widget on `index.html`/`404.html` 
 - Project images should use local `frontend/assets/img/projects/` paths when external hosts block hotlinking.
 - Do not use `innerHTML` with API-controlled data; use DOM creation and `textContent`.
 - `frontend/vercel.json`'s CSP `connect-src` directive hardcodes the backend hostname. If the Railway backend URL ever changes, both `frontend/assets/js/config.js` (`API_BASE_URL`) and this CSP directive must be updated together — a mismatch here silently blocks every fetch in the browser (looks like "backend is down"/CORS in devtools, but is neither; it's the CSP). This exact bug occurred and was fixed 2026-08-26 (stale hostname `portfolio-api-production` vs actual `portfolio-production-fef5`). CSP is an HTTP header set by Vercel, so a redeploy is required after editing `vercel.json` — CDN cache does not pick it up automatically.
+- `CATEGORY_TRANSLATIONS_EN` in `i18n.js` has no fallback: any skill category not present as a key renders untranslated in EN. Keys must match the DB value exactly (accents/case). Confirm this map whenever a new category is added in the admin panel.
+- `chat.warningText` (i18n.js) is rendered via `innerHTML` in `chat-widget.js`, not `textContent` — a deliberate, scoped exception to the "no innerHTML for dynamic content" rule because it's a static developer-authored string containing a styling `<span>`. See DECISIONS.md.
+- **The `.admin-table-wrap`/mobile-CSS gap recurred twice** (Phase 15 and again found in Phase 18): the HTML wrapper div existed, but its CSS rule was never actually added to `admin.css`. Whenever "mobile fix delivered" appears in this changelog, verify the actual CSS rule exists in the file — don't trust the HTML markup alone as proof.
 
 ## Current known cleanup
 
