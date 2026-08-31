@@ -44,7 +44,13 @@
   }
 
   function appendMessage(container, message) {
+    // Dedupe: an optimistic append from a POST response and a concurrent
+    // poll tick (already in flight with a stale after_id) can both resolve
+    // with the same message. Rendering is keyed by message id, so a repeat
+    // is a no-op instead of a duplicate bubble.
+    if (container.querySelector('[data-message-id="' + message.id + '"]')) return;
     var bubble = el("div", "chat-bubble chat-bubble-" + message.sender);
+    bubble.dataset.messageId = String(message.id);
     bubble.textContent = message.content; // textContent only — never innerHTML with API data
     container.appendChild(bubble);
     container.scrollTop = container.scrollHeight;

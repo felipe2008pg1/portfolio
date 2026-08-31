@@ -840,8 +840,12 @@ async function loadChatConversations() {
 }
 
 function appendChatBubble(container, message) {
+  // Same dedupe rationale as the public widget: an optimistic append after
+  // sending and an overlapping poll tick can both deliver the same message.
+  if (container.querySelector(`[data-message-id="${message.id}"]`)) return;
   const bubble = document.createElement("div");
   bubble.className = "admin-chat-bubble admin-chat-bubble-" + message.sender;
+  bubble.dataset.messageId = String(message.id);
   bubble.textContent = message.content; // textContent only — never innerHTML with API data
   container.appendChild(bubble);
   container.scrollTop = container.scrollHeight;
