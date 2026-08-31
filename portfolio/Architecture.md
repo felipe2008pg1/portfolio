@@ -59,6 +59,7 @@ Schema changes are not managed through active Alembic migrations. Existing one-o
 The backend uses Argon2id password hashing, short-lived JWT access tokens, rotated refresh tokens, optional TOTP MFA, rate limiting, Turnstile, restrictive CORS, security headers, HSTS in production, HttpOnly/Secure/SameSite cookies, and TrustedHostMiddleware.
 
 `TrustedHostMiddleware` is registered using `settings.allowed_hosts_list`, and only the restrictive CORS registration remains in `main.py`.
+**External audit note (2026-08-31):** cookie-based admin auth (`SameSite=None` in production) has no CSRF token — mutating admin routes rely on CORS + cookie alone (see DECISIONS.md "CSRF protection: double-submit cookie token"). `POST /api/auth/refresh`, `POST /api/auth/logout`, and `POST /api/auth/mfa/setup/init` have no rate limit, unlike every other auth-adjacent route. Both tracked in TODO.md Security follow-up, not yet fixed.
 
 ## Frontend
 

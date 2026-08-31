@@ -47,3 +47,11 @@
 **Reason:** `painel-fg-2026x/assets/js/dashboard.js` had accumulated a second, verbatim-duplicate `DOMContentLoaded` block (plus a duplicate `logoutBtn` listener) at the end of the file — almost certainly from a copy/paste of an earlier version of the file's tail being appended instead of replacing it. Because the block called `setInterval(pollActiveChatConversation, 5000)`, this silently started two competing polling loops sharing the same `chatLastMessageId` cursor, which caused the admin's own outgoing chat messages to render three times (one immediate render from the submit handler, plus one duplicate render from each of the two poll timers racing to fetch the same new message). Found by inspection — two identical blocks are trivial to spot with `grep -n "DOMContentLoaded"` once suspected, but there's no automated check for it today.
 
 **Consequences:** Fixed by deleting the duplicate block (file: 992 → 972 lines). No test currently guards against this regressing. Consider it whenever `dashboard.js` grows a new "add setup code at the end of the file" edit — check `grep -c "DOMContentLoaded" dashboard.js` returns `1` before shipping.
+
+## CSRF protection: double-submit cookie token (proposed, not yet implemented)
+
+**Decision:** Issue a non-HttpOnly `csrf_token` cookie alongside `access_token`/`refresh_token` at login/refresh. Every mutating admin request must echo it in an `X-CSRF-Token` header; the backend compares header vs. cookie and rejects (403) on mismatch/absence.
+
+**Reason:** Admin cookies use `SameSite=None` in production (required — frontend/Vercel and backend/Railway are different origins), which disables the browser-native CSRF mitigation. `SameSite=None` + credentialed CORS with a fixed origin allowlist reduces but doesn't eliminate CSRF (XSS on any allowed origin, subdomain takeover, misconfigured proxy could still forge a request). Double-submit is the standard fallback when `SameSite` can't be relied on.
+
+**Consequences:** One more cookie + header on every admin mutating request; `admin-api.js` must read `csrf_token` via `document.cookie` (must stay non-HttpOnly) and attach it manually. GET routes unaffected. Not yet implemented — tracked in TODO.md Security follow-up.

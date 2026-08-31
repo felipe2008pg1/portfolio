@@ -1486,10 +1486,10 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-blueprint);
+  background-color: color-mix(in srgb, var(--color-blueprint) 65%, black);
   background-image:
-    linear-gradient(var(--color-grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px);
+    linear-gradient(rgba(45, 85, 120, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 85, 120, 0.35) 1px, transparent 1px);
   background-size: var(--grid-size) var(--grid-size);
   padding: var(--space-6);
 }
@@ -2410,6 +2410,13 @@ body.fade-init.is-loaded {
 .chat-warning-label {
   color: #FFEB3B;
   text-shadow: 0 0 6px rgba(255, 235, 59, 0.8);
+}
+
+.chat-antifraud-badge {
+  display: inline-block;
+  margin-left: 0.35em;
+  color: #4FD8FF;
+  text-shadow: 0 0 6px rgba(79, 216, 255, 0.85), 0 0 14px rgba(79, 216, 255, 0.5);
 }
 
 @keyframes chat-warning-pulse {

@@ -80,7 +80,7 @@ const TRANSLATIONS = {
     "chat.header": "Fale comigo",
     "chat.close": "Fechar chat",
     "chat.warningLabel": "ATENÇÃO",
-    "chat.warningText": "Só entre em contato aqui se não der no WhatsApp, caso contrário, seu IP será bloqueado.",
+    "chat.warningText": "Utilize este canal apenas caso o atendimento via WhatsApp esteja indisponível. O uso indevido resultará no bloqueio permanente do endereço IP de origem. <span class=\"chat-antifraud-badge\">Protegido por Anti-Fraude</span>",
     "chat.placeholder": "Escreva sua mensagem...",
     "chat.send": "Enviar",
     "chat.verifying": "Verificando...",
@@ -356,7 +356,7 @@ const TRANSLATIONS = {
     "chat.header": "Talk to me",
     "chat.close": "Close chat",
     "chat.warningLabel": "ATTENTION",
-    "chat.warningText": "Only contact us here if WhatsApp isn't working — otherwise your IP will be blocked.",
+    "chat.warningText": "Please use this channel only if WhatsApp support is unavailable. Misuse will result in a permanent block of the originating IP address. <span class=\"chat-antifraud-badge\">Protected by Anti-Fraud</span>",
     "chat.placeholder": "Write your message...",
     "chat.send": "Send",
     "chat.verifying": "Verifying...",
@@ -559,6 +559,7 @@ const CATEGORY_TRANSLATIONS_EN = {
   "Framework": "Framework",
   "API": "API",
   "Ferramentas": "Tools",
+  "Inteligência Artificial": "Artificial Intelligence",
 };
 
 const i18n = (() => {

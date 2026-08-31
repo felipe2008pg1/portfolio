@@ -15,6 +15,41 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/custom-cursor.js"></script>
+    <style>
+        main.container>section {
+            background: color-mix(in srgb, var(--color-blueprint-soft) 55%, black);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-md);
+            padding: var(--space-6);
+        }
+
+        @keyframes termsBackPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 6px 0 rgba(255, 59, 59, 0.55);
+            }
+
+            50% {
+                box-shadow: 0 0 20px 5px rgba(255, 59, 59, 0.95);
+            }
+        }
+
+        .terms-back-link {
+            display: inline-block;
+            color: #fff;
+            background: var(--color-danger);
+            padding: 0.5em 1.2em;
+            border-radius: 999px;
+            font-weight: 700;
+            text-decoration: none;
+            animation: termsBackPulse 1.6s ease-in-out infinite;
+        }
+
+        .terms-back-link:hover {
+            background: #ff3b3b;
+        }
+    </style>
 </head>
 
 <body>
@@ -105,7 +140,7 @@
         <div class="container footer-inner">
             <span>© <span id="year"></span> Felipe Gonzalez</span>
             <div class="footer-links">
-                <a href="index.html" data-i18n="terms.backToSite">Voltar ao site</a>
+                <a href="index.html" data-i18n="terms.backToSite" class="terms-back-link">Voltar ao site</a>
             </div>
         </div>
     </footer>

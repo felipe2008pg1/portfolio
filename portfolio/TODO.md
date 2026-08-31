@@ -82,6 +82,11 @@
 - [ ] Confirm the production Turnstile secret and hostname configuration in Railway/Cloudflare.
 - [ ] Confirm the admin password was changed after the earlier accidental plaintext exposure.
 - [ ] If server-side URL fetching is ever introduced, harden public URL validation against RFC1918, link-local, IPv6 private ranges, and DNS rebinding.
+- [ ] **CSRF real e não mitigado (CWE-352)**: cookies admin usam `SameSite=None` em produção, sem CSRF token. Todas as rotas mutáveis (`POST/PUT/PATCH/DELETE` em `/api/projects`, `/api/skills`, `/api/experiences`, `/api/chat/admin/*`) dependem só do cookie. Ver DECISIONS.md ("CSRF protection: double-submit cookie token").
+- [ ] **Sem rate limit** em `POST /api/auth/refresh`, `POST /api/auth/logout`, `POST /api/auth/mfa/setup/init` — todas as outras rotas de auth têm `@limiter.limit(...)`, essas três não.
+- [ ] **Reuso de refresh token não é logado**: `validate_and_rotate_refresh_token` retorna `None` silenciosamente em token inválido/revogado/expirado. Reuso de token já rotacionado é sinal de roubo (replay) e deveria gerar `security_logger.warning(...)` + idealmente revogar toda a família de tokens do admin, não só rejeitar.
+- [ ] **Sem rate limit em rotas admin autenticadas** (`/api/*/admin`, `/api/chat/admin/*`) como defesa extra contra cookie de sessão roubado/replay.
+- [ ] **Retenção de PII indefinida**: `contact_messages.ip_address` e `conversations.ip_address` não têm política de expurgo documentada (LGPD/GDPR).
 
 ## Next logical step for the next session
 

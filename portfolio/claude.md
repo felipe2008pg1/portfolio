@@ -98,6 +98,7 @@ Public support chat is code-complete: visitor widget on `index.html`/`404.html` 
 
 ## Current known cleanup
 
+- **Security audit 2026-08-31**: CSRF (no token, `SameSite=None`), missing rate limits on refresh/logout/mfa-setup-init, and unlogged refresh-token reuse — see TODO.md "Security follow-up" and DECISIONS.md.
 - ~~`backend/app/db/init_db.py` is empty/unused.~~ File no longer exists in the repo — this note was stale, removed 2026-08-30.
 - Alembic is installed but not actively used.
 - Duplicate/placeholder README documentation remains.

@@ -388,3 +388,16 @@ Get Felipe's confirmation that this phase's files are pushed and live (frontend 
 - Did not delete the orphan `frontend/assets/js/dashboard.js` — flagged for Felipe to confirm/delete himself, per the project rule of not assuming sandbox edits reach his real working tree.
 
 **Files affected**: `frontend/painel-fg-2026x/assets/js/dashboard.js` (fix delivered as an instruction, not yet applied by Felipe), `claude.md`, `Architecture.md`, `DECISIONS.md`, `TODO.md`.
+
+## Phase 17 — Session 2026-08-31 (2): External OWASP-style security audit (read-only, no code changed)
+
+Manual review of `backend/app` (~2,227 LOC) against OWASP Top 10/ASVS/CWE Top 25. Confirmed already correct: 100% parameterized SQLAlchemy queries (no raw-SQL injection), Argon2id + dummy-hash check on unknown usernames (no user enumeration), lockout (5 attempts/15min), JWT decoded with explicit `algorithms=[...]` (no alg-confusion), HttpOnly/Secure cookies, restrictive CORS allowlist, `TrustedHostMiddleware`, full security-headers set + CSP + HSTS, Turnstile on login/contact/chat-start, SSRF-safe URL validation (rejects private/loopback/link-local IPs, unused for any server-side fetch), no file-upload endpoints (no LFI/RFI/upload surface), no XML parsing (no XXE), no LDAP/NoSQL surface, no hardcoded secrets (`.env.example` uses placeholders only), no stack-trace leakage (generic 500 handler).
+
+**New findings, added to TODO.md/DECISIONS.md:**
+- CSRF (CWE-352): `SameSite=None` cookies, no CSRF token — real, unmitigated.
+- Missing rate limits: `/api/auth/refresh`, `/api/auth/logout`, `/api/auth/mfa/setup/init`.
+- Refresh-token reuse (replay) not logged — theft-detection gap.
+- No rate limit on authenticated admin routes.
+- No PII retention/purge policy for stored `ip_address` fields.
+
+No code changed this phase — findings only, per Felipe's request to update context docs (README excluded) before shipping fixes.

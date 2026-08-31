@@ -136,7 +136,7 @@
     refs.sendBtn.textContent = t("chat.send");
     refs.toggleLabel.textContent = t("chat.toggleLabel");
     refs.warningLabel.textContent = t("chat.warningLabel") + ":";
-    refs.warningText.textContent = t("chat.warningText");
+    refs.warningText.innerHTML = t("chat.warningText");
   }
   window.renderChatWidget = renderChatWidget;
 

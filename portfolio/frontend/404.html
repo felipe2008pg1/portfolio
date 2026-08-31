@@ -49,6 +49,39 @@
         --notfound-angle: 360deg;
       }
     }
+
+    @keyframes notfoundBackPulse {
+
+      0%,
+      100% {
+        text-shadow: 0 0 6px rgba(255, 40, 40, 0.7), 0 0 14px rgba(255, 40, 40, 0.4);
+        box-shadow: 0 0 10px 0 rgba(255, 40, 40, 0.5);
+      }
+
+      50% {
+        text-shadow: 0 0 14px rgba(255, 40, 40, 1), 0 0 28px rgba(255, 40, 40, 0.7);
+        box-shadow: 0 0 24px 6px rgba(255, 40, 40, 0.9);
+      }
+    }
+
+    @keyframes notfoundCodePulse {
+      0%, 100% {
+        text-shadow: 0 0 6px rgba(255, 40, 40, 0.7), 0 0 14px rgba(255, 40, 40, 0.4);
+      }
+      50% {
+        text-shadow: 0 0 14px rgba(255, 40, 40, 1), 0 0 30px rgba(255, 40, 40, 0.8);
+      }
+    }
+
+    .notfound-code {
+      color: #ff2828 !important;
+      font-weight: 700;
+      animation: notfoundCodePulse 1.5s ease-in-out infinite;
+    }
+
+    .notfound-content .btn-primary:hover {
+      background: rgba(255, 40, 40, 0.1);
+    }
   </style>
 </head>
 
