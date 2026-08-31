@@ -22,7 +22,7 @@
   }
 
   function t(key) {
-    return window.i18n && typeof window.i18n.t === "function" ? window.i18n.t(key) : key;
+    return typeof i18n !== "undefined" && typeof i18n.t === "function" ? i18n.t(key) : key;
   }
 
   function chatRequest(path, options) {
@@ -124,17 +124,37 @@
   function renderChatWidget() {
     if (!refs.toggle) return;
     refs.toggle.setAttribute("aria-label", t("chat.ariaOpen"));
-    refs.header.textContent = t("chat.header");
+    refs.headerTitle.textContent = t("chat.header");
+    refs.closeBtn.setAttribute("aria-label", t("chat.close"));
     refs.input.placeholder = t("chat.placeholder");
     refs.sendBtn.textContent = t("chat.send");
+    refs.toggleLabel.textContent = t("chat.toggleLabel");
+    refs.warningLabel.textContent = t("chat.warningLabel") + ":";
+    refs.warningText.textContent = t("chat.warningText");
   }
   window.renderChatWidget = renderChatWidget;
 
   document.addEventListener("DOMContentLoaded", function () {
     var root = el("div", "chat-widget");
+    var backdrop = el("div", "chat-backdrop");
+
+    var popupStack = el("div", "chat-popup-stack");
+
+    var warningBubble = el("div", "chat-warning-bubble");
+    var warningLabel = el("span", "chat-warning-label");
+    var warningText = el("span", "chat-warning-text");
+    warningBubble.appendChild(warningLabel);
+    warningBubble.appendChild(document.createTextNode(" "));
+    warningBubble.appendChild(warningText);
 
     var panel = el("div", "chat-panel");
     var header = el("div", "chat-panel-header");
+    var headerTitle = el("span", "chat-panel-title");
+    var closeBtn = el("button", "chat-panel-close");
+    closeBtn.type = "button";
+    closeBtn.innerHTML = "&times;";
+    header.appendChild(headerTitle);
+    header.appendChild(closeBtn);
 
     var messagesEl = el("div", "chat-messages");
     var statusEl = el("div", "chat-status");
@@ -167,31 +187,63 @@
     panel.appendChild(statusEl);
     panel.appendChild(form);
 
+    popupStack.appendChild(warningBubble);
+    popupStack.appendChild(panel);
+
     var toggleWrap = el("div", "chat-toggle-wrap");
+    var toggleLabel = el("span", "chat-toggle-label");
     var toggle = el("button", "chat-toggle");
     toggle.type = "button";
     toggle.setAttribute("aria-expanded", "false");
     toggle.innerHTML = chatIconSvg();
 
+    toggleWrap.appendChild(toggleLabel);
     toggleWrap.appendChild(toggle);
-    root.appendChild(panel);
+
+    root.appendChild(popupStack);
     root.appendChild(toggleWrap);
+    document.body.appendChild(backdrop);
     document.body.appendChild(root);
 
-    refs = { toggle: toggle, header: header, input: input, sendBtn: sendBtn };
+    refs = {
+      toggle: toggle,
+      headerTitle: headerTitle,
+      closeBtn: closeBtn,
+      input: input,
+      sendBtn: sendBtn,
+      toggleLabel: toggleLabel,
+      warningLabel: warningLabel,
+      warningText: warningText,
+    };
     renderChatWidget();
 
-    toggle.addEventListener("click", function () {
-      var willOpen = !panel.classList.contains("is-open");
-      panel.classList.toggle("is-open", willOpen);
-      toggle.setAttribute("aria-expanded", String(willOpen));
-
-      if (willOpen && !opened) {
+    function openChat() {
+      popupStack.classList.add("is-open");
+      backdrop.classList.add("is-open");
+      toggle.setAttribute("aria-expanded", "true");
+      if (!opened) {
         opened = true;
         loadHistory(messagesEl);
         pollTimer = setInterval(function () { poll(messagesEl); }, POLL_INTERVAL_MS);
       }
+    }
+
+    function closeChat() {
+      popupStack.classList.remove("is-open");
+      backdrop.classList.remove("is-open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+
+    toggle.addEventListener("click", function () {
+      if (popupStack.classList.contains("is-open")) {
+        closeChat();
+      } else {
+        openChat();
+      }
     });
+
+    closeBtn.addEventListener("click", closeChat);
+    backdrop.addEventListener("click", closeChat);
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();

@@ -562,4 +562,11 @@
   border-radius: 6px;
   padding: var(--space-2);
   font: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+  caret-color: var(--color-text);
+}
+
+.admin-chat-input::placeholder {
+  color: var(--color-text-muted);
 }

@@ -889,3 +889,25 @@ function renderChatSection() {
   }
 }
 window.renderChatSection = renderChatSection;
+
+document.getElementById("chatReplyForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const input = document.getElementById("chatReplyInput");
+  const content = input.value.trim();
+  if (!content || !chatActiveConversationId) return;
+
+  const sendBtn = document.getElementById("chatReplySend");
+  sendBtn.disabled = true;
+
+  try {
+    const message = await adminApi.sendConversationMessage(chatActiveConversationId, content);
+    appendChatBubble(document.getElementById("chatThreadMessages"), message);
+    chatLastMessageId = Math.max(chatLastMessageId, message.id);
+    input.value = "";
+  } catch (error) {
+    console.error("Failed to send admin reply", error);
+  } finally {
+    sendBtn.disabled = false;
+  }
+});
