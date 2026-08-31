@@ -95,9 +95,19 @@ Public support chat: visitor chats from `index.html`, admin sees/replies to all 
 - Do not use `innerHTML` with API-controlled data; use DOM creation and `textContent`.
 - `frontend/vercel.json`'s CSP `connect-src` directive hardcodes the backend hostname. If the Railway backend URL ever changes, both `frontend/assets/js/config.js` (`API_BASE_URL`) and this CSP directive must be updated together — a mismatch here silently blocks every fetch in the browser (looks like "backend is down"/CORS in devtools, but is neither; it's the CSP). This exact bug occurred and was fixed 2026-08-26 (stale hostname `portfolio-api-production` vs actual `portfolio-production-fef5`). CSP is an HTTP header set by Vercel, so a redeploy is required after editing `vercel.json` — CDN cache does not pick it up automatically.
 
+## Chat feature (2026-08-30)
+
+Public visitor chat + admin reply panel. Backend fully implemented and tested; frontend in progress.
+
+- Visitor identity: opaque token (`secrets.token_urlsafe(32)`) hashed at rest, sent via `X-Visitor-Token` header, stored client-side in `localStorage` — no real auth, see DECISIONS.md for the accepted trade-off.
+- Real-time = polling (4s visitor / 5s admin), not WebSocket — see DECISIONS.md.
+- Turnstile required only to open a conversation, never per message. Message cooldown (3s) and per-conversation message cap are enforced **server-side** in `chat_service.py`, not just client-side.
+- Public endpoints live under `/api/chat/conversations*`, admin under `/api/chat/admin/conversations*` (reuses the existing `get_current_admin` cookie-JWT dependency — same auth as every other admin route).
+- New tables (`conversations`, `chat_messages`) need no manual migration — unlike `experiences.logo_url`, they're created automatically by `Base.metadata.create_all()` on startup since they're new tables, not new columns on an existing one.
+
 ## Current known cleanup
 
-- `backend/app/db/init_db.py` is empty/unused.
+- ~~`backend/app/db/init_db.py` is empty/unused.~~ File no longer exists in the repo — this note was stale, removed 2026-08-30.
 - Alembic is installed but not actively used.
 - Duplicate/placeholder README documentation remains.
 - Production `ALLOWED_HOSTS` must be confirmed after TrustedHostMiddleware was enabled.

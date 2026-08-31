@@ -68,6 +68,21 @@ const adminApi = {
     adminRequest("/api/auth/mfa/setup/confirm", { method: "POST", body: JSON.stringify({ code }) }),
   mfaDisable: (code) =>
     adminRequest("/api/auth/mfa/disable", { method: "POST", body: JSON.stringify({ code }) }),
+
+  getConversations: (limit = 50, offset = 0) =>
+    adminRequest(`/api/chat/admin/conversations?limit=${limit}&offset=${offset}`),
+  getConversationMessages: (id, afterId = 0) =>
+    adminRequest(`/api/chat/admin/conversations/${id}/messages?after_id=${afterId}`),
+  sendConversationMessage: (id, content) =>
+    adminRequest(`/api/chat/admin/conversations/${id}/messages`, {
+      method: "POST",
+      body: JSON.stringify({ content, website: "" }),
+    }),
+  updateConversationStatus: (id, statusValue) =>
+    adminRequest(`/api/chat/admin/conversations/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: statusValue }),
+    }),
 };
 
 async function requireAdminSession() {

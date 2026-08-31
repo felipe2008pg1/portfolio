@@ -1,5 +1,21 @@
 # CHANGELOG_AI.md
 
+## 2026-08-30 — Chat widget frontend (public + admin)
+
+**Added**
+- `frontend/assets/js/chat-widget.js` — widget público flutuante (canto superior direito, borda BR/US giratória igual ao stat card do admin), Turnstile na abertura da conversa, polling 4s, cooldown 3s client-side (espelhando o cooldown real do backend).
+- `frontend/assets/css/style.css` — estilos `.chat-widget`/`.chat-toggle`/`.chat-panel`.
+- `frontend/painel-fg-2026x/dashboard.html` — nova seção `#chat` (lista de conversas + thread + ações bloquear/encerrar/reabrir).
+- `frontend/painel-fg-2026x/assets/js/dashboard.js` — `loadChatConversations`, `selectChatConversation`, `pollActiveChatConversation`, `updateChatConversationStatus`. Polling: lista a cada 6s, conversa ativa a cada 5s.
+- `frontend/painel-fg-2026x/assets/js/admin-api.js` — `getConversations`, `getConversationMessages`, `sendConversationMessage`, `updateConversationStatus`.
+- `frontend/painel-fg-2026x/assets/css/admin.css` — `.admin-chat-*` (layout duas colunas, bolhas de mensagem).
+
+**Known gap**
+- Textos do chat (admin e público) ainda não seguem a convenção i18n do projeto (`data-i18n`/`i18n.apply()` hook) — estão hardcoded em PT. Ver TODO.md.
+
+**Also fixed during backend integration (local dev, not part of the original delivery)**
+- Vários arquivos (`app/main.py`, `app/schemas/chat.py`, `app/api/routes/chat.py`, models) tiveam conteúdo trocado/duplicado/vazio durante cópia manual local — corrigido iterativamente nesta sessão. Nomes finais: `app/models/conversation.py` (`Conversation`), `app/models/chat_message.py` (`ChatMessage`) — um sistema paralelo `support.py`/`ws_manager.py` (casca vazia, WebSocket) foi removido por decisão do usuário para não duplicar o sistema já funcional.
+
 > Chronological log reconstructed from the history of a single long and continuous conversation between the user and a previous Claude. There are no actual commit timestamps associated with each item (there was no access to a detailed `git log` throughout the entire session) — the order reflects the order of decisions in the conversation, not necessarily the exact order of Git commits.
 
 ## Phase 1 — Planning and Initial Scaffold
@@ -335,4 +351,21 @@ First draft of the dirty-tracking block was handed over in a partial/out-of-orde
 
 ### Recommended next step
 
-Get Felipe's confirmation that this phase's files are pushed and live (frontend is static, so a Vercel deploy is the only requirement — no backend/DB changes this phase). Then return to the still-open Priority 0 items (Neon `logo_url` column, Railway `ALLOWED_HOSTS`/Turnstile confirmation).
+Get Felipe's confirmation that this phase's files are pushed and live (frontend is static, so a Vercel deploy is the only requirement — no backend/DB changes this phase). Then return to the still-open Priority 0 items (Neon `logo_url` column, Railway `ALLOWED_HOSTS`/Turnstile confirmation).## 2026-08-30 — Chat widget backend + cleanup
+
+**Added**
+- `backend/app/models/conversation.py`, `backend/app/models/chat_message.py` — new tables `conversations`/`chat_messages`, created automatically by `Base.metadata.create_all()` on startup (no manual migration needed, unlike `experiences.logo_url`).
+- `backend/app/schemas/chat.py`, `backend/app/services/chat_service.py`, `backend/app/api/routes/chat.py` — public visitor endpoints (`/api/chat/conversations`, `/api/chat/conversations/me/messages`) and admin endpoints (`/api/chat/admin/conversations[...]`), registered in `main.py`.
+- Visitor identity: opaque server-issued token (`secrets.token_urlsafe(32)`), stored only as a SHA-256 hash (`token_hash`, same pattern as `RefreshToken`), sent by the client via `X-Visitor-Token` header. `main.py` CORS `allow_headers` updated to permit it; `allow_methods` gained `PATCH` for the status-update endpoint.
+- Server-side cooldown (`CHAT_MESSAGE_COOLDOWN_SECONDS=3`) and a hard per-conversation message cap (`CHAT_MAX_MESSAGES_PER_CONVERSATION=500`) enforced in `chat_service.add_visitor_message`, independent of any client-side timer.
+- Turnstile required only on conversation creation (`POST /api/chat/conversations`), not per message — see DECISIONS.md.
+- New rate limits: `RATE_LIMIT_CHAT_START`, `RATE_LIMIT_CHAT_MESSAGE`, `RATE_LIMIT_CHAT_POLL` in `config.py` (all with safe defaults, no `.env` change required).
+- Backend validated with a real SQLite boot + 16 functional assertions (cooldown, IDOR-safe 404 on wrong token, honeypot, control-char stripping, blocking, full admin login→reply→close flow). No regressions in existing routes.
+
+**Fixed**
+- `frontend/index.html`: `custom-cursor.js` was loaded via `../assets/js/custom-cursor.js`, resolving outside the project root (silent 404). Corrected to `assets/js/custom-cursor.js`.
+
+**Removed (dead code, confirmed via grep — zero references in any `.html`)**
+- `frontend/assets/js/admin-api.js`, `dashboard.js`, `login.js`, `frontend/assets/css/admin.css` — pre-`/painel-fg-2026x` rename leftovers. Current admin pages load their own local copies under `painel-fg-2026x/assets/`, which are newer (have MFA support; the old `login.js` even contained a broken, half-commented dead block).
+
+**Files affected**: `backend/app/models/{conversation,chat_message,__init__}.py`, `backend/app/schemas/chat.py`, `backend/app/services/chat_service.py`, `backend/app/api/routes/chat.py`, `backend/app/core/config.py`, `backend/app/main.py`, `frontend/index.html`, 4 deleted files.

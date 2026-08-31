@@ -768,4 +768,124 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadSkills();
   loadExperiences();
   updateMfaStat();
+  loadChatConversations();
+  setInterval(loadChatConversations, 6000);
+  chatPollTimer = setInterval(pollActiveChatConversation, 5000);
 });
+
+// ===== CHAT =====
+let chatConversationsCache = [];
+let chatActiveConversationId = null;
+let chatPollTimer = null;
+let chatLastMessageId = 0;
+
+function chatStatusLabel(statusValue) {
+  return i18n.t(`admin.dashboard.chatStatus${statusValue.charAt(0).toUpperCase()}${statusValue.slice(1)}`);
+}
+
+function chatConversationHeaderLabel(conversationId, statusValue) {
+  const label = i18n.t("admin.dashboard.chatConversationLabel").replace("{id}", conversationId);
+  return statusValue ? `${label} — ${chatStatusLabel(statusValue)}` : label;
+}
+
+function renderChatConversationList() {
+  const container = document.getElementById("chatConversationList");
+  container.innerHTML = "";
+
+  if (chatConversationsCache.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "admin-chat-empty";
+    empty.textContent = i18n.t("admin.dashboard.chatNoConversations");
+    container.appendChild(empty);
+    return;
+  }
+
+  chatConversationsCache.forEach((conversation) => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "admin-chat-conversation" + (conversation.id === chatActiveConversationId ? " is-active" : "");
+
+    const idRow = document.createElement("div");
+    idRow.className = "admin-chat-conversation-id";
+    idRow.textContent = i18n.t("admin.dashboard.chatConversationLabel").replace("{id}", conversation.id);
+
+    const metaRow = document.createElement("div");
+    metaRow.className = "admin-chat-conversation-meta";
+
+    const date = document.createElement("span");
+    const when = conversation.last_message_at || conversation.created_at;
+    date.textContent = when ? new Date(when).toLocaleString(i18n.getLang() === "en" ? "en-US" : "pt-BR") : "";
+
+    const badge = document.createElement("span");
+    badge.className = `admin-chat-badge status-${conversation.status}`;
+    badge.textContent = chatStatusLabel(conversation.status);
+
+    metaRow.appendChild(date);
+    metaRow.appendChild(badge);
+    item.appendChild(idRow);
+    item.appendChild(metaRow);
+
+    item.addEventListener("click", () => selectChatConversation(conversation.id));
+    container.appendChild(item);
+  });
+}
+
+async function loadChatConversations() {
+  try {
+    chatConversationsCache = await adminApi.getConversations();
+    renderChatConversationList();
+  } catch (error) {
+    // Silent on background refresh; the list simply stays as-is until the next tick.
+  }
+}
+
+function appendChatBubble(container, message) {
+  const bubble = document.createElement("div");
+  bubble.className = "admin-chat-bubble admin-chat-bubble-" + message.sender;
+  bubble.textContent = message.content; // textContent only — never innerHTML with API data
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+}
+
+async function selectChatConversation(conversationId) {
+  chatActiveConversationId = conversationId;
+  chatLastMessageId = 0;
+  renderChatConversationList();
+
+  const conversation = chatConversationsCache.find((c) => c.id === conversationId);
+  const messagesEl = document.getElementById("chatThreadMessages");
+  const headerEl = document.getElementById("chatThreadHeader");
+  const actionsEl = document.getElementById("chatThreadActions");
+  const formEl = document.getElementById("chatReplyForm");
+
+  messagesEl.innerHTML = "";
+  headerEl.textContent = chatConversationHeaderLabel(conversationId, conversation ? conversation.status : "");
+  actionsEl.style.display = "flex";
+  formEl.style.display = conversation && conversation.status !== "closed" ? "flex" : "none";
+
+  document.getElementById("chatCloseBtn").style.display = conversation && conversation.status !== "closed" ? "inline-flex" : "none";
+  document.getElementById("chatReopenBtn").style.display = conversation && conversation.status === "closed" ? "inline-flex" : "none";
+  document.getElementById("chatBlockBtn").style.display = conversation && conversation.status !== "blocked" ? "inline-flex" : "none";
+
+  try {
+    const messages = await adminApi.getConversationMessages(conversationId, 0);
+    messages.forEach((message) => {
+      appendChatBubble(messagesEl, message);
+      chatLastMessageId = Math.max(chatLastMessageId, message.id);
+    });
+  } catch (error) {
+    headerEl.textContent = i18n.t("admin.dashboard.chatErrorLoad");
+  }
+}
+
+function renderChatSection() {
+  renderChatConversationList();
+  if (chatActiveConversationId) {
+    const conversation = chatConversationsCache.find((c) => c.id === chatActiveConversationId);
+    document.getElementById("chatThreadHeader").textContent =
+      chatConversationHeaderLabel(chatActiveConversationId, conversation ? conversation.status : "");
+  } else {
+    document.getElementById("chatThreadHeader").textContent = i18n.t("admin.dashboard.chatSelectConversation");
+  }
+}
+window.renderChatSection = renderChatSection;

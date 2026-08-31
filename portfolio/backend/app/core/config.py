@@ -18,8 +18,13 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str
     ADMIN_PASSWORD: str
     RATE_LIMIT_CONTACT: str = "5/hour"
-    RATE_LIMIT_SUPPORT_START: str = "10/hour"
     RATE_LIMIT_LOGIN: str = "5/minute"
+    RATE_LIMIT_CHAT_START: str = "10/hour"
+    RATE_LIMIT_CHAT_MESSAGE: str = "20/minute"
+    RATE_LIMIT_CHAT_POLL: str = "60/minute"
+    CHAT_MESSAGE_COOLDOWN_SECONDS: int = 3
+    CHAT_MAX_MESSAGES_PER_CONVERSATION: int = 500
+    RATE_LIMIT_SUPPORT_START: str = "10/hour"
     TURNSTILE_SITE_KEY: str
     TURNSTILE_SECRET_KEY: str
 

@@ -79,3 +79,22 @@
 1. Do a fresh clone and diff against what's documented here before assuming anything is applied — this has been wrong before (see Priority 0).
 2. Get Felipe's confirmation on the `logo_url` Neon column (MFA Security panel already confirmed working, Priority 1b — closed).
 3. Once confirmed, test Experience CRUD with a real logo image end-to-end.
+
+## Done this session
+- [x] Chat feature backend (models, schemas, service, routes) — validated end-to-end.
+- [x] `frontend/index.html` custom-cursor.js broken path.
+- [x] Removed 4 dead admin frontend files (see CHANGELOG_AI.md 2026-08-30).
+
+## High priority
+- [x] Chat frontend: widget público + painel admin de conversas.
+- [ ] i18n do chat (público e admin) — hoje hardcoded em PT, fora da convenção `data-i18n`/`i18n.apply()` do resto do painel.
+- [ ] Decide whether to rename `claude.md` → `CLAUDE.md` and `Architecture.md` → `ARCHITECTURE.md` for exact convention match (cosmetic, but confirm before touching — case-sensitive on Linux deploy targets).
+- [ ] `backend/app/db/init_db.py` referenced as "empty/unused" in claude.md/Architecture.md no longer exists in the repo — stale doc reference, needs a pass to remove.
+
+## Medium priority
+- [ ] Confirm nested `portfolio/portfolio/` repo structure is intentional (Railway/Vercel root-directory settings) before ever restructuring it.
+- [ ] Duplicate `.cursor-dot` CSS rule (two separate blocks in `style.css`, one with `z-index: 1001`, one with `z-index: 99999`) — likely leftover from an edit, second one wins; worth consolidating.
+- [ ] Pre-existing CSRF exposure: admin cookies use `SameSite=None` in production (cross-domain Vercel/Railway), which is a real CSRF surface for all cookie-authenticated admin routes, chat admin endpoints included. Not introduced by chat, but chat adds more state-changing admin surface. Consider a double-submit CSRF token.
+
+## Future improvements
+- [ ] If real-time latency ever matters, revisit WebSocket for chat (see DECISIONS.md).
