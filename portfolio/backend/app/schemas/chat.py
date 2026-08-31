@@ -41,6 +41,17 @@ class ConversationOut(BaseModel):
     status: str
     created_at: datetime
     last_message_at: datetime | None
+    ip_address: str | None = None
+    ip_blocked: bool = False
+
+    model_config = {"from_attributes": True}
+
+
+class BlockedIpOut(BaseModel):
+    id: int
+    ip_address: str
+    reason: str | None
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 

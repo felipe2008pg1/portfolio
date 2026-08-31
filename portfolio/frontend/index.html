@@ -54,6 +54,23 @@
 </head>
 
 <body class="fade-init">
+  <div class="consent-gate-overlay" id="consentGateOverlay">
+    <div class="consent-gate">
+      <div class="lang-toggle consent-gate-lang" role="group" aria-label="Language">
+        <button type="button" data-lang="pt">PT</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+      <p class="consent-gate-title" data-i18n="consent.title">Antes de continuar</p>
+      <p class="consent-gate-text" data-i18n-html="consent.text">Ao usufruir deste site e suas utilidades, você
+        concorda com nossos <a href="termos.html" target="_blank" rel="noopener">Termos de Uso e Privacidade</a>.</p>
+      <label class="consent-gate-checkbox">
+        <input type="checkbox" id="consentGateCheckbox">
+        <span data-i18n="consent.checkbox">Li e concordo com os Termos de Uso e Privacidade.</span>
+      </label>
+      <button type="button" class="consent-gate-button" id="consentGateButton" disabled
+        data-i18n="consent.button">Continuar</button>
+    </div>
+  </div>
   <div class="scroll-progress" id="scrollProgress"></div>
   <div class="cursor-dot" id="cursorDot"></div>
   <header class="header">
@@ -340,6 +357,7 @@
       <div class="footer-links">
         <a href="#top" data-i18n="footer.top">Topo</a>
         <a href="#contato" data-i18n="footer.contact">Contato</a>
+        <a href="termos.html" target="_blank" rel="noopener" data-i18n="footer.terms">Termos de Uso</a>
       </div>
     </div>
   </footer>
@@ -362,6 +380,7 @@
   <script src="assets/js/legal-popup.js"></script>
   <script src="assets/js/contact-form.js"></script>
   <script src="assets/js/chat-widget.js"></script>
+  <script src="assets/js/consent-gate.js"></script>
 </body>
 
 </html>

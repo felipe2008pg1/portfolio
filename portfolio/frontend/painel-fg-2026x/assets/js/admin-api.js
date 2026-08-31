@@ -85,8 +85,11 @@ const adminApi = {
     }),
   deleteConversation: (id) =>
     adminRequest(`/api/chat/admin/conversations/${id}`, { method: "DELETE" }),
+  blockConversationIp: (id) =>
+    adminRequest(`/api/chat/admin/conversations/${id}/block-ip`, { method: "POST" }),
+  unblockConversationIp: (id) =>
+    adminRequest(`/api/chat/admin/conversations/${id}/block-ip`, { method: "DELETE" }),
 };
-
 async function requireAdminSession() {
   try {
     await adminApi.me();

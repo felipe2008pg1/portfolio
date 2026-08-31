@@ -7,3 +7,4 @@ from app.models.mfa_backup_code import MfaBackupCode  # noqa: F401
 from app.models.experience import Experience  # noqa: F401
 from app.models.conversation import Conversation  # noqa: F401
 from app.models.chat_message import ChatMessage  # noqa: F401
+from app.models.blocked_ip import BlockedIp  # noqa: F401

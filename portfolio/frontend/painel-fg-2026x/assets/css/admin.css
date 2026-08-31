@@ -331,6 +331,7 @@
 .admin-modal-confirm p {
   color: var(--color-text-muted);
   margin: var(--space-2) 0 var(--space-6);
+  white-space: pre-line;
 }
 
 .admin-modal-confirm-actions {

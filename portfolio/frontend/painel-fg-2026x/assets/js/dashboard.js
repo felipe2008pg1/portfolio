@@ -861,9 +861,13 @@ function updateChatActionButtons(conversation) {
   document.getElementById("chatCloseBtn").style.display =
     conversation && conversation.status !== "closed" ? "inline-flex" : "none";
   document.getElementById("chatReopenBtn").style.display =
-    conversation && conversation.status === "closed" ? "inline-flex" : "none";
+    conversation && conversation.status !== "open" ? "inline-flex" : "none";
   document.getElementById("chatBlockBtn").style.display =
     conversation && conversation.status !== "blocked" ? "inline-flex" : "none";
+
+  const ipBlocked = !!(conversation && conversation.ip_blocked);
+  document.getElementById("chatBlockIpBtn").style.display = ipBlocked ? "none" : "inline-flex";
+  document.getElementById("chatUnblockIpBtn").style.display = ipBlocked ? "inline-flex" : "none";
 }
 
 async function selectChatConversation(conversationId) {
@@ -953,6 +957,58 @@ document.getElementById("chatReplyForm").addEventListener("submit", async (event
 document.getElementById("chatBlockBtn").addEventListener("click", () => updateChatConversationStatus("blocked"));
 document.getElementById("chatCloseBtn").addEventListener("click", () => updateChatConversationStatus("closed"));
 document.getElementById("chatReopenBtn").addEventListener("click", () => updateChatConversationStatus("open"));
+document.getElementById("chatBlockIpBtn").addEventListener("click", () => blockActiveConversationIp());
+document.getElementById("chatUnblockIpBtn").addEventListener("click", () => unblockActiveConversationIp());
+
+async function unblockActiveConversationIp() {
+  if (!chatActiveConversationId) return;
+
+  const conversation = chatConversationsCache.find((c) => c.id === chatActiveConversationId);
+  const ip = conversation && conversation.ip_address;
+  const info = i18n.t("admin.dashboard.chatUnblockIpInfo").replace("{ip}", ip || "");
+
+  if (!(await confirmAction(info, { confirmLabel: i18n.t("admin.dashboard.chatUnblockIp") }))) return;
+
+  try {
+    await adminApi.unblockConversationIp(chatActiveConversationId);
+    showGlobalAlert(i18n.t("admin.dashboard.chatIpUnblocked"), "success");
+    await loadChatConversations();
+    await selectChatConversation(chatActiveConversationId);
+  } catch (error) {
+    alert(error.message || i18n.t("admin.dashboard.chatErrorStatus"));
+  }
+}
+
+async function blockActiveConversationIp() {
+  if (!chatActiveConversationId) return;
+
+  const conversation = chatConversationsCache.find((c) => c.id === chatActiveConversationId);
+  const ip = conversation && conversation.ip_address;
+  if (!ip) {
+    alert(i18n.t("admin.dashboard.chatNoIp"));
+    return;
+  }
+
+  const when = conversation.created_at
+    ? new Date(conversation.created_at).toLocaleString(i18n.getLang() === "en" ? "en-US" : "pt-BR")
+    : "";
+  const info = i18n
+    .t("admin.dashboard.chatBlockIpInfo")
+    .replace("{ip}", ip)
+    .replace("{id}", chatActiveConversationId)
+    .replace("{when}", when);
+
+  if (!(await confirmAction(info, { confirmLabel: i18n.t("admin.dashboard.chatBlockIp") }))) return;
+
+  try {
+    await adminApi.blockConversationIp(chatActiveConversationId);
+    showGlobalAlert(i18n.t("admin.dashboard.chatIpBlocked"), "success");
+    await loadChatConversations();
+    await selectChatConversation(chatActiveConversationId);
+  } catch (error) {
+    alert(error.message || i18n.t("admin.dashboard.chatErrorStatus"));
+  }
+}
 
 document.getElementById("chatDeleteBtn").addEventListener("click", async () => {
   if (!chatActiveConversationId) return;

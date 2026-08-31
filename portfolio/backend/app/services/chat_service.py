@@ -6,6 +6,7 @@ from app.core.config import get_settings
 from app.core.security import hash_opaque_token, ensure_aware_utc
 from app.models.conversation import Conversation
 from app.models.chat_message import ChatMessage
+from app.models.blocked_ip import BlockedIp
 
 settings = get_settings()
 
@@ -18,11 +19,52 @@ class CooldownError(Exception):
     pass
 
 
+class IpBlockedError(Exception):
+    pass
+
+
 def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def list_blocked_ip_addresses(db: Session) -> set[str]:
+    return set(db.execute(select(BlockedIp.ip_address)).scalars())
+
+
+def is_ip_blocked(db: Session, ip_address: str | None) -> bool:
+    if not ip_address:
+        return False
+    return db.execute(
+        select(BlockedIp).where(BlockedIp.ip_address == ip_address)
+    ).scalar_one_or_none() is not None
+
+
+def block_ip(db: Session, ip_address: str, reason: str | None = None) -> BlockedIp:
+    existing = db.execute(
+        select(BlockedIp).where(BlockedIp.ip_address == ip_address)
+    ).scalar_one_or_none()
+    if existing:
+        return existing
+    blocked = BlockedIp(ip_address=ip_address, reason=reason)
+    db.add(blocked)
+    db.commit()
+    db.refresh(blocked)
+    return blocked
+
+
+def unblock_ip(db: Session, ip_address: str) -> None:
+    existing = db.execute(
+        select(BlockedIp).where(BlockedIp.ip_address == ip_address)
+    ).scalar_one_or_none()
+    if existing:
+        db.delete(existing)
+        db.commit()
+
+
 def create_conversation(db: Session, ip_address: str | None) -> tuple[Conversation, str]:
+    if is_ip_blocked(db, ip_address):
+        raise IpBlockedError()
+
     raw_token = secrets.token_urlsafe(32)
     conversation = Conversation(
         token_hash=hash_opaque_token(raw_token),
@@ -83,6 +125,9 @@ def _message_count(db: Session, conversation_id: int) -> int:
 def add_visitor_message(db: Session, conversation: Conversation, content: str) -> ChatMessage:
     if conversation.status != "open":
         raise ConversationClosedError()
+
+    if is_ip_blocked(db, conversation.ip_address):
+        raise IpBlockedError()
 
     now = _now()
     last = ensure_aware_utc(conversation.last_visitor_message_at)

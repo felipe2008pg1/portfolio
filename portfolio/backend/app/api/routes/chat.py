@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.core.logging import security_logger
 from app.core.turnstile import verify_turnstile_token
 from app.schemas.chat import (
+    BlockedIpOut,
     ChatMessageCreate,
     ChatMessageOut,
     ConversationCreate,
@@ -45,7 +46,10 @@ async def start_conversation(request: Request, payload: ConversationCreate, db: 
     if not await verify_turnstile_token(payload.turnstile_token, client_ip):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Security verification failed.")
 
-    conversation, raw_token = chat_service.create_conversation(db, client_ip)
+    try:
+        conversation, raw_token = chat_service.create_conversation(db, client_ip)
+    except chat_service.IpBlockedError:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This conversation is no longer open.")
     security_logger.info("chat_conversation_created id=%s ip=%s", conversation.id, client_ip)
     return ConversationCreateResponse(visitor_token=raw_token, conversation_status=conversation.status)
 
@@ -78,7 +82,7 @@ async def send_message(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="You're sending messages too fast. Please wait a moment.",
         )
-    except chat_service.ConversationClosedError:
+    except (chat_service.ConversationClosedError, chat_service.IpBlockedError):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This conversation is no longer open.")
 
 
@@ -89,7 +93,14 @@ def admin_list_conversations(
     db: Session = Depends(get_db),
     admin: str = Depends(get_current_admin),
 ):
-    return chat_service.list_conversations(db, limit=limit, offset=offset)
+    conversations = chat_service.list_conversations(db, limit=limit, offset=offset)
+    blocked_ips = chat_service.list_blocked_ip_addresses(db)
+    result = []
+    for conversation in conversations:
+        item = ConversationOut.model_validate(conversation)
+        item.ip_blocked = conversation.ip_address in blocked_ips
+        result.append(item)
+    return result
 
 
 @router.get("/admin/conversations/{conversation_id}/messages", response_model=list[ChatMessageOut])
@@ -134,6 +145,42 @@ def admin_update_status(
         "chat_conversation_status_changed id=%s status=%s admin=%s", conversation_id, payload.status, admin
     )
     return conversation
+
+
+@router.post(
+    "/admin/conversations/{conversation_id}/block-ip",
+    response_model=BlockedIpOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def admin_block_ip(
+    conversation_id: int,
+    db: Session = Depends(get_db),
+    admin: str = Depends(get_current_admin),
+):
+    conversation = _require_conversation_by_id(db, conversation_id)
+    if not conversation.ip_address:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This conversation has no recorded IP address.")
+    blocked = chat_service.block_ip(db, conversation.ip_address, reason=f"Blocked from conversation #{conversation_id}")
+    chat_service.set_status(db, conversation, "blocked")
+    security_logger.info(
+        "chat_ip_blocked ip=%s conversation_id=%s admin=%s", conversation.ip_address, conversation_id, admin
+    )
+    return blocked
+
+
+@router.delete("/admin/conversations/{conversation_id}/block-ip", status_code=status.HTTP_204_NO_CONTENT)
+def admin_unblock_ip(
+    conversation_id: int,
+    db: Session = Depends(get_db),
+    admin: str = Depends(get_current_admin),
+):
+    conversation = _require_conversation_by_id(db, conversation_id)
+    if conversation.ip_address:
+        chat_service.unblock_ip(db, conversation.ip_address)
+        security_logger.info(
+            "chat_ip_unblocked ip=%s conversation_id=%s admin=%s", conversation.ip_address, conversation_id, admin
+        )
+    return None
 
 
 @router.delete("/admin/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)

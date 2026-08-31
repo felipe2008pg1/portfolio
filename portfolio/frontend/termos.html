@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="meta.termsTitle">Termos de Uso e Privacidade — Felipe Gonzalez</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet" crossorigin>
+    <link rel="stylesheet" href="assets/css/reset.css">
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/custom-cursor.js"></script>
+</head>
+
+<body>
+    <div class="cursor-dot" id="cursorDot"></div>
+    <header class="header">
+        <nav class="nav container">
+            <a href="index.html" class="nav-logo">felipe<span>.dev</span></a>
+            <div class="nav-right">
+                <div class="lang-toggle" role="group" aria-label="Language">
+                    <button type="button" data-lang="pt">PT</button>
+                    <button type="button" data-lang="en">EN</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero" style="padding-block: var(--space-10) var(--space-8);">
+        <div class="container">
+            <span class="hero-eyebrow" data-i18n="terms.eyebrow">// termos de uso &amp; privacidade</span>
+            <h1 class="hero-title" data-i18n="terms.title">Termos de Uso e Privacidade</h1>
+            <p class="hero-lede" data-i18n="terms.updated">Última atualização: agosto de 2026.</p>
+        </div>
+    </section>
+
+    <main class="container" style="max-width: 760px; padding-block: var(--space-8); line-height: 1.75;">
+        <section style="margin-bottom: var(--space-8);">
+            <h2 data-i18n="terms.s1.title">1. O que é este site</h2>
+            <p data-i18n="terms.s1.text">Este é o portfólio pessoal de Felipe Gonzalez. Ao navegar e usar suas
+                funcionalidades (formulário de contato, chat de suporte, alternância de idioma/tema), você concorda com
+                estes termos.</p>
+        </section>
+
+        <section style="margin-bottom: var(--space-8);">
+            <h2 data-i18n="terms.s2.title">2. Dados que coletamos</h2>
+            <p data-i18n="terms.s2.text">Coletamos apenas o necessário para o site funcionar:</p>
+            <ul style="margin: var(--space-3) 0; padding-left: var(--space-6);">
+                <li data-i18n="terms.s2.li1">Formulário de contato: nome, e-mail, assunto e mensagem que você digitar,
+                    usados só para responder você via WhatsApp/e-mail.</li>
+                <li data-i18n="terms.s2.li2">Chat de suporte: as mensagens trocadas, um identificador anônimo salvo no
+                    seu
+                    navegador (localStorage) para manter a conversa entre acessos, e seu endereço IP, registrado por
+                    segurança e para prevenir abuso.</li>
+                <li data-i18n="terms.s2.li3">Preferências de idioma e tema (claro/escuro), salvas localmente no seu
+                    navegador.</li>
+            </ul>
+        </section>
+
+        <section style="margin-bottom: var(--space-8);">
+            <h2 data-i18n="terms.s3.title">3. Cookies e armazenamento local</h2>
+            <p data-i18n="terms.s3.text">Não usamos cookies de rastreamento ou publicidade. Usamos apenas
+                armazenamento local do navegador (localStorage) para idioma, tema e o identificador anônimo do chat —
+                nada
+                disso é compartilhado com terceiros para fins de marketing.</p>
+        </section>
+
+        <section style="margin-bottom: var(--space-8);">
+            <h2 data-i18n="terms.s4.title">4. Serviços de terceiros</h2>
+            <p data-i18n="terms.s4.text">Usamos o Cloudflare Turnstile para verificar que quem envia o formulário ou
+                abre o chat é humano, não um robô. Esse serviço processa dados técnicos do seu navegador conforme a
+                própria
+                política de privacidade da Cloudflare.</p>
+        </section>
+
+        <section style="margin-bottom: var(--space-8);">
+            <h2 data-i18n="terms.s5.title">5. Segurança e retenção</h2>
+            <p data-i18n="terms.s5.text">Mensagens de contato e conversas de chat ficam armazenadas em banco de dados
+                protegido por autenticação. Endereços IP associados a abuso ou spam podem ser bloqueados. Você pode
+                pedir a
+                exclusão dos seus dados a qualquer momento pelo contato abaixo.</p>
+        </section>
+
+        <section style="margin-bottom: var(--space-8);">
+            <h2 data-i18n="terms.s6.title">6. Seus direitos</h2>
+            <p data-i18n="terms.s6.text">Você pode solicitar acesso, correção ou exclusão dos seus dados a qualquer
+                momento, entrando em contato pelo formulário do site ou diretamente pelo WhatsApp/e-mail informados na
+                página principal.</p>
+        </section>
+
+        <section>
+            <h2 data-i18n="terms.s7.title">7. Alterações destes termos</h2>
+            <p data-i18n="terms.s7.text">Estes termos podem ser atualizados. Mudanças relevantes serão refletidas na
+                data
+                no topo desta página.</p>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <span>© <span id="year"></span> Felipe Gonzalez</span>
+            <div class="footer-links">
+                <a href="index.html" data-i18n="terms.backToSite">Voltar ao site</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+    <script src="assets/js/i18n.js"></script>
+</body>
+
+</html>

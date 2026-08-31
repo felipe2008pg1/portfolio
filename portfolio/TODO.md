@@ -26,6 +26,11 @@
   - `frontend/assets/css/style.css` (mobile spacing — 2026-08-28)
 - [ ] **Backend blocker (unresolved, carried over)**: `logo_url` column does not exist in the production Neon `experiences` table yet. Must be added manually: `ALTER TABLE experiences ADD COLUMN logo_url VARCHAR(500);`. No migration system in active use.
 
+- [ ] **New, 2026-08-31 (later)**: Apply chat IP-blocking feature (backend model/service/routes + admin UI) — delivered as instructions, not yet on Felipe's real tree.
+- [ ] **New, 2026-08-31 (later)**: Apply chat `chatReopenBtn` visibility fix (`status === "closed"` → `status !== "open"`) — blocked conversations currently have no way back to "open" via the UI.
+- [ ] **New, 2026-08-31 (later)**: Apply consent gate (`consent-gate.js`, `termos.html`, `index.html`/CSS/i18n changes) — delivered, not yet on Felipe's real tree.
+- [ ] **Before going live**: bump `CONSENT_DURATION_MS` in `consent-gate.js` from 2 minutes (test value) to a real production duration (e.g. 30 days).
+
 ## Priority 1 — Experience feature: functionally complete, visually still moving
 
 - [x] Public Experience rendering (`render-experience.js`) — implemented and confirmed working by the user (index.html no longer stuck on "Carregando").
