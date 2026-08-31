@@ -847,6 +847,21 @@ function appendChatBubble(container, message) {
   container.scrollTop = container.scrollHeight;
 }
 
+function updateChatActionButtons(conversation) {
+  const actionsEl = document.getElementById("chatThreadActions");
+  const formEl = document.getElementById("chatReplyForm");
+
+  actionsEl.style.display = "flex";
+  formEl.style.display = conversation && conversation.status !== "closed" ? "flex" : "none";
+
+  document.getElementById("chatCloseBtn").style.display =
+    conversation && conversation.status !== "closed" ? "inline-flex" : "none";
+  document.getElementById("chatReopenBtn").style.display =
+    conversation && conversation.status === "closed" ? "inline-flex" : "none";
+  document.getElementById("chatBlockBtn").style.display =
+    conversation && conversation.status !== "blocked" ? "inline-flex" : "none";
+}
+
 async function selectChatConversation(conversationId) {
   chatActiveConversationId = conversationId;
   chatLastMessageId = 0;
@@ -855,17 +870,10 @@ async function selectChatConversation(conversationId) {
   const conversation = chatConversationsCache.find((c) => c.id === conversationId);
   const messagesEl = document.getElementById("chatThreadMessages");
   const headerEl = document.getElementById("chatThreadHeader");
-  const actionsEl = document.getElementById("chatThreadActions");
-  const formEl = document.getElementById("chatReplyForm");
 
   messagesEl.innerHTML = "";
   headerEl.textContent = chatConversationHeaderLabel(conversationId, conversation ? conversation.status : "");
-  actionsEl.style.display = "flex";
-  formEl.style.display = conversation && conversation.status !== "closed" ? "flex" : "none";
-
-  document.getElementById("chatCloseBtn").style.display = conversation && conversation.status !== "closed" ? "inline-flex" : "none";
-  document.getElementById("chatReopenBtn").style.display = conversation && conversation.status === "closed" ? "inline-flex" : "none";
-  document.getElementById("chatBlockBtn").style.display = conversation && conversation.status !== "blocked" ? "inline-flex" : "none";
+  updateChatActionButtons(conversation);
 
   try {
     const messages = await adminApi.getConversationMessages(conversationId, 0);
@@ -875,6 +883,20 @@ async function selectChatConversation(conversationId) {
     });
   } catch (error) {
     headerEl.textContent = i18n.t("admin.dashboard.chatErrorLoad");
+  }
+}
+
+async function pollActiveChatConversation() {
+  if (!chatActiveConversationId) return;
+  try {
+    const messages = await adminApi.getConversationMessages(chatActiveConversationId, chatLastMessageId);
+    const messagesEl = document.getElementById("chatThreadMessages");
+    messages.forEach((message) => {
+      appendChatBubble(messagesEl, message);
+      chatLastMessageId = Math.max(chatLastMessageId, message.id);
+    });
+  } catch (error) {
+    // Transient polling failure — retried on the next tick.
   }
 }
 
@@ -890,12 +912,24 @@ function renderChatSection() {
 }
 window.renderChatSection = renderChatSection;
 
+async function updateChatConversationStatus(newStatus) {
+  if (!chatActiveConversationId) return;
+  try {
+    await adminApi.updateConversationStatus(chatActiveConversationId, newStatus);
+    await loadChatConversations();
+    await selectChatConversation(chatActiveConversationId);
+  } catch (error) {
+    alert(error.message || i18n.t("admin.dashboard.chatErrorStatus"));
+  }
+}
+
 document.getElementById("chatReplyForm").addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (!chatActiveConversationId) return;
 
   const input = document.getElementById("chatReplyInput");
   const content = input.value.trim();
-  if (!content || !chatActiveConversationId) return;
+  if (!content) return;
 
   const sendBtn = document.getElementById("chatReplySend");
   sendBtn.disabled = true;
@@ -906,8 +940,53 @@ document.getElementById("chatReplyForm").addEventListener("submit", async (event
     chatLastMessageId = Math.max(chatLastMessageId, message.id);
     input.value = "";
   } catch (error) {
-    console.error("Failed to send admin reply", error);
+    alert(error.message || i18n.t("admin.dashboard.chatErrorSend"));
   } finally {
     sendBtn.disabled = false;
   }
+});
+
+document.getElementById("chatBlockBtn").addEventListener("click", () => updateChatConversationStatus("blocked"));
+document.getElementById("chatCloseBtn").addEventListener("click", () => updateChatConversationStatus("closed"));
+document.getElementById("chatReopenBtn").addEventListener("click", () => updateChatConversationStatus("open"));
+
+document.getElementById("chatDeleteBtn").addEventListener("click", async () => {
+  if (!chatActiveConversationId) return;
+
+  const message = i18n.t("admin.dashboard.chatConfirmDelete").replace("{id}", chatActiveConversationId);
+  if (!(await confirmAction(message, { confirmLabel: i18n.t("admin.confirm.delete") }))) return;
+
+  const deletedId = chatActiveConversationId;
+  try {
+    await adminApi.deleteConversation(deletedId);
+    chatActiveConversationId = null;
+    chatLastMessageId = 0;
+    document.getElementById("chatThreadMessages").innerHTML = "";
+    document.getElementById("chatThreadActions").style.display = "none";
+    document.getElementById("chatReplyForm").style.display = "none";
+    document.getElementById("chatThreadHeader").textContent = i18n.t("admin.dashboard.chatSelectConversation");
+    await loadChatConversations();
+  } catch (error) {
+    alert(error.message || i18n.t("admin.dashboard.chatErrorDelete"));
+  }
+});
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  try {
+    await adminApi.logout();
+  } finally {
+    window.location.href = "login.html";
+  }
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const authed = await requireAdminSession();
+  if (!authed) return;
+  loadProjects();
+  loadSkills();
+  loadExperiences();
+  updateMfaStat();
+  loadChatConversations();
+  setInterval(loadChatConversations, 6000);
+  chatPollTimer = setInterval(pollActiveChatConversation, 5000);
 });

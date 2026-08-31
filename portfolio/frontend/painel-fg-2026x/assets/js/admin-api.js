@@ -83,6 +83,8 @@ const adminApi = {
       method: "PATCH",
       body: JSON.stringify({ status: statusValue }),
     }),
+  deleteConversation: (id) =>
+    adminRequest(`/api/chat/admin/conversations/${id}`, { method: "DELETE" }),
 };
 
 async function requireAdminSession() {

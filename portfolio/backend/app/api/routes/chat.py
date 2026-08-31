@@ -134,3 +134,15 @@ def admin_update_status(
         "chat_conversation_status_changed id=%s status=%s admin=%s", conversation_id, payload.status, admin
     )
     return conversation
+
+
+@router.delete("/admin/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
+def admin_delete_conversation(
+    conversation_id: int,
+    db: Session = Depends(get_db),
+    admin: str = Depends(get_current_admin),
+):
+    conversation = _require_conversation_by_id(db, conversation_id)
+    chat_service.delete_conversation(db, conversation)
+    security_logger.info("chat_conversation_deleted id=%s admin=%s", conversation_id, admin)
+    return None

@@ -172,6 +172,10 @@ const TRANSLATIONS = {
     "admin.dashboard.chatErrorLoad": "Não foi possível carregar esta conversa.",
     "admin.dashboard.chatErrorSend": "Não foi possível enviar a resposta.",
     "admin.dashboard.chatErrorStatus": "Não foi possível atualizar o status da conversa.",
+    "admin.dashboard.chatDelete": "Excluir conversa",
+    "admin.dashboard.chatConfirmDelete": "Excluir a conversa #{id}? Essa ação apaga todas as mensagens e não pode ser desfeita.",
+    "admin.dashboard.chatDeleted": "Conversa excluída.",
+    "admin.dashboard.chatErrorDelete": "Não foi possível excluir a conversa.",
     "admin.dashboard.edit": "Editar",
     "admin.dashboard.delete": "Excluir",
     "admin.dashboard.yes": "Sim",
@@ -410,6 +414,10 @@ const TRANSLATIONS = {
     "admin.dashboard.chatErrorLoad": "Couldn't load this conversation.",
     "admin.dashboard.chatErrorSend": "Couldn't send the reply.",
     "admin.dashboard.chatErrorStatus": "Couldn't update the conversation status.",
+    "admin.dashboard.chatDelete": "Delete conversation",
+    "admin.dashboard.chatConfirmDelete": "Delete conversation #{id}? This deletes every message and cannot be undone.",
+    "admin.dashboard.chatDeleted": "Conversation deleted.",
+    "admin.dashboard.chatErrorDelete": "Couldn't delete the conversation.",
     "admin.dashboard.edit": "Edit",
     "admin.dashboard.delete": "Delete",
     "admin.dashboard.yes": "Yes",
@@ -521,6 +529,14 @@ const i18n = (() => {
 
     document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
       el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
+    });
+
+    document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+      el.setAttribute("title", t(el.getAttribute("data-i18n-title")));
+    });
+
+    document.querySelectorAll("[data-i18n-aria-label]").forEach((el) => {
+      el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria-label")));
     });
 
     document.title = t("meta.title");

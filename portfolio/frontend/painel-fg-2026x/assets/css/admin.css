@@ -570,3 +570,14 @@
 .admin-chat-input::placeholder {
   color: var(--color-text-muted);
 }
+
+.admin-chat-delete-btn {
+  margin-left: auto;
+  color: var(--color-usa-red);
+  border-color: var(--color-usa-red);
+}
+
+.admin-chat-delete-btn svg {
+  width: 16px;
+  height: 16px;
+}

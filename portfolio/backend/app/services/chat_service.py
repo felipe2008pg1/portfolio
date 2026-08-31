@@ -120,3 +120,11 @@ def set_status(db: Session, conversation: Conversation, new_status: str) -> Conv
     db.commit()
     db.refresh(conversation)
     return conversation
+
+
+def delete_conversation(db: Session, conversation: Conversation) -> None:
+    # cascade="all, delete-orphan" on Conversation.messages (ORM-level) plus
+    # ondelete="CASCADE" on the FK (DB-level) both cover this — belt and
+    # suspenders in case a message row was ever inserted outside the ORM.
+    db.delete(conversation)
+    db.commit()
