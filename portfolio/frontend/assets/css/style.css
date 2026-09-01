@@ -1103,11 +1103,11 @@ h3 {
     gap: var(--space-5);
   }
 
-  .skills-row + .skills-row {
+  .skills-row+.skills-row {
     margin-top: 0;
   }
 
-  .experience-item + .experience-item {
+  .experience-item+.experience-item {
     margin-top: var(--space-5);
   }
 
@@ -2059,8 +2059,12 @@ h3 {
    condition in main.js (`hover: hover`) and the .cursor-dot display rule
    below, so touch devices / reduced-motion users always keep a real cursor. */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  html {
-    cursor: none;
+
+  html,
+  *,
+  *::before,
+  *::after {
+    cursor: none !important;
   }
 }
 
@@ -2273,19 +2277,17 @@ body.fade-init.is-loaded {
   width: 220%;
   height: 220%;
   transform: translate(-50%, -50%) rotate(0deg);
-  background: conic-gradient(
-    from 0deg,
-    var(--color-usa-red) 0deg,
-    #ffffff 35deg,
-    var(--color-usa-blue) 70deg,
-    #ffffff 105deg,
-    var(--color-brasil-green) 140deg,
-    var(--color-brasil-yellow) 190deg,
-    var(--color-brasil-green) 240deg,
-    #ffffff 275deg,
-    var(--color-usa-blue) 305deg,
-    var(--color-usa-red) 360deg
-  );
+  background: conic-gradient(from 0deg,
+      var(--color-usa-red) 0deg,
+      #ffffff 35deg,
+      var(--color-usa-blue) 70deg,
+      #ffffff 105deg,
+      var(--color-brasil-green) 140deg,
+      var(--color-brasil-yellow) 190deg,
+      var(--color-brasil-green) 240deg,
+      #ffffff 275deg,
+      var(--color-usa-blue) 305deg,
+      var(--color-usa-red) 360deg);
   animation: chat-toggle-border-spin 5s linear infinite;
 }
 
@@ -2299,15 +2301,25 @@ body.fade-init.is-loaded {
 }
 
 @keyframes chat-toggle-border-spin {
-  to { transform: translate(-50%, -50%) rotate(360deg); }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 @keyframes chat-toggle-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .chat-toggle::before,
   .chat-toggle-wrap,
   .chat-panel::before,
@@ -2333,6 +2345,7 @@ body.fade-init.is-loaded {
 .chat-panel-close:hover {
   color: var(--color-text);
 }
+
 .chat-backdrop {
   position: fixed;
   inset: 0;
@@ -2420,10 +2433,13 @@ body.fade-init.is-loaded {
 }
 
 @keyframes chat-warning-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     border-color: #FF1A1A;
     box-shadow: 0 0 8px rgba(255, 26, 26, 0.35);
   }
+
   50% {
     border-color: #FF6B6B;
     box-shadow: 0 0 18px rgba(255, 60, 60, 0.85);
@@ -2460,19 +2476,17 @@ body.fade-init.is-loaded {
   width: 220%;
   height: 220%;
   transform: translate(-50%, -50%) rotate(0deg);
-  background: conic-gradient(
-    from 0deg,
-    var(--color-usa-red) 0deg,
-    #ffffff 35deg,
-    var(--color-usa-blue) 70deg,
-    #ffffff 105deg,
-    var(--color-brasil-green) 140deg,
-    var(--color-brasil-yellow) 190deg,
-    var(--color-brasil-green) 240deg,
-    #ffffff 275deg,
-    var(--color-usa-blue) 305deg,
-    var(--color-usa-red) 360deg
-  );
+  background: conic-gradient(from 0deg,
+      var(--color-usa-red) 0deg,
+      #ffffff 35deg,
+      var(--color-usa-blue) 70deg,
+      #ffffff 105deg,
+      var(--color-brasil-green) 140deg,
+      var(--color-brasil-yellow) 190deg,
+      var(--color-brasil-green) 240deg,
+      #ffffff 275deg,
+      var(--color-usa-blue) 305deg,
+      var(--color-usa-red) 360deg);
   animation: chat-toggle-border-spin 5s linear infinite;
 }
 
