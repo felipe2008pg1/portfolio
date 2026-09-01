@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         showMfaAlert(loginText("admin.login.errorMfaInvalid", "Código inválido."));
       }
       mfaSubmitBtn.disabled = false;
-      mfaSubmitBtn.textContent = loginText("admin.login.submit", "Verificar");
+      mfaSubmitBtn.textContent = loginText("admin.login.mfaSubmit", "Verificar");
     }
   });
 });

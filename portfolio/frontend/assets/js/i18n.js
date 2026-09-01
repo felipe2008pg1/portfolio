@@ -110,7 +110,8 @@ const TRANSLATIONS = {
     "admin.login.errorRateLimit": "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
     "admin.login.errorGeneric": "Usuário ou senha inválidos.",
     "admin.login.errorNetwork": "Não foi possível conectar ao servidor. Verifique se o backend está rodando e o CORS liberado.",
-
+    "admin.login.mfaCodeLabel": "Código do autenticador (ou código de backup)",
+    "admin.login.mfaSubmit": "Verificar",
     "admin.nav.dashboard": "Dashboard",
     "admin.nav.projects": "Projetos",
     "admin.nav.skills": "Skills",
@@ -386,7 +387,8 @@ const TRANSLATIONS = {
     "admin.login.errorRateLimit": "Too many attempts. Wait a few minutes before trying again.",
     "admin.login.errorGeneric": "Invalid username or password.",
     "admin.login.errorNetwork": "Couldn't connect to the server. Check the backend is running and CORS is allowed.",
-
+    "admin.login.mfaCodeLabel": "Authenticator code (or backup code)",
+    "admin.login.mfaSubmit": "Verify",
     "admin.nav.dashboard": "Dashboard",
     "admin.nav.projects": "Projects",
     "admin.nav.skills": "Skills",

@@ -76,12 +76,17 @@
 
       <form id="mfaForm" novalidate style="display:none;">
         <div class="form-field">
-          <label for="mfaCode">Código do autenticador (ou código de backup)</label>
-          <input type="text" id="mfaCode" name="mfaCode" required maxlength="20" autocomplete="one-time-code"
-            placeholder="123456">
-        </div>
+          <form id="mfaForm" novalidate style="display:none;">
+            <div class="form-field">
+              <label for="mfaCode" data-i18n="admin.login.mfaCodeLabel">Código do autenticador (ou código de
+                backup)</label>
+              <input type="text" id="mfaCode" name="mfaCode" required maxlength="20" autocomplete="one-time-code"
+                placeholder="123456">
+            </div>
 
-        <button type="submit" class="btn btn-primary" id="mfaSubmit">Verificar</button>
+            <button type="submit" class="btn btn-primary" id="mfaSubmit"
+              data-i18n="admin.login.mfaSubmit">Verificar</button>
+          </form>
       </form>
     </div>
   </div>
