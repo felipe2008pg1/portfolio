@@ -20,7 +20,8 @@ async function adminRequest(path, options = {}, isRetry = false) {
   // value the backend has stored in the csrf_token cookie, or it's rejected
   // with 403. Safe (GET) requests, and the csrf-token fetch itself, don't
   // need it — skip to avoid infinite recursion.
-  if (method !== "GET" && method !== "HEAD" && path !== "/api/auth/csrf-token") {
+  const CSRF_EXEMPT_PATHS = ["/api/auth/csrf-token", "/api/auth/login", "/api/auth/refresh"];
+  if (method !== "GET" && method !== "HEAD" && !CSRF_EXEMPT_PATHS.includes(path)) {
     const csrfToken = await ensureCsrfToken();
     if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
   }
