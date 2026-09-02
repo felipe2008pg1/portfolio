@@ -16,7 +16,9 @@ async function adminRequest(path, options = {}, isRetry = false) {
   const method = (options.method || "GET").toUpperCase();
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
 
-  if (method !== "GET" && method !== "HEAD" && path !== "/api/auth/csrf-token") {
+  const CSRF_EXEMPT_PATHS = ["/api/auth/csrf-token", "/api/auth/login", "/api/auth/mfa/verify", "/api/auth/refresh"];
+
+  if (method !== "GET" && method !== "HEAD" && !CSRF_EXEMPT_PATHS.includes(path)) {
     const csrfToken = await ensureCsrfToken();
     if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
   }
