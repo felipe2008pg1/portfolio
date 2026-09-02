@@ -57,7 +57,9 @@ Everything here — backend, frontend, security, deployment — was designed and
 | 🇧🇷🇺🇸 | **Full PT/EN bilingual support** — every string, on every page (including admin), switches instantly with zero reload. |
 | 🌗 | **Dark / Light theme toggle**, remembered across visits. |
 | 🎌 | **Animated Brazil/USA flag GIFs** woven into the hero background — a visual signature of my dual cultural and professional focus. |
+| 🧭 | **Professional Experience timeline** — company, role, period, and description, fully managed from the admin dashboard. |
 | 💬 | **"Request a Quote" contact form** — messages are delivered straight to WhatsApp, shielded by Cloudflare Turnstile and rate limiting. |
+| 🛡️💬 | **Live support chat widget**, protected by the same **anti-fraud layer** as the rest of the site: Turnstile verification, per-IP rate limiting, and admin-side IP blocking for abusive visitors. |
 | 📄 | **Custom 404 page** with its own lightweight language toggle. |
 | 🎨 | Small, deliberate motion design throughout: 3D tilt on project cards, an animated scroll-progress "radar", scroll-triggered reveals. |
 
@@ -66,24 +68,29 @@ Everything here — backend, frontend, security, deployment — was designed and
 |---|---|
 | 🔑 | **MFA-protected login (TOTP)** — Google Authenticator / Authy compatible, with one-time-use encrypted backup codes. |
 | 🗂️ | **Full CRUD** for Projects, Skills, and Experience — content updates with zero deploys. |
+| 💬 | **Chat inbox** — reply to visitors in real time, close/reopen conversations, and block a visitor's IP directly from the thread. |
 | 📊 | Live stats: project/skill/experience counts, publish status, MFA status — at a glance. |
+| 📱 | Responsive, mobile-friendly layout for managing the site from a phone. |
 | 🌍 | Fully bilingual admin UI, matching the public site 1:1. |
 
 ---
 
 ## 🔒 Security — treated as a feature, not an afterthought
 
-> Most portfolio sites don't need this level of hardening. Mine has it anyway, because that's the standard I hold my own code to.
+> Most portfolio sites don't need this level of hardening. Mine has it anyway, because that's the standard I hold my own code to. This system is under an **active anti-fraud layer**: every public entry point (contact form, support chat, login) is verified, rate-limited, and monitored — abuse gets logged and blocked, not just tolerated.
 
-- 🔐 **Argon2id** password hashing — the current OWASP-recommended algorithm.
-- 🍪 Authentication via short-lived **JWT access tokens** + rotating **refresh tokens**, delivered only as `HttpOnly` + `Secure` + `SameSite`-protected cookies — never touchable by client-side JS.
+- 🛡️ **Anti-fraud protection on every visitor-facing endpoint** — Cloudflare Turnstile human verification, per-IP rate limiting, and admin-controlled IP blocking on contact and chat.
+- 🔐 **Argon2id** password hashing — the current OWASP-recommended algorithm — with **account lockout** after repeated failed attempts, enforced on *both* the password step and the MFA step.
+- 🍪 Authentication via short-lived **JWT access tokens** + rotating **refresh tokens**, delivered only as `HttpOnly` + `Secure` + `SameSite`-protected cookies — never touchable by client-side JS. **Refresh-token reuse detection**: if a rotated/revoked token is ever replayed, the entire token family is revoked and the attempt is logged as a probable theft.
+- 🧾 **CSRF-protected admin actions** — a double-submit token, independent of the session cookie, is required on every mutating admin request.
 - 📱 **Optional TOTP MFA** on the admin account, with encrypted backup codes.
-- 🤖 **Bot & abuse protection**: Cloudflare Turnstile on every public form + rate limiting (`slowapi`) on login and contact endpoints.
+- 🚦 **Rate limiting on every authenticated admin route**, not just login — defense-in-depth in case a session is ever compromised.
 - 🌐 **Strict, allowlist-only CORS** — no wildcard origins, ever.
-- 🛡️ **Full security header suite** on every response: `Content-Security-Policy`, `Strict-Transport-Security` (HSTS), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`.
+- 🛡️ **Full security header suite** on every response: a **`script-src` CSP with no `unsafe-inline`**, `Strict-Transport-Security` (HSTS), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` + `frame-ancestors 'none'` (clickjacking-proof), `Referrer-Policy`, `Permissions-Policy`.
 - 🎭 **`TrustedHostMiddleware`** — rejects requests carrying a forged/unexpected `Host` header.
 - 🗄️ **Zero raw SQL** — 100% SQLAlchemy ORM / parameterized queries, immune to SQL injection by construction.
 - 🔗 **SSRF-hardened URL validation** on every user-supplied link field — blocks `localhost`, private, link-local, and reserved IP ranges before they're ever accepted.
+- 🕵️ **PII data minimization** — visitor IP addresses on contact messages and chat conversations are automatically purged after a configurable retention window.
 - 🚫 **No internal errors ever reach the client** — everything is logged server-side and returned as a safe, generic message.
 - 🔄 Ongoing dependency hygiene via Dependabot (with cooldown windows) and periodic manual security audits.
 
