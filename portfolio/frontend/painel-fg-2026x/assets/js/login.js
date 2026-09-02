@@ -5,18 +5,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
   if (typeof i18n !== "undefined") i18n.apply();
 
-  // --- COMENTE ESTE BLOCO TOTALMENTE ---
-  /*
-  try {
-    await adminApi.me();
-    window.location.href = "dashboard.html";
-    return;
-  } catch (_) {
-    console.debug("[admin]);
-  }
-  */
-  // ------------------------------------
-
   const form = document.getElementById("loginForm");
   const submitBtn = document.getElementById("loginSubmit");
   const alertEl = document.getElementById("loginAlert");

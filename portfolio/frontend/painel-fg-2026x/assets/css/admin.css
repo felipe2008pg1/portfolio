@@ -393,7 +393,7 @@ html, body {
 .admin-alert.is-error { background: rgba(193, 67, 46, 0.1); color: var(--color-danger); border: var(--border-w) solid var(--color-danger); }
 .admin-alert.is-success { background: rgba(47, 125, 92, 0.1); color: var(--color-success); border: var(--border-w) solid var(--color-success); }
 
-/* Toast de canto: usado só pelo #globalAlert (feedback de salvar/editar/excluir) */
+/* Corner toast: used only by #globalAlert (save/edit/delete feedback) */
 .admin-toast {
   display: block;
   position: fixed;

@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Link ativo conforme a seção visível
+  // Active link corresponding to the visible section
   const sections = document.querySelectorAll("main section[id]");
   const navLinkEls = document.querySelectorAll("[data-nav-link]");
 
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     sections.forEach((section) => sectionObserver.observe(section));
   }
 
-  // Reveal on scroll (inclui .about-facts e .skills-table pro stagger interno funcionar)
+  // Reveal on scroll (includes .about-facts and .skills-table so the internal stagger works)
   const revealEls = document.querySelectorAll(".reveal, .about-facts, .skills-table");
   if (revealEls.length && "IntersectionObserver" in window) {
     const revealObserver = new IntersectionObserver(
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     revealEls.forEach((el) => el.classList.add("is-visible"));
   }
 
-  // Barra de progresso de scroll
+  // Scroll progress bar
   const progressBar = document.getElementById("scrollProgress");
   if (progressBar) {
     const updateProgress = () => {
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateProgress();
   }
 
-  // Crosshair segue o mouse dentro do hero
+  // The crosshair follows the mouse within the hero.
   const hero = document.querySelector(".hero");
   const crosshair = document.getElementById("heroCrosshair");
   if (hero && crosshair && window.matchMedia("(hover: hover)").matches) {
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Tilt 3D sutil nos cards de projeto
+  // Subtle 3D tilt on project cards
   if (window.matchMedia("(hover: hover)").matches) {
     document.addEventListener("mousemove", (event) => {
       const card = event.target.closest(".project-card");
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, true);
   }
 
-  // Título dinâmico da aba: chama a atenção quando o usuário sai pra outra aba
+  // Dynamic tab title: grabs attention when the user switches to another tab.
   (function () {
     let storedTitle = document.title;
     let timeoutId = null;
