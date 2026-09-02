@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
-from app.api.deps import get_current_admin, get_db
+from app.api.deps import get_current_admin, get_db, verify_csrf
 from app.core.config import get_settings
 from app.core.logging import security_logger
 from app.core.turnstile import verify_turnstile_token
@@ -87,7 +87,9 @@ async def send_message(
 
 
 @router.get("/admin/conversations", response_model=list[ConversationOut])
+@limiter.limit(settings.RATE_LIMIT_ADMIN)
 def admin_list_conversations(
+    request: Request,
     limit: int = 50,
     offset: int = 0,
     db: Session = Depends(get_db),
@@ -104,7 +106,9 @@ def admin_list_conversations(
 
 
 @router.get("/admin/conversations/{conversation_id}/messages", response_model=list[ChatMessageOut])
+@limiter.limit(settings.RATE_LIMIT_ADMIN)
 def admin_get_messages(
+    request: Request,
     conversation_id: int,
     after_id: int = 0,
     db: Session = Depends(get_db),
@@ -118,8 +122,11 @@ def admin_get_messages(
     "/admin/conversations/{conversation_id}/messages",
     response_model=ChatMessageOut,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(verify_csrf)],
 )
+@limiter.limit(settings.RATE_LIMIT_ADMIN)
 def admin_send_message(
+    request: Request,
     conversation_id: int,
     payload: ChatMessageCreate,
     db: Session = Depends(get_db),
@@ -132,8 +139,14 @@ def admin_send_message(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This conversation is closed.")
 
 
-@router.patch("/admin/conversations/{conversation_id}/status", response_model=ConversationOut)
+@router.patch(
+    "/admin/conversations/{conversation_id}/status",
+    response_model=ConversationOut,
+    dependencies=[Depends(verify_csrf)],
+)
+@limiter.limit(settings.RATE_LIMIT_ADMIN)
 def admin_update_status(
+    request: Request,
     conversation_id: int,
     payload: ConversationStatusUpdate,
     db: Session = Depends(get_db),
@@ -151,8 +164,11 @@ def admin_update_status(
     "/admin/conversations/{conversation_id}/block-ip",
     response_model=BlockedIpOut,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(verify_csrf)],
 )
+@limiter.limit(settings.RATE_LIMIT_ADMIN)
 def admin_block_ip(
+    request: Request,
     conversation_id: int,
     db: Session = Depends(get_db),
     admin: str = Depends(get_current_admin),
@@ -168,8 +184,14 @@ def admin_block_ip(
     return blocked
 
 
-@router.delete("/admin/conversations/{conversation_id}/block-ip", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/admin/conversations/{conversation_id}/block-ip",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(verify_csrf)],
+)
+@limiter.limit(settings.RATE_LIMIT_ADMIN)
 def admin_unblock_ip(
+    request: Request,
     conversation_id: int,
     db: Session = Depends(get_db),
     admin: str = Depends(get_current_admin),
@@ -183,8 +205,14 @@ def admin_unblock_ip(
     return None
 
 
-@router.delete("/admin/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/admin/conversations/{conversation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(verify_csrf)],
+)
+@limiter.limit(settings.RATE_LIMIT_ADMIN)
 def admin_delete_conversation(
+    request: Request,
     conversation_id: int,
     db: Session = Depends(get_db),
     admin: str = Depends(get_current_admin),

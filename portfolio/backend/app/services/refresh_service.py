@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, timezone
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 from app.core.config import get_settings
+from app.core.logging import security_logger
 from app.core.security import generate_refresh_token, hash_refresh_token, ensure_aware_utc
 from app.models.refresh_token import RefreshToken
 
@@ -30,7 +31,21 @@ def validate_and_rotate_refresh_token(db: Session, token: str) -> tuple[int, str
     expires_at = ensure_aware_utc(record.expires_at)
     revoked_at = ensure_aware_utc(record.revoked_at)
 
-    if revoked_at is not None or expires_at < now:
+    if revoked_at is not None:
+        # Reuse of an already-rotated/revoked token is a strong signal of theft
+        # (an attacker replaying a stolen copy while the legit rotation already
+        # happened). Revoke the whole family so a stolen token can't keep being
+        # retried, and log it so the incident isn't silent.
+        security_logger.warning("refresh_token_reuse_detected admin_id=%s", record.admin_id)
+        db.execute(
+            update(RefreshToken)
+            .where(RefreshToken.admin_id == record.admin_id, RefreshToken.revoked_at.is_(None))
+            .values(revoked_at=now)
+        )
+        db.commit()
+        return None
+
+    if expires_at < now:
         return None
 
     record.revoked_at = now

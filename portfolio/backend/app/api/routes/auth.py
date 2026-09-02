@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
-from app.api.deps import get_db, get_current_admin
+import secrets
+
+from app.api.deps import get_db, get_current_admin, verify_csrf, CSRF_COOKIE_NAME
 from app.core.config import get_settings
 from app.core.security import create_access_token, create_mfa_pending_token, decode_mfa_pending_token
 from app.core.turnstile import verify_turnstile_token
@@ -18,7 +20,14 @@ from app.schemas.auth import (
     MfaDisableRequest,
 )
 from app.services import refresh_service, mfa_service
-from app.services.auth_service import authenticate_admin, get_admin_by_id, get_admin_by_username
+from app.services.auth_service import (
+    authenticate_admin,
+    get_admin_by_id,
+    get_admin_by_username,
+    is_locked_out,
+    register_failed_attempt,
+    clear_failed_attempts,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
@@ -45,6 +54,19 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
         samesite=cookie_samesite,
         max_age=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
         path="/api/auth",
+    )
+    # Non-HttpOnly on purpose: the admin dashboard JS must read this value and
+    # echo it back in the X-CSRF-Token header (double-submit pattern). It is
+    # never a secret by itself — its only job is to prove the request came
+    # from a page that could read our own cookie, i.e. not cross-site.
+    response.set_cookie(
+        key=CSRF_COOKIE_NAME,
+        value=secrets.token_urlsafe(32),
+        httponly=False,
+        secure=settings.is_production,
+        samesite=cookie_samesite,
+        max_age=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        path="/",
     )
 
 
@@ -86,6 +108,7 @@ def mfa_verify(
     payload: MfaVerifyRequest,
     db: Session = Depends(get_db),
 ):
+    client_ip = get_remote_address(request)
     username = decode_mfa_pending_token(payload.mfa_token)
 
     if not username:
@@ -102,12 +125,23 @@ def mfa_verify(
             detail="Verification session expired.",
         )
 
+    # Same lockout counter as the password step: an attacker who already has
+    # the password can't brute-force the TOTP/backup code indefinitely across
+    # distributed IPs just because per-IP rate limiting doesn't catch them.
+    if is_locked_out(admin):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account temporarily locked. Try again later.",
+        )
+
     if not mfa_service.verify_mfa_code(db, admin, payload.code):
+        register_failed_attempt(db, admin, client_ip, "mfa_verify_failed")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid code.",
         )
 
+    clear_failed_attempts(db, admin)
     access_token = create_access_token(subject=admin.username)
     refresh_token = refresh_service.issue_refresh_token(db, admin.id)
     _set_auth_cookies(response, access_token, refresh_token)
@@ -152,7 +186,7 @@ def refresh(
     return TokenResponse()
 
 
-@router.post("/logout")
+@router.post("/logout", dependencies=[Depends(verify_csrf)])
 def logout(
     request: Request,
     response: Response,
@@ -165,6 +199,7 @@ def logout(
 
     response.delete_cookie(key="access_token", path="/")
     response.delete_cookie(key="refresh_token", path="/api/auth")
+    response.delete_cookie(key=CSRF_COOKIE_NAME, path="/")
 
     return {"message": "logout succesfully"}
 
@@ -184,7 +219,7 @@ def mfa_status(
     return MfaStatusResponse(enabled=bool(admin and admin.mfa_enabled))
 
 
-@router.post("/mfa/setup/init", response_model=MfaSetupInitResponse)
+@router.post("/mfa/setup/init", response_model=MfaSetupInitResponse, dependencies=[Depends(verify_csrf)])
 def mfa_setup_init(
     username: str = Depends(get_current_admin),
     db: Session = Depends(get_db),
@@ -202,7 +237,7 @@ def mfa_setup_init(
     return MfaSetupInitResponse(**data)
 
 
-@router.post("/mfa/setup/confirm", response_model=MfaSetupConfirmResponse)
+@router.post("/mfa/setup/confirm", response_model=MfaSetupConfirmResponse, dependencies=[Depends(verify_csrf)])
 @limiter.limit("5/minute")
 def mfa_setup_confirm(
     request: Request,
@@ -229,7 +264,7 @@ def mfa_setup_confirm(
     return MfaSetupConfirmResponse(backup_codes=codes)
 
 
-@router.post("/mfa/disable")
+@router.post("/mfa/disable", dependencies=[Depends(verify_csrf)])
 @limiter.limit("5/minute")
 def mfa_disable(
     request: Request,

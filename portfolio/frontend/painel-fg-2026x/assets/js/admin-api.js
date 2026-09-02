@@ -1,7 +1,23 @@
-﻿async function adminRequest(path, options = {}, isRetry = false) {
+﻿﻿function getCsrfToken() {
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+async function adminRequest(path, options = {}, isRetry = false) {
+  const method = (options.method || "GET").toUpperCase();
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+
+  // Double-submit CSRF: every mutating request must echo back the value of
+  // the non-HttpOnly csrf_token cookie in this header, or the backend
+  // rejects it with 403. Safe (GET) requests don't need it.
+  if (method !== "GET" && method !== "HEAD") {
+    const csrfToken = getCsrfToken();
+    if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    headers,
     credentials: "include",
   });
 

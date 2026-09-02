@@ -50,20 +50,6 @@
       }
     }
 
-    @keyframes notfoundBackPulse {
-
-      0%,
-      100% {
-        text-shadow: 0 0 6px rgba(255, 40, 40, 0.7), 0 0 14px rgba(255, 40, 40, 0.4);
-        box-shadow: 0 0 10px 0 rgba(255, 40, 40, 0.5);
-      }
-
-      50% {
-        text-shadow: 0 0 14px rgba(255, 40, 40, 1), 0 0 28px rgba(255, 40, 40, 0.7);
-        box-shadow: 0 0 24px 6px rgba(255, 40, 40, 0.9);
-      }
-    }
-
     @keyframes notfoundCodePulse {
       0%, 100% {
         text-shadow: 0 0 6px rgba(255, 40, 40, 0.7), 0 0 14px rgba(255, 40, 40, 0.4);
@@ -77,10 +63,6 @@
       color: #ff2828 !important;
       font-weight: 700;
       animation: notfoundCodePulse 1.5s ease-in-out infinite;
-    }
-
-    .notfound-content .btn-primary:hover {
-      background: rgba(255, 40, 40, 0.1);
     }
   </style>
 </head>
@@ -106,39 +88,7 @@
         início</a>
     </div>
   </div>
-  <script>
-    (function () {
-      var SUPPORTED = ["pt", "en"];
-      var lang = localStorage.getItem("lang");
-      if (SUPPORTED.indexOf(lang) === -1) {
-        lang = navigator.language && navigator.language.toLowerCase().indexOf("en") === 0 ? "en" : "pt";
-      }
-
-      function apply() {
-        document.documentElement.setAttribute("lang", lang === "en" ? "en" : "pt-BR");
-        document.querySelectorAll("[data-i18n-pt]").forEach(function (el) {
-          el.textContent = el.getAttribute(lang === "en" ? "data-i18n-en" : "data-i18n-pt");
-        });
-        document.querySelectorAll("[data-lang]").forEach(function (btn) {
-          var active = btn.getAttribute("data-lang") === lang;
-          btn.classList.toggle("is-active", active);
-          btn.setAttribute("aria-pressed", String(active));
-        });
-      }
-
-      document.querySelectorAll("[data-lang]").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var next = btn.getAttribute("data-lang");
-          if (SUPPORTED.indexOf(next) === -1 || next === lang) return;
-          lang = next;
-          localStorage.setItem("lang", lang);
-          apply();
-        });
-      });
-
-      apply();
-    })();
-  </script>
+  <script src="assets/js/notfound-i18n.js"></script>
 </body>
 
 </html>

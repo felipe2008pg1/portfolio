@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     CHAT_MESSAGE_COOLDOWN_SECONDS: int = 3
     CHAT_MAX_MESSAGES_PER_CONVERSATION: int = 500
     RATE_LIMIT_SUPPORT_START: str = "10/hour"
+    RATE_LIMIT_ADMIN: str = "60/minute"
+    # LGPD/GDPR data minimization: how long to keep visitor IP addresses on
+    # contact messages and chat conversations before anonymizing them.
+    # Run purge_pii.py periodically (e.g. monthly cron) to enforce this.
+    PII_RETENTION_DAYS: int = 90
     TURNSTILE_SITE_KEY: str
     TURNSTILE_SECRET_KEY: str
 
