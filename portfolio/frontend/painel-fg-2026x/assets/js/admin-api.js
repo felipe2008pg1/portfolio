@@ -1,17 +1,27 @@
-﻿﻿function getCsrfToken() {
-  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
-  return match ? decodeURIComponent(match[1]) : null;
+﻿// The csrf_token cookie belongs to the backend's domain (different from the
+// frontend's domain on Vercel), so document.cookie can never read it here —
+// that's a same-origin browser restriction. Instead we ask the backend for
+// it (GET /api/auth/csrf-token, itself protected by the access_token cookie)
+// and cache it in memory for the lifetime of this page.
+let cachedCsrfToken = null;
+
+async function ensureCsrfToken() {
+  if (cachedCsrfToken) return cachedCsrfToken;
+  const data = await adminRequest("/api/auth/csrf-token");
+  cachedCsrfToken = data.csrf_token;
+  return cachedCsrfToken;
 }
 
 async function adminRequest(path, options = {}, isRetry = false) {
   const method = (options.method || "GET").toUpperCase();
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
 
-  // Double-submit CSRF: every mutating request must echo back the value of
-  // the non-HttpOnly csrf_token cookie in this header, or the backend
-  // rejects it with 403. Safe (GET) requests don't need it.
-  if (method !== "GET" && method !== "HEAD") {
-    const csrfToken = getCsrfToken();
+  // Double-submit CSRF: every mutating request must echo back the same
+  // value the backend has stored in the csrf_token cookie, or it's rejected
+  // with 403. Safe (GET) requests, and the csrf-token fetch itself, don't
+  // need it — skip to avoid infinite recursion.
+  if (method !== "GET" && method !== "HEAD" && path !== "/api/auth/csrf-token") {
+    const csrfToken = await ensureCsrfToken();
     if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
   }
 
@@ -24,10 +34,26 @@ async function adminRequest(path, options = {}, isRetry = false) {
   if (response.status === 401 && !isRetry && path !== "/api/auth/login" && path !== "/api/auth/refresh") {
     try {
       await adminRequest("/api/auth/refresh", { method: "POST" }, true);
+      // The refresh rotates the csrf_token cookie server-side, so the
+      // cached value is now stale — drop it and let the retried request
+      // (or the next mutating one) fetch a fresh one.
+      cachedCsrfToken = null;
       return adminRequest(path, options, true);
     } catch (_) {
       window.location.href = "login.html";
       throw new Error("Sessão expirada.");
+    }
+  }
+
+  // A 403 specifically for a bad/expired CSRF token (e.g. this tab was left
+  // open across a token rotation) is recoverable by refetching once, unlike
+  // other 403s (permission errors) which should just surface to the user.
+  if (response.status === 403 && !isRetry) {
+    let peek = null;
+    try { peek = await response.clone().json(); } catch (_) { }
+    if (peek && typeof peek.detail === "string" && peek.detail.toLowerCase().includes("csrf")) {
+      cachedCsrfToken = null;
+      return adminRequest(path, options, true);
     }
   }
 

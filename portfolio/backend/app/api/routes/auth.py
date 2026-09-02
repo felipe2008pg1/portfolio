@@ -209,6 +209,25 @@ def me(username: str = Depends(get_current_admin)):
     return {"username": username}
 
 
+@router.get("/csrf-token")
+def get_csrf_token(request: Request, username: str = Depends(get_current_admin)):
+    """
+    The frontend and backend live on different domains (Vercel/Railway), so
+    the csrf_token cookie set by _set_auth_cookies belongs to the backend's
+    domain and can never be read via document.cookie from the frontend page
+    — that's a browser same-origin restriction, not a bug. Instead, the
+    already-authenticated frontend asks the backend directly for the value
+    it should echo back in X-CSRF-Token on mutating requests.
+    """
+    csrf_value = request.cookies.get(CSRF_COOKIE_NAME)
+    if not csrf_value:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing session. Please log in again.",
+        )
+    return {"csrf_token": csrf_value}
+
+
 @router.get("/mfa/status", response_model=MfaStatusResponse)
 def mfa_status(
     username: str = Depends(get_current_admin),
