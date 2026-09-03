@@ -2,7 +2,7 @@ import base64
 import io
 from datetime import datetime, timezone
 import qrcode
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 from app.core.security import (
     generate_totp_secret,
@@ -38,10 +38,15 @@ def init_mfa_setup(db: Session, admin: AdminUser) -> dict:
     }
 
 def confirm_mfa_setup(db: Session, admin: AdminUser, code: str) -> list[str] | None:
-    if not admin.mfa_secret or not verify_totp_code(admin.mfa_secret, code):
+    if not admin.mfa_secret:
+        return None
+
+    ok, counter = verify_totp_code(admin.mfa_secret, code, admin.mfa_last_totp_counter)
+    if not ok:
         return None
 
     admin.mfa_enabled = True
+    admin.mfa_last_totp_counter = counter
 
     db.query(MfaBackupCode).filter(MfaBackupCode.admin_id == admin.id).delete()
 
@@ -56,22 +61,26 @@ def verify_mfa_code(db: Session, admin: AdminUser, code: str) -> bool:
     if not code:
         return False
 
-    if admin.mfa_secret and verify_totp_code(admin.mfa_secret, code):
-        return True
+    if admin.mfa_secret:
+        ok, counter = verify_totp_code(admin.mfa_secret, code, admin.mfa_last_totp_counter)
+        if ok:
+            admin.mfa_last_totp_counter = counter
+            db.commit()
+            return True
 
     code_hash = hash_opaque_token(code.strip().upper())
-    stmt = select(MfaBackupCode).where(
-        MfaBackupCode.admin_id == admin.id,
-        MfaBackupCode.code_hash == code_hash,
-        MfaBackupCode.used_at.is_(None),
+    stmt = (
+        update(MfaBackupCode)
+        .where(
+            MfaBackupCode.admin_id == admin.id,
+            MfaBackupCode.code_hash == code_hash,
+            MfaBackupCode.used_at.is_(None),
+        )
+        .values(used_at=datetime.now(timezone.utc))
     )
-    backup = db.scalars(stmt).first()
-    if backup:
-        backup.used_at = datetime.now(timezone.utc)
-        db.commit()
-        return True
-
-    return False
+    result = db.execute(stmt)
+    db.commit()
+    return result.rowcount > 0
 
 def disable_mfa(db: Session, admin: AdminUser) -> None:
     admin.mfa_enabled = False

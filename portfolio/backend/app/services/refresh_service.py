@@ -21,21 +21,35 @@ def issue_refresh_token(db: Session, admin_id: int) -> str:
 
 def validate_and_rotate_refresh_token(db: Session, token: str) -> tuple[int, str] | None:
     token_hash = hash_refresh_token(token)
-    stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash)
-    record = db.scalars(stmt).first()
-
     now = datetime.now(timezone.utc)
+
+    claim_stmt = (
+        update(RefreshToken)
+        .where(
+            RefreshToken.token_hash == token_hash,
+            RefreshToken.revoked_at.is_(None),
+            RefreshToken.expires_at > now,
+        )
+        .values(revoked_at=now)
+        .returning(RefreshToken.admin_id)
+    )
+    claimed = db.execute(claim_stmt).first()
+
+    if claimed is not None:
+        admin_id = claimed.admin_id
+        new_token = issue_refresh_token(db, admin_id)
+        db.commit()
+        return admin_id, new_token
+
+    record = db.scalars(
+        select(RefreshToken).where(RefreshToken.token_hash == token_hash)
+    ).first()
+
     if record is None:
         return None
 
-    expires_at = ensure_aware_utc(record.expires_at)
     revoked_at = ensure_aware_utc(record.revoked_at)
-
     if revoked_at is not None:
-        # Reuse of an already-rotated/revoked token is a strong signal of theft
-        # (an attacker replaying a stolen copy while the legit rotation already
-        # happened). Revoke the whole family so a stolen token can't keep being
-        # retried, and log it so the incident isn't silent.
         security_logger.warning("refresh_token_reuse_detected admin_id=%s", record.admin_id)
         db.execute(
             update(RefreshToken)
@@ -43,15 +57,8 @@ def validate_and_rotate_refresh_token(db: Session, token: str) -> tuple[int, str
             .values(revoked_at=now)
         )
         db.commit()
-        return None
 
-    if expires_at < now:
-        return None
-
-    record.revoked_at = now
-    new_token = issue_refresh_token(db, record.admin_id)
-    db.commit()
-    return record.admin_id, new_token
+    return None
 
 def revoke_refresh_token(db: Session, token: str) -> None:
     token_hash = hash_refresh_token(token)

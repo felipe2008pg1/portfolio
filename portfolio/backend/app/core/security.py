@@ -151,17 +151,36 @@ def get_totp_provisioning_uri(
     )
 
 
-def verify_totp_code(secret: str, code: str) -> bool:
+def verify_totp_code(
+    secret: str, code: str, last_used_counter: int | None = None
+) -> tuple[bool, Optional[int]]:
+    """Verifies a TOTP code within a +-1 step window (~90s total) and returns
+    (is_valid, matched_counter). Pass the admin's last successfully-used
+    counter to reject a code tied to a step already consumed — without this,
+    a captured/observed valid code could be replayed repeatedly for as long
+    as it remains inside the verification window (CWE-294: Authentication
+    Bypass by Capture-replay)."""
     if not code or not secret:
-        return False
+        return False, None
+
+    code = code.strip()
+    if not code.isdigit():
+        return False, None
 
     try:
-        return pyotp.TOTP(secret).verify(
-            code.strip(),
-            valid_window=1,
-        )
+        totp = pyotp.TOTP(secret)
+        current_counter = totp.timecode(datetime.now(timezone.utc))
+
+        for offset in (0, -1, 1):
+            counter = current_counter + offset
+            if last_used_counter is not None and counter <= last_used_counter:
+                continue
+            if secrets.compare_digest(totp.generate_otp(counter), code):
+                return True, counter
+
+        return False, None
     except Exception:
-        return False
+        return False, None
 
 
 def generate_backup_codes(count: int = 10) -> list[str]:

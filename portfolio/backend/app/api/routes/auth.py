@@ -258,7 +258,9 @@ def mfa_status(
 
 
 @router.post("/mfa/setup/init", response_model=MfaSetupInitResponse, dependencies=[Depends(verify_csrf)])
+@limiter.limit("5/minute")
 def mfa_setup_init(
+    request: Request,
     username: str = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
