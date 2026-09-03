@@ -32,6 +32,20 @@ class Settings(BaseSettings):
     PII_RETENTION_DAYS: int = 90
     TURNSTILE_SITE_KEY: str
     TURNSTILE_SECRET_KEY: str
+    MFA_ENCRYPTION_KEY: str
+
+    @field_validator("MFA_ENCRYPTION_KEY")
+    @classmethod
+    def validate_mfa_encryption_key(cls, v: str) -> str:
+        from cryptography.fernet import Fernet
+        try:
+            Fernet(v.encode("utf-8"))
+        except Exception:
+            raise ValueError(
+                "Invalid or missing MFA_ENCRYPTION_KEY. "
+                "Generate one with: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
+            )
+        return v
 
     @field_validator("JWT_SECRET_KEY")
     @classmethod

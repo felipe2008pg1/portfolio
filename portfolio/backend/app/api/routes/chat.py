@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
@@ -21,6 +21,21 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 settings = get_settings()
 limiter = Limiter(key_func=get_remote_address)
 
+VISITOR_TOKEN_COOKIE = "visitor_token"
+
+
+def _set_visitor_cookie(response: Response, raw_token: str) -> None:
+    # httpOnly: an XSS elsewhere on the site can no longer read/exfiltrate
+    # this token, unlike the previous localStorage-based storage.
+    response.set_cookie(
+        key=VISITOR_TOKEN_COOKIE,
+        value=raw_token,
+        httponly=True,
+        secure=settings.is_production,
+        samesite="none" if settings.is_production else "lax",
+        max_age=60 * 60 * 24 * 30,
+        path="/api/chat",
+    )
 
 def _require_conversation_by_token(db: Session, token: str | None):
     if not token:
@@ -40,7 +55,7 @@ def _require_conversation_by_id(db: Session, conversation_id: int):
 
 @router.post("/conversations", response_model=ConversationCreateResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit(settings.RATE_LIMIT_CHAT_START)
-async def start_conversation(request: Request, payload: ConversationCreate, db: Session = Depends(get_db)):
+async def start_conversation(request: Request, response: Response, payload: ConversationCreate, db: Session = Depends(get_db)):
     client_ip = get_remote_address(request)
 
     if not await verify_turnstile_token(payload.turnstile_token, client_ip):
@@ -51,7 +66,8 @@ async def start_conversation(request: Request, payload: ConversationCreate, db: 
     except chat_service.IpBlockedError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This conversation is no longer open.")
     security_logger.info("chat_conversation_created id=%s ip=%s", conversation.id, client_ip)
-    return ConversationCreateResponse(visitor_token=raw_token, conversation_status=conversation.status)
+    _set_visitor_cookie(response, raw_token)
+    return ConversationCreateResponse(conversation_status=conversation.status)
 
 
 @router.get("/conversations/me/messages", response_model=list[ChatMessageOut])
@@ -59,10 +75,9 @@ async def start_conversation(request: Request, payload: ConversationCreate, db: 
 async def get_my_messages(
     request: Request,
     after_id: int = 0,
-    x_visitor_token: str | None = Header(default=None, alias="X-Visitor-Token"),
     db: Session = Depends(get_db),
 ):
-    conversation = _require_conversation_by_token(db, x_visitor_token)
+    conversation = _require_conversation_by_token(db, request.cookies.get(VISITOR_TOKEN_COOKIE))
     return chat_service.list_messages(db, conversation.id, after_id=after_id)
 
 
@@ -71,10 +86,9 @@ async def get_my_messages(
 async def send_message(
     request: Request,
     payload: ChatMessageCreate,
-    x_visitor_token: str | None = Header(default=None, alias="X-Visitor-Token"),
     db: Session = Depends(get_db),
 ):
-    conversation = _require_conversation_by_token(db, x_visitor_token)
+    conversation = _require_conversation_by_token(db, request.cookies.get(VISITOR_TOKEN_COOKIE))
     try:
         return chat_service.add_visitor_message(db, conversation, payload.content)
     except chat_service.CooldownError:

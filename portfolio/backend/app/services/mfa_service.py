@@ -2,7 +2,7 @@ import base64
 import io
 from datetime import datetime, timezone
 import qrcode
-from sqlalchemy import select, update
+from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session
 from app.core.security import (
     generate_totp_secret,
@@ -10,6 +10,8 @@ from app.core.security import (
     verify_totp_code,
     generate_backup_codes,
     hash_opaque_token,
+    encrypt_totp_secret,
+    decrypt_totp_secret,
 )
 
 from app.models.admin_user import AdminUser
@@ -26,7 +28,7 @@ def init_mfa_setup(db: Session, admin: AdminUser) -> dict:
     """Generates a new TOTP secret. It remains 'pending' (mfa_enabled=False) until
     the admin confirms it with a valid code in confirm_mfa_setup."""
     secret = generate_totp_secret()
-    admin.mfa_secret = secret
+    admin.mfa_secret = encrypt_totp_secret(secret)
     admin.mfa_enabled = False
     db.commit()
 
@@ -41,7 +43,7 @@ def confirm_mfa_setup(db: Session, admin: AdminUser, code: str) -> list[str] | N
     if not admin.mfa_secret:
         return None
 
-    ok, counter = verify_totp_code(admin.mfa_secret, code, admin.mfa_last_totp_counter)
+    ok, counter = verify_totp_code(decrypt_totp_secret(admin.mfa_secret), code, admin.mfa_last_totp_counter)
     if not ok:
         return None
 
@@ -62,11 +64,29 @@ def verify_mfa_code(db: Session, admin: AdminUser, code: str) -> bool:
         return False
 
     if admin.mfa_secret:
-        ok, counter = verify_totp_code(admin.mfa_secret, code, admin.mfa_last_totp_counter)
+        ok, counter = verify_totp_code(decrypt_totp_secret(admin.mfa_secret), code, admin.mfa_last_totp_counter)
         if ok:
-            admin.mfa_last_totp_counter = counter
+            # Atomic compare-and-swap against the DB value (not the possibly
+            # stale in-memory one): two concurrent requests replaying the
+            # same captured code can't both win — only the first UPDATE to
+            # land claims this counter step, closing the replay race.
+            claim_stmt = (
+                update(AdminUser)
+                .where(
+                    AdminUser.id == admin.id,
+                    or_(
+                        AdminUser.mfa_last_totp_counter.is_(None),
+                        AdminUser.mfa_last_totp_counter < counter,
+                    ),
+                )
+                .values(mfa_last_totp_counter=counter)
+            )
+            result = db.execute(claim_stmt)
             db.commit()
-            return True
+            if result.rowcount > 0:
+                admin.mfa_last_totp_counter = counter
+                return True
+            return False
 
     code_hash = hash_opaque_token(code.strip().upper())
     stmt = (

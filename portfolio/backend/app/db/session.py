@@ -20,10 +20,13 @@ engine = create_engine(
 
 @event.listens_for(Engine, "connect")
 def _enforce_sqlite_pragmas(dbapi_connection, connection_record):
-    """Enables foreign key constraints in SQLite (disabled by default)."""
+    """Enables foreign key constraints in SQLite (disabled by default) and
+    gives concurrent writers (e.g. the concurrency test suite) up to 5s to
+    wait for a lock instead of failing immediately with 'database is locked'."""
     if settings.DATABASE_URL.startswith("sqlite"):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA busy_timeout=5000")
         cursor.close()
 
 SessionLocal = sessionmaker(

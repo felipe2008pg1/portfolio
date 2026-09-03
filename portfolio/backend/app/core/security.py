@@ -5,6 +5,7 @@ from typing import Optional
 
 import jwt
 import pyotp
+from cryptography.fernet import Fernet
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError, VerificationError
 from jwt.exceptions import PyJWTError
@@ -134,6 +135,19 @@ def decode_mfa_pending_token(token: str) -> Optional[str]:
 
     except PyJWTError:
         return None
+
+
+_fernet = Fernet(settings.MFA_ENCRYPTION_KEY.encode("utf-8"))
+
+
+def encrypt_totp_secret(secret: str) -> str:
+    return _fernet.encrypt(secret.encode("utf-8")).decode("utf-8")
+
+
+def decrypt_totp_secret(token: str) -> str:
+    """Raises cryptography.fernet.InvalidToken if the value isn't a valid
+    Fernet ciphertext (e.g. a still-plaintext legacy secret)."""
+    return _fernet.decrypt(token.encode("utf-8")).decode("utf-8")
 
 
 def generate_totp_secret() -> str:

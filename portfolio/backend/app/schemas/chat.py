@@ -13,7 +13,6 @@ class ConversationCreate(BaseModel):
     website: str = Field(default="", max_length=0)
 
 class ConversationCreateResponse(BaseModel):
-    visitor_token: str
     conversation_status: str
 
 class ChatMessageCreate(BaseModel):
