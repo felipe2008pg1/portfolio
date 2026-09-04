@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     RATE_LIMIT_CHAT_POLL: str = "60/minute"
     CHAT_MESSAGE_COOLDOWN_SECONDS: int = 3
     CHAT_MAX_MESSAGES_PER_CONVERSATION: int = 500
+    # Trusted proxy hops between the internet and this process (Railway = 1).
+    # 0 (default) ignores X-Forwarded-For entirely and uses the raw TCP peer.
+    TRUSTED_PROXY_HOPS: int = 0
     RATE_LIMIT_SUPPORT_START: str = "10/hour"
     RATE_LIMIT_ADMIN: str = "60/minute"
     # LGPD/GDPR data minimization: how long to keep visitor IP addresses on
@@ -55,6 +58,13 @@ class Settings(BaseSettings):
                 "Invalid or missing JWT_SECRET_KEY. "
                 "Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(64))\""
             )
+        return v
+
+    @field_validator("TRUSTED_PROXY_HOPS")
+    @classmethod
+    def validate_trusted_proxy_hops(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError("TRUSTED_PROXY_HOPS must be zero or a positive integer.")
         return v
 
     @field_validator("WHATSAPP_NUMBER")

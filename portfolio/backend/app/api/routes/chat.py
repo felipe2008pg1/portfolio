@@ -1,13 +1,22 @@
+import secrets
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from slowapi import Limiter
-from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
-from app.api.deps import get_current_admin, get_db, verify_csrf
+from app.api.deps import (
+    CHAT_CSRF_COOKIE_NAME,
+    get_current_admin,
+    get_db,
+    verify_chat_csrf,
+    verify_csrf,
+)
 from app.core.config import get_settings
+from app.core.ip import get_client_ip
 from app.core.logging import security_logger
 from app.core.turnstile import verify_turnstile_token
 from app.schemas.chat import (
     BlockedIpOut,
+    ChatCsrfTokenOut,
     ChatMessageCreate,
     ChatMessageOut,
     ConversationCreate,
@@ -19,22 +28,33 @@ from app.services import chat_service
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 settings = get_settings()
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=get_client_ip)
 
 VISITOR_TOKEN_COOKIE = "visitor_token"
 
+_CHAT_COOKIE_KWARGS = dict(
+    secure=settings.is_production,
+    samesite="none" if settings.is_production else "lax",
+    max_age=60 * 60 * 24 * 30,
+    path="/api/chat",
+)
+
 
 def _set_visitor_cookie(response: Response, raw_token: str) -> None:
-    # httpOnly: an XSS elsewhere on the site can no longer read/exfiltrate
-    # this token, unlike the previous localStorage-based storage.
     response.set_cookie(
         key=VISITOR_TOKEN_COOKIE,
         value=raw_token,
         httponly=True,
-        secure=settings.is_production,
-        samesite="none" if settings.is_production else "lax",
-        max_age=60 * 60 * 24 * 30,
-        path="/api/chat",
+        **_CHAT_COOKIE_KWARGS,
+    )
+
+
+def _set_chat_csrf_cookie(response: Response, raw_token: str) -> None:
+    response.set_cookie(
+        key=CHAT_CSRF_COOKIE_NAME,
+        value=raw_token,
+        httponly=True,
+        **_CHAT_COOKIE_KWARGS,
     )
 
 def _require_conversation_by_token(db: Session, token: str | None):
@@ -56,7 +76,7 @@ def _require_conversation_by_id(db: Session, conversation_id: int):
 @router.post("/conversations", response_model=ConversationCreateResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit(settings.RATE_LIMIT_CHAT_START)
 async def start_conversation(request: Request, response: Response, payload: ConversationCreate, db: Session = Depends(get_db)):
-    client_ip = get_remote_address(request)
+    client_ip = get_client_ip(request)
 
     if not await verify_turnstile_token(payload.turnstile_token, client_ip):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Security verification failed.")
@@ -67,7 +87,27 @@ async def start_conversation(request: Request, response: Response, payload: Conv
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This conversation is no longer open.")
     security_logger.info("chat_conversation_created id=%s ip=%s", conversation.id, client_ip)
     _set_visitor_cookie(response, raw_token)
-    return ConversationCreateResponse(conversation_status=conversation.status)
+    csrf_token = secrets.token_urlsafe(32)
+    _set_chat_csrf_cookie(response, csrf_token)
+    return ConversationCreateResponse(conversation_status=conversation.status, csrf_token=csrf_token)
+
+
+@router.get("/conversations/me/csrf-token", response_model=ChatCsrfTokenOut)
+@limiter.limit(settings.RATE_LIMIT_CHAT_POLL)
+async def get_chat_csrf_token(
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    _require_conversation_by_token(db, request.cookies.get(VISITOR_TOKEN_COOKIE))
+
+    existing = request.cookies.get(CHAT_CSRF_COOKIE_NAME)
+    if existing:
+        return ChatCsrfTokenOut(csrf_token=existing)
+
+    csrf_token = secrets.token_urlsafe(32)
+    _set_chat_csrf_cookie(response, csrf_token)
+    return ChatCsrfTokenOut(csrf_token=csrf_token)
 
 
 @router.get("/conversations/me/messages", response_model=list[ChatMessageOut])
@@ -81,7 +121,12 @@ async def get_my_messages(
     return chat_service.list_messages(db, conversation.id, after_id=after_id)
 
 
-@router.post("/conversations/me/messages", response_model=ChatMessageOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/conversations/me/messages",
+    response_model=ChatMessageOut,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(verify_chat_csrf)],
+)
 @limiter.limit(settings.RATE_LIMIT_CHAT_MESSAGE)
 async def send_message(
     request: Request,

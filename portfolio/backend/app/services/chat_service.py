@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import secrets
-from sqlalchemy import select, func
+from sqlalchemy import select, or_, update
 from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.core.security import hash_opaque_token, ensure_aware_utc
@@ -116,31 +116,68 @@ def list_messages(db: Session, conversation_id: int, after_id: int = 0, limit: i
     )
 
 
-def _message_count(db: Session, conversation_id: int) -> int:
-    return db.execute(
-        select(func.count()).select_from(ChatMessage).where(ChatMessage.conversation_id == conversation_id)
-    ).scalar_one()
+def _raise_add_visitor_message_error(db: Session, conversation_id: int) -> None:
+    """Called after the atomic UPDATE fails, solely to select the correct
+    exception. The check was already performed atomically during the UPDATE—
+    this read serves only to determine the reason for the error in the response."""
+    fresh = db.get(Conversation, conversation_id)
 
-
-def add_visitor_message(db: Session, conversation: Conversation, content: str) -> ChatMessage:
-    if conversation.status != "open":
+    if fresh is None or fresh.status != "open":
         raise ConversationClosedError()
 
-    if is_ip_blocked(db, conversation.ip_address):
+    if is_ip_blocked(db, fresh.ip_address):
         raise IpBlockedError()
 
+    if fresh.visitor_message_count >= settings.CHAT_MAX_MESSAGES_PER_CONVERSATION:
+        raise ConversationClosedError()
+
     now = _now()
-    last = ensure_aware_utc(conversation.last_visitor_message_at)
+    last = ensure_aware_utc(fresh.last_visitor_message_at)
     cooldown = timedelta(seconds=settings.CHAT_MESSAGE_COOLDOWN_SECONDS)
     if last is not None and (now - last) < cooldown:
         raise CooldownError()
 
-    if _message_count(db, conversation.id) >= settings.CHAT_MAX_MESSAGES_PER_CONVERSATION:
-        raise ConversationClosedError()
+    raise CooldownError()
+
+
+def add_visitor_message(db: Session, conversation: Conversation, content: str) -> ChatMessage:
+    if is_ip_blocked(db, conversation.ip_address):
+        raise IpBlockedError()
+
+    now = _now()
+    cutoff = now - timedelta(seconds=settings.CHAT_MESSAGE_COOLDOWN_SECONDS)
+
+    # Single atomic UPDATE: the cooldown, the message limit, and the
+    # mutation itself occur in the same statement, on the same line. A
+    # concurrent request either commits first (seeing 0 affected rows and
+    # failing) or blocks on the row lock until the first one commits, then
+    # re-evaluates the WHERE clause against the updated value—there is no
+    # read-and-write window where two requests can proceed simultaneously.
+    claim_stmt = (
+        update(Conversation)
+        .where(
+            Conversation.id == conversation.id,
+            Conversation.status == "open",
+            or_(
+                Conversation.last_visitor_message_at.is_(None),
+                Conversation.last_visitor_message_at <= cutoff,
+            ),
+            Conversation.visitor_message_count < settings.CHAT_MAX_MESSAGES_PER_CONVERSATION,
+        )
+        .values(
+            last_visitor_message_at=now,
+            last_message_at=now,
+            visitor_message_count=Conversation.visitor_message_count + 1,
+        )
+        .returning(Conversation.id)
+    )
+    claimed = db.execute(claim_stmt).first()
+
+    if claimed is None:
+        db.rollback()
+        _raise_add_visitor_message_error(db, conversation.id)
 
     message = ChatMessage(conversation_id=conversation.id, sender="visitor", content=content)
-    conversation.last_visitor_message_at = now
-    conversation.last_message_at = now
     db.add(message)
     db.commit()
     db.refresh(message)

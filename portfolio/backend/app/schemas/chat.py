@@ -14,6 +14,10 @@ class ConversationCreate(BaseModel):
 
 class ConversationCreateResponse(BaseModel):
     conversation_status: str
+    csrf_token: str
+
+class ChatCsrfTokenOut(BaseModel):
+    csrf_token: str
 
 class ChatMessageCreate(BaseModel):
     content: str = Field(min_length=1, max_length=2000)

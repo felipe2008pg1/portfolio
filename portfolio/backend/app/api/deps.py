@@ -39,27 +39,36 @@ def get_current_admin(request: Request) -> str:
 CSRF_COOKIE_NAME = "csrf_token"
 CSRF_HEADER_NAME = "X-CSRF-Token"
 
+CHAT_CSRF_COOKIE_NAME = "chat_csrf_token"
+CHAT_CSRF_HEADER_NAME = "X-Chat-CSRF-Token"
 
-def verify_csrf(request: Request) -> None:
-    """Double-submit CSRF check for mutating admin requests.
 
-    The admin session cookies use SameSite=None in production (frontend and
-    backend live on different domains), which disables the browser's native
-    CSRF mitigation. This dependency requires the caller to echo back, in a
-    custom header, the same random value that was set in a non-HttpOnly
-    cookie at login/refresh — something a cross-site form/fetch/img tag can
-    trigger but cannot read or forge, because it can't read cookies from a
-    different origin and CORS blocks the response to a script origin that
-    isn't allowlisted.
-    """
-    cookie_token = request.cookies.get(CSRF_COOKIE_NAME)
-    header_token = request.headers.get(CSRF_HEADER_NAME)
+def _verify_double_submit(request: Request, cookie_name: str, header_name: str) -> None:
+    cookie_token = request.cookies.get(cookie_name)
+    header_token = request.headers.get(header_name)
 
     if not cookie_token or not header_token or not secrets.compare_digest(cookie_token, header_token):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Missing or invalid CSRF token.",
         )
+
+
+def verify_csrf(request: Request) -> None:
+    """Double-submit CSRF check for mutating admin requests."""
+    _verify_double_submit(request, CSRF_COOKIE_NAME, CSRF_HEADER_NAME)
+
+
+def verify_chat_csrf(request: Request) -> None:
+    """Double-submit CSRF check for POST /api/chat/conversations/me/messages.
+
+    The `visitor_token` is `HttpOnly` and `SameSite=None` in production (across different domains), so the browser
+    attaches this cookie to forged cross-site requests. An additional token (`chat_csrf_token`), also 
+    `HttpOnly`, is delivered to the legitimate frontend solely via the JSON body (protected by CORS) 
+    and must be echoed in the `X-Chat-CSRF-Token` header. A cross-site attacker 
+    can trigger the cookie to be sent but cannot read its value.
+    """
+    _verify_double_submit(request, CHAT_CSRF_COOKIE_NAME, CHAT_CSRF_HEADER_NAME)
 
 
 def get_current_admin_ws(websocket: WebSocket) -> str | None:

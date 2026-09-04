@@ -4,9 +4,12 @@
   // Only a (non-secret) UI flag remains in localStorage now — the actual
   // session is an httpOnly cookie automatically attached by the browser.
   var STORAGE_KEY = "chat_has_conversation";
+  var CSRF_STORAGE_KEY = "chat_csrf_token";
+  var CSRF_HEADER = "X-Chat-CSRF-Token";
   var POLL_INTERVAL_MS = 4000;
   var COOLDOWN_MS = 3000;
   var hasConversation = localStorage.getItem(STORAGE_KEY) === "1";
+  var csrfToken = localStorage.getItem(CSRF_STORAGE_KEY) || null;
   var lastMessageId = 0;
   var pollTimer = null;
   var turnstileWidgetId = null;
@@ -89,12 +92,25 @@
           body: JSON.stringify({ turnstile_token: token, website: "" }),
         });
       })
-      .then(function () {
+      .then(function (data) {
         hasConversation = true;
         localStorage.setItem(STORAGE_KEY, "1");
+        if (data && data.csrf_token) {
+          csrfToken = data.csrf_token;
+          localStorage.setItem(CSRF_STORAGE_KEY, csrfToken);
+        }
         if (window.turnstile && turnstileWidgetId !== null) window.turnstile.remove(turnstileWidgetId);
         host.innerHTML = "";
       });
+  }
+
+  function ensureCsrfToken() {
+    if (csrfToken) return Promise.resolve(csrfToken);
+    return chatRequest("/api/chat/conversations/me/csrf-token").then(function (data) {
+      csrfToken = data && data.csrf_token;
+      if (csrfToken) localStorage.setItem(CSRF_STORAGE_KEY, csrfToken);
+      return csrfToken;
+    });
   }
 
   function poll(messagesEl) {
@@ -270,12 +286,26 @@
 
       var ensureConversation = hasConversation ? Promise.resolve() : startConversation(turnstileHost);
 
+      function postMessage(token) {
+        var headers = {};
+        if (token) headers[CSRF_HEADER] = token;
+        return chatRequest("/api/chat/conversations/me/messages", {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify({ content: content, website: honeypot.value }),
+        });
+      }
+
       ensureConversation
-        .then(function () {
-          return chatRequest("/api/chat/conversations/me/messages", {
-            method: "POST",
-            body: JSON.stringify({ content: content, website: honeypot.value }),
-          });
+        .then(ensureCsrfToken)
+        .then(postMessage)
+        .catch(function (error) {
+          if (error.status === 403 && csrfToken) {
+            csrfToken = null;
+            localStorage.removeItem(CSRF_STORAGE_KEY);
+            return ensureCsrfToken().then(postMessage);
+          }
+          throw error;
         })
         .then(function (message) {
           appendMessage(messagesEl, message);

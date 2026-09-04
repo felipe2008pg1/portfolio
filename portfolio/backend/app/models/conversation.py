@@ -15,6 +15,10 @@ class Conversation(Base):
     )
     last_visitor_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    # Denormalized counter, atomically incremented alongside the
+    # cooldown/status check in a single conditional UPDATE (see
+    # chat_service.add_visitor_message) — eliminates the limit race condition.
+    visitor_message_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
     messages: Mapped[list["ChatMessage"]] = relationship(
         back_populates="conversation",
