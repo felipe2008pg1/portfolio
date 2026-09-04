@@ -5,6 +5,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 from app.api.deps import get_current_admin, get_db, verify_csrf
+from app.core.ip import get_client_ip
 from app.core.config import get_settings
 from app.core.logging import security_logger
 from app.core.turnstile import verify_turnstile_token
@@ -76,10 +77,13 @@ def verify_chat_csrf(request: Request) -> None:
 
 def _set_chat_csrf_cookie(response: Response, raw_token: str) -> None:
     response.set_cookie(
-        key=CHAT_CSRF_COOKIE_NAME,
+        key=CHAT_CSRF_COOKIE,
         value=raw_token,
-        httponly=True,
-        **_CHAT_COOKIE_KWARGS,
+        httponly=False,
+        secure=settings.is_production,
+        samesite="none" if settings.is_production else "lax",
+        max_age=60 * 60 * 24 * 30,
+        path="/api/chat",
     )
 
 def _require_conversation_by_token(db: Session, token: str | None):
@@ -111,7 +115,7 @@ async def start_conversation(request: Request, response: Response, payload: Conv
     except chat_service.IpBlockedError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This conversation is no longer open.")
     security_logger.info("chat_conversation_created id=%s ip=%s", conversation.id, client_ip)
-    _set_visitor_cookie(response, raw_token)
+    _set_visitor_cookies(response, raw_token)
     csrf_token = secrets.token_urlsafe(32)
     _set_chat_csrf_cookie(response, csrf_token)
     return ConversationCreateResponse(conversation_status=conversation.status, csrf_token=csrf_token)
@@ -126,7 +130,7 @@ async def get_chat_csrf_token(
 ):
     _require_conversation_by_token(db, request.cookies.get(VISITOR_TOKEN_COOKIE))
 
-    existing = request.cookies.get(CHAT_CSRF_COOKIE_NAME)
+    existing = request.cookies.get(CHAT_CSRF_COOKIE)
     if existing:
         return ChatCsrfTokenOut(csrf_token=existing)
 
