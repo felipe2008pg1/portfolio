@@ -15,6 +15,11 @@ class Conversation(Base):
     )
     last_visitor_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    # Denormalized counter kept in sync with COUNT(chat_messages) for this
+    # conversation. Lets add_visitor_message() enforce the cooldown AND the
+    # CHAT_MAX_MESSAGES_PER_CONVERSATION cap in a single atomic UPDATE ...
+    # WHERE, instead of a check-then-insert that's racy under concurrency.
+    message_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False, server_default="0")
     # Denormalized counter, atomically incremented alongside the
     # cooldown/status check in a single conditional UPDATE (see
     # chat_service.add_visitor_message) — eliminates the limit race condition.

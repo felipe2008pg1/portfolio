@@ -2,21 +2,15 @@ import secrets
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
-from app.api.deps import (
-    CHAT_CSRF_COOKIE_NAME,
-    get_current_admin,
-    get_db,
-    verify_chat_csrf,
-    verify_csrf,
-)
+from app.api.deps import get_current_admin, get_db, verify_csrf
 from app.core.config import get_settings
-from app.core.ip import get_client_ip
 from app.core.logging import security_logger
 from app.core.turnstile import verify_turnstile_token
 from app.schemas.chat import (
     BlockedIpOut,
-    ChatCsrfTokenOut,
+    ChatCsrfTokenResponse,
     ChatMessageCreate,
     ChatMessageOut,
     ConversationCreate,
@@ -28,25 +22,56 @@ from app.services import chat_service
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 settings = get_settings()
-limiter = Limiter(key_func=get_client_ip)
+limiter = Limiter(key_func=get_remote_address)
 
 VISITOR_TOKEN_COOKIE = "visitor_token"
-
-_CHAT_COOKIE_KWARGS = dict(
-    secure=settings.is_production,
-    samesite="none" if settings.is_production else "lax",
-    max_age=60 * 60 * 24 * 30,
-    path="/api/chat",
-)
+CHAT_CSRF_COOKIE = "chat_csrf_token"
+CHAT_CSRF_HEADER = "X-Chat-CSRF-Token"
 
 
-def _set_visitor_cookie(response: Response, raw_token: str) -> None:
+def _set_visitor_cookies(response: Response, raw_token: str) -> None:
+    # httpOnly: an XSS elsewhere on the site can't read/exfiltrate this —
+    # it's the actual bearer credential for the anonymous chat session.
     response.set_cookie(
         key=VISITOR_TOKEN_COOKIE,
         value=raw_token,
         httponly=True,
-        **_CHAT_COOKIE_KWARGS,
+        secure=settings.is_production,
+        samesite="none" if settings.is_production else "lax",
+        max_age=60 * 60 * 24 * 30,
+        path="/api/chat",
     )
+    # SameSite=None (required cross-origin, frontend/backend live on
+    # different domains) means the browser attaches visitor_token even on
+    # cross-site requests — a forged <form>/fetch from another origin can
+    # trigger a POST here. This second cookie is the CSRF compensating
+    # control (double-submit): non-httpOnly so it CAN be handed to the
+    # widget (via GET /csrf-token, since cross-origin JS can't read a
+    # cookie set by a different domain directly), but a cross-site
+    # attacker page can never read it, so it can't be echoed back in the
+    # X-Chat-CSRF-Token header. Kept separate (different name/path) from
+    # the admin panel's csrf_token cookie so the two never collide in a
+    # browser that has both an admin and a visitor session open.
+    response.set_cookie(
+        key=CHAT_CSRF_COOKIE,
+        value=secrets.token_urlsafe(32),
+        httponly=False,
+        secure=settings.is_production,
+        samesite="none" if settings.is_production else "lax",
+        max_age=60 * 60 * 24 * 30,
+        path="/api/chat",
+    )
+
+
+def verify_chat_csrf(request: Request) -> None:
+    cookie_token = request.cookies.get(CHAT_CSRF_COOKIE)
+    header_token = request.headers.get(CHAT_CSRF_HEADER)
+
+    if not cookie_token or not header_token or not secrets.compare_digest(cookie_token, header_token):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Missing or invalid CSRF token.",
+        )
 
 
 def _set_chat_csrf_cookie(response: Response, raw_token: str) -> None:

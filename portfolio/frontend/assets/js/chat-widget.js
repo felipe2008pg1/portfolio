@@ -129,6 +129,10 @@
 
   function loadHistory(messagesEl) {
     if (!hasConversation) return;
+    ensureChatCsrfToken().catch(function () {
+      localStorage.removeItem(STORAGE_KEY);
+      hasConversation = false;
+    });
     chatRequest("/api/chat/conversations/me/messages?after_id=0")
       .then(function (messages) {
         messages.forEach(function (message) {

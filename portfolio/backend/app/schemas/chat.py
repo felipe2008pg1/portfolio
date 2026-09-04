@@ -14,6 +14,9 @@ class ConversationCreate(BaseModel):
 
 class ConversationCreateResponse(BaseModel):
     conversation_status: str
+
+class ChatCsrfTokenResponse(BaseModel):
+    csrf_token: str
     csrf_token: str
 
 class ChatCsrfTokenOut(BaseModel):
