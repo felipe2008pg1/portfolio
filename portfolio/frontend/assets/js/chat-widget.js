@@ -1,11 +1,12 @@
 (function () {
   "use strict";
 
-  var STORAGE_KEY = "chat_visitor_token";
+  // Only a (non-secret) UI flag remains in localStorage now — the actual
+  // session is an httpOnly cookie automatically attached by the browser.
+  var STORAGE_KEY = "chat_has_conversation";
   var POLL_INTERVAL_MS = 4000;
   var COOLDOWN_MS = 3000;
-
-  var visitorToken = localStorage.getItem(STORAGE_KEY) || "";
+  var hasConversation = localStorage.getItem(STORAGE_KEY) === "1";
   var lastMessageId = 0;
   var pollTimer = null;
   var turnstileWidgetId = null;
@@ -28,9 +29,8 @@
   function chatRequest(path, options) {
     options = options || {};
     var headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
-    if (visitorToken) headers["X-Visitor-Token"] = visitorToken;
 
-    return fetch(API_BASE_URL + path, Object.assign({}, options, { headers: headers, credentials: "omit" }))
+    return fetch(API_BASE_URL + path, Object.assign({}, options, { headers: headers, credentials: "include" }))
       .then(function (response) {
         return response.json().catch(function () { return null; }).then(function (data) {
           if (!response.ok) {
@@ -89,16 +89,16 @@
           body: JSON.stringify({ turnstile_token: token, website: "" }),
         });
       })
-      .then(function (result) {
-        visitorToken = result.visitor_token;
-        localStorage.setItem(STORAGE_KEY, visitorToken);
+      .then(function () {
+        hasConversation = true;
+        localStorage.setItem(STORAGE_KEY, "1");
         if (window.turnstile && turnstileWidgetId !== null) window.turnstile.remove(turnstileWidgetId);
         host.innerHTML = "";
       });
   }
 
   function poll(messagesEl) {
-    if (!visitorToken) return;
+    if (!hasConversation) return;
     chatRequest("/api/chat/conversations/me/messages?after_id=" + lastMessageId)
       .then(function (messages) {
         messages.forEach(function (message) {
@@ -112,7 +112,7 @@
   }
 
   function loadHistory(messagesEl) {
-    if (!visitorToken) return;
+    if (!hasConversation) return;
     chatRequest("/api/chat/conversations/me/messages?after_id=0")
       .then(function (messages) {
         messages.forEach(function (message) {
@@ -121,9 +121,9 @@
         });
       })
       .catch(function () {
-        // Stale/invalid token — drop it so the next message starts fresh.
+        // Stale/invalid session — drop the flag so the next message starts fresh.
         localStorage.removeItem(STORAGE_KEY);
-        visitorToken = "";
+        hasConversation = false;
       });
   }
 
@@ -266,9 +266,9 @@
 
       sending = true;
       sendBtn.disabled = true;
-      statusEl.textContent = visitorToken ? "" : t("chat.verifying");
+      statusEl.textContent = hasConversation ? "" : t("chat.verifying");
 
-      var ensureConversation = visitorToken ? Promise.resolve() : startConversation(turnstileHost);
+      var ensureConversation = hasConversation ? Promise.resolve() : startConversation(turnstileHost);
 
       ensureConversation
         .then(function () {

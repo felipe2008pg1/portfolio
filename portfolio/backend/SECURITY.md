@@ -34,7 +34,5 @@ pip-audit -r requirements.txt
 
 
 ## Known gaps (not in scope this round)
-- No rate limit on authenticated admin CRUD routes (`/api/*/admin`,
-  `/api/chat/admin/*`) as defense-in-depth against a stolen session cookie.
 - No versioned migration tool (Alembic is a dependency but unused) — schema
   changes are ad-hoc `ALTER TABLE` scripts (`add_*.py`, `widen_*.py`).

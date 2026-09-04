@@ -83,17 +83,18 @@
 
 ## Security follow-up
 
-- [x] GitGuard scan (2026-08-26, commit `ed4097538f50`) triaged: `python-jose` CVE was a stale/false finding (repo already on `PyJWT`); `sqlalchemy.text()` and DOM-XSS findings were false positives (no injectable/untrusted data reaches those sinks); `missing-integrity` fixed via `crossorigin` on Google Fonts/Turnstile tags (SRI itself is not applicable to either, per vendor docs); `dependabot-missing-cooldown` fixed in `.github/dependabot.yml`.
-- [x] Turnstile diagnostic log reduced to `error-codes` only (was logging the full Cloudflare response).
+- [x] CSRF (double-submit cookie token) — implemented, `verify_csrf` dependency on all mutating admin/chat-admin routes.
+- [x] Rate limit em `/api/auth/refresh` e `/api/auth/logout` — adicionado.
+- [x] Reuso de refresh token — logado (`security_logger.warning`) e revoga a família inteira.
+- [x] Retenção de PII — `PII_RETENTION_DAYS` + `purge_pii.py`, documentado.
+- [x] TOTP replay via race condition — corrigido (compare-and-swap atômico).
+- [x] `mfa_secret` em texto puro — criptografado at rest (Fernet). Ver `backend/SECURITY.md`.
+- [x] Visitor chat token em `localStorage` — migrado pra cookie httpOnly.
 - [ ] Confirm Railway `ALLOWED_HOSTS` includes the real production backend hostname.
 - [ ] Confirm the production Turnstile secret and hostname configuration in Railway/Cloudflare.
 - [ ] Confirm the admin password was changed after the earlier accidental plaintext exposure.
 - [ ] If server-side URL fetching is ever introduced, harden public URL validation against RFC1918, link-local, IPv6 private ranges, and DNS rebinding.
-- [ ] **CSRF real e não mitigado (CWE-352)**: cookies admin usam `SameSite=None` em produção, sem CSRF token. Todas as rotas mutáveis (`POST/PUT/PATCH/DELETE` em `/api/projects`, `/api/skills`, `/api/experiences`, `/api/chat/admin/*`) dependem só do cookie. Ver DECISIONS.md ("CSRF protection: double-submit cookie token").
-- [ ] **Sem rate limit** em `POST /api/auth/refresh`, `POST /api/auth/logout`, `POST /api/auth/mfa/setup/init` — todas as outras rotas de auth têm `@limiter.limit(...)`, essas três não.
-- [ ] **Reuso de refresh token não é logado**: `validate_and_rotate_refresh_token` retorna `None` silenciosamente em token inválido/revogado/expirado. Reuso de token já rotacionado é sinal de roubo (replay) e deveria gerar `security_logger.warning(...)` + idealmente revogar toda a família de tokens do admin, não só rejeitar.
-- [ ] **Sem rate limit em rotas admin autenticadas** (`/api/*/admin`, `/api/chat/admin/*`) como defesa extra contra cookie de sessão roubado/replay.
-- [ ] **Retenção de PII indefinida**: `contact_messages.ip_address` e `conversations.ip_address` não têm política de expurgo documentada (LGPD/GDPR).
+- [ ] Sem rate limit em rotas admin autenticadas (`/api/*/admin`, `/api/chat/admin/*`) como defesa extra contra cookie de sessão roubado/replay — ver `backend/SECURITY.md` (Known gaps).
 
 ## Next logical step for the next session
 
