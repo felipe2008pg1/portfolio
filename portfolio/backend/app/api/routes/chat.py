@@ -10,7 +10,7 @@ from app.core.logging import security_logger
 from app.core.turnstile import verify_turnstile_token
 from app.schemas.chat import (
     BlockedIpOut,
-    ChatCsrfTokenResponse,
+    ChatCsrfTokenOut,
     ChatMessageCreate,
     ChatMessageOut,
     ConversationCreate,
