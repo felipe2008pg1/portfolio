@@ -145,7 +145,11 @@ def add_visitor_message(db: Session, conversation: Conversation, content: str) -
         raise IpBlockedError()
 
     now = _now()
-    cutoff = now - timedelta(seconds=settings.CHAT_MESSAGE_COOLDOWN_SECONDS)
+    # Bind as naive UTC: SQLite returns naive datetimes for stored aware
+    # values, so comparing an aware cutoff against the column in the WHERE
+    # silently never matches (and the aware/naive mix later raises
+    # TypeError in the fallback path). Postgres compares fine either way.
+    cutoff = (now - timedelta(seconds=settings.CHAT_MESSAGE_COOLDOWN_SECONDS)).replace(tzinfo=None)
 
     # Single atomic UPDATE: the cooldown, the message limit, and the
     # mutation itself occur in the same statement, on the same line. A
@@ -165,8 +169,8 @@ def add_visitor_message(db: Session, conversation: Conversation, content: str) -
             Conversation.visitor_message_count < settings.CHAT_MAX_MESSAGES_PER_CONVERSATION,
         )
         .values(
-            last_visitor_message_at=now,
-            last_message_at=now,
+            last_visitor_message_at=now.replace(tzinfo=None),
+            last_message_at=now.replace(tzinfo=None),
             visitor_message_count=Conversation.visitor_message_count + 1,
         )
         .returning(Conversation.id)
