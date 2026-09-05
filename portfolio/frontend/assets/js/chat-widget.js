@@ -129,7 +129,7 @@
 
   function loadHistory(messagesEl) {
     if (!hasConversation) return;
-    ensureChatCsrfToken().catch(function () {
+    ensureCsrfToken().catch(function () {
       localStorage.removeItem(STORAGE_KEY);
       hasConversation = false;
     });
