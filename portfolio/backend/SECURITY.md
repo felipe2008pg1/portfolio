@@ -16,6 +16,23 @@ sessions.
 - Visitor chat token lived in `localStorage` (JS/XSS-readable) — now an
   httpOnly cookie scoped to `/api/chat`.
 
+## Fixed — chat hardening round
+- Missing CSRF protection on `POST /api/chat/conversations/me/messages`:
+  the `visitor_token` cookie is `SameSite=None` in production (required,
+  cross-origin), so it was forgeable cross-site. Fixed with a double-submit
+  `chat_csrf_token` cookie + `X-Chat-CSRF-Token` header (`verify_chat_csrf`
+  in `deps.py`).
+- Cooldown check-then-write race in `add_visitor_message`: two concurrent
+  requests could both pass the cooldown check before either committed.
+  Fixed with a single atomic `UPDATE ... WHERE ... RETURNING` that checks
+  and claims the cooldown, the `CHAT_MAX_MESSAGES_PER_CONVERSATION` cap,
+  and the increment in one statement.
+- `request.client.host` behind the Railway proxy was either the edge's
+  internal IP (rate limiting/IP-blocking effectively global) or trivially
+  spoofable via `X-Forwarded-For`, depending on config. Fixed with
+  `core/ip.get_client_ip()` + `TRUSTED_PROXY_HOPS`, which trusts exactly N
+  proxy hops counted from the right, ignoring anything an attacker prepends.
+
 ## Already correct (verified, not re-touched)
 - CORS: single `CORSMiddleware`, explicit origin allowlist.
 - `TrustedHostMiddleware` added last (outermost, runs first).
@@ -34,5 +51,6 @@ pip-audit -r requirements.txt
 
 
 ## Known gaps (not in scope this round)
-- No versioned migration tool (Alembic is a dependency but unused) — schema
-  changes are ad-hoc `ALTER TABLE` scripts (`add_*.py`, `widen_*.py`).
+- No rate limit on the polling-heavy `GET /api/chat/conversations/me/messages`
+  and admin conversation-list endpoints beyond the shared per-route limiter —
+  low risk (read-only) but not defense-in-depth against a stolen session.

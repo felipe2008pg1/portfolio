@@ -49,7 +49,7 @@ Backend, admin CRUD, public rendering, and i18n for Experience are implemented i
 
 - Backend: `backend/app/models/experience.py`, `schemas/experience.py`, `services/experience_service.py`, `api/routes/experiences.py` (public `GET /api/experiences`, admin `GET /api/experiences/admin`, `POST/PUT/DELETE /api/experiences[/{id}]`). Router registered in `main.py`.
 - `logo_url` field (String(500), nullable, http/https validated) exists on the model/schemas.
-- **Still blocked**: no migration system in use. `logo_url` column must be added manually to the production Neon `experiences` table: `ALTER TABLE experiences ADD COLUMN logo_url VARCHAR(500);` — unconfirmed whether this has been run.
+- **Resolved 2026-09-05**: Alembic adopted (baseline + `visitor_message_count` migrations, both `stamp`ed/applied in local and production Postgres). `logo_url` is part of the baseline — no more manual `ALTER TABLE` needed for schema changes going forward.
 - Admin dashboard now also has a 5th stat card, `statTotalExperiences` (see below) — delivered this session, not confirmed applied.
 
 ## Repo/chat sync reality (read before trusting any "confirmed" claim in these docs)
@@ -103,11 +103,11 @@ Public support chat is code-complete: visitor widget on `index.html`/`404.html` 
 
 - **Security audit 2026-08-31**: CSRF (no token, `SameSite=None`), missing rate limits on refresh/logout/mfa-setup-init, and unlogged refresh-token reuse — see TODO.md "Security follow-up" and DECISIONS.md.
 - ~~`backend/app/db/init_db.py` is empty/unused.~~ File no longer exists in the repo — this note was stale, removed 2026-08-30.
-- Alembic is installed but not actively used.
+- ~~Alembic is installed but not actively used.~~ Resolved 2026-09-05 — Alembic is now the schema-change mechanism (see `backend/alembic/`), baseline stamped in both local and production DBs.
 - Duplicate/placeholder README documentation remains.
 - Production `ALLOWED_HOSTS` must be confirmed after TrustedHostMiddleware was enabled.
 - Turnstile diagnostic logging still needs review.
-- Major dependency updates and `python-jose` → `PyJWT` migration remain intentionally postponed.
+- Major dependency updates remain intentionally postponed. `python-jose` → `PyJWT` migration is done (confirmed: `PyJWT` in `requirements.txt`, `import jwt` in `security.py`, no `jose` references left).
 - **`frontend/assets/js/dashboard.js` (the orphan, distinct from `frontend/painel-fg-2026x/assets/js/dashboard.js`) is still present in the repo as of the 2026-08-31 clone**, despite CHANGELOG_AI.md (Phase "2026-08-30") recording it as deleted. Re-confirmed unreferenced by any `.html` file via `grep` this session — genuinely dead, safe to delete. Likely explanation: the deletion was delivered to Felipe as an instruction but never actually applied/committed to his working tree — consistent with the "Repo/chat sync reality" note above. Don't assume it's gone until Felipe confirms he removed it.
 - **Repo history was squashed**: the 2026-08-31 clone has a single commit (`Bugs fixed`, `0060043`). None of the phase-by-phase commit history CHANGELOG_AI.md implicitly assumes is retrievable via `git log` — treat CHANGELOG_AI.md as the only remaining record of *intent*, not as something you can `git blame`/diff against for what actually shipped when.
 

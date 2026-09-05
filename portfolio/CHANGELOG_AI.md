@@ -355,6 +355,18 @@ Get Felipe's confirmation that this phase's files are pushed and live (frontend 
 
 **Added**
 - `backend/app/models/conversation.py`, `backend/app/models/chat_message.py` — new tables `conversations`/`chat_messages`, created automatically by `Base.metadata.create_all()` on startup (no manual migration needed, unlike `experiences.logo_url`).
+
+## 2026-09-05 — Security hardening pass (FASE 1–6) + Alembic adoption
+
+Multi-session pass fixing real (not false-positive) findings across auth, MFA, chat, and infra, plus adopting Alembic for schema changes. Summary (see `backend/SECURITY.md` for the authoritative, maintained list):
+
+- Duplicate `/api/auth/csrf-token` route; missing rate limit on `/refresh`/`/logout`.
+- TOTP replay race (atomic compare-and-swap) and TOTP secret encryption at rest (Fernet, `MFA_ENCRYPTION_KEY`).
+- Visitor chat token moved from `localStorage`/`X-Visitor-Token` header to an `httpOnly` cookie.
+- Alembic adopted: baseline migration generated from the live schema, `stamp head` applied to local and production Postgres without touching existing data; `visitor_message_count` added as a real migration afterward (first schema change to go through the new process).
+- Chat hardening: double-submit CSRF (`chat_csrf_token`/`X-Chat-CSRF-Token`) on `POST .../messages`; cooldown + `CHAT_MAX_MESSAGES_PER_CONVERSATION` enforced in one atomic `UPDATE ... RETURNING` (was check-then-write, racy); `core/ip.get_client_ip()` + `TRUSTED_PROXY_HOPS` replacing raw `request.client.host` (was either always the Railway edge's own IP, or spoofable, depending on config).
+- Automated test suite added (`backend/tests/`, pytest): security + concurrency tests for all of the above, run in CI alongside `pip-audit`.
+- Post-deploy incident (self-inflicted, fixed same session): a stray Alembic migration (`d52fd2f62fee`) from an earlier draft of the `message_count` fix created a second head/branch and a duplicate model column; caused a prod 500 until the orphan migration and column were removed. Lesson: `alembic heads` should show exactly one head before merging.
 - `backend/app/schemas/chat.py`, `backend/app/services/chat_service.py`, `backend/app/api/routes/chat.py` — public visitor endpoints (`/api/chat/conversations`, `/api/chat/conversations/me/messages`) and admin endpoints (`/api/chat/admin/conversations[...]`), registered in `main.py`.
 - Visitor identity: opaque server-issued token (`secrets.token_urlsafe(32)`), stored only as a SHA-256 hash (`token_hash`, same pattern as `RefreshToken`), sent by the client via `X-Visitor-Token` header. `main.py` CORS `allow_headers` updated to permit it; `allow_methods` gained `PATCH` for the status-update endpoint.
 - Server-side cooldown (`CHAT_MESSAGE_COOLDOWN_SECONDS=3`) and a hard per-conversation message cap (`CHAT_MAX_MESSAGES_PER_CONVERSATION=500`) enforced in `chat_service.add_visitor_message`, independent of any client-side timer.

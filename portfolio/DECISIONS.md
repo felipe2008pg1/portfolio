@@ -10,7 +10,9 @@
 
 ## Chat visitor identity: opaque server-issued token, not real auth
 
-**Decision:** Visitors are identified by a random token generated server-side (`secrets.token_urlsafe(32)`), returned once, stored client-side in `localStorage`, and sent back via the `X-Visitor-Token` header. Only its SHA-256 hash is persisted (`Conversation.token_hash`), mirroring `RefreshToken.token_hash`.
+**Decision:** Visitors are identified by a random token generated server-side (`secrets.token_urlsafe(32)`). Only its SHA-256 hash is persisted (`Conversation.token_hash`), mirroring `RefreshToken.token_hash`.
+
+**Update 2026-09-05:** delivery mechanism changed from `localStorage` + `X-Visitor-Token` header to an `httpOnly` cookie (`visitor_token`, scoped to `/api/chat`) — the original approach left the bearer token readable by any XSS on the page. A second cookie/token pair (`chat_csrf_token` / `X-Chat-CSRF-Token`) now double-submit-protects the one mutating endpoint (`POST .../messages`) against the `SameSite=None` cross-origin exposure this cookie-based approach otherwise reopens. The paragraph below (localStorage-loss caveat) still applies conceptually — clearing cookies has the same effect clearing `localStorage` used to.
 
 **Reason:** The public site has no visitor accounts. This is the minimum mechanism to correlate a visitor's messages across page reloads without inventing a login system for anonymous chat.
 
@@ -25,6 +27,8 @@
 **Reason:** Turnstile tokens are single-use and short-lived; requiring one per message would break the chat UX for no real security gain once a conversation is already open and rate-limited. The cooldown is enforced in `chat_service.add_visitor_message` using the DB row's `last_visitor_message_at`, so a client that skips the JS-side timer and calls the API directly still gets rejected (429).
 
 **Consequences:** A verified visitor could still spam within the 3s/rate-limit bounds; `CHAT_MAX_MESSAGES_PER_CONVERSATION` (500) caps worst-case storage abuse per token.
+
+**Update 2026-09-05:** the cooldown-check and the cap-check were originally read-then-write (racy — concurrent requests could both pass either check before either committed). Both are now enforced in the single atomic `UPDATE ... WHERE ... RETURNING` in `chat_service.add_visitor_message`, so the numbers above are now a hard guarantee, not a best-effort one.
 
 ---
 
@@ -48,13 +52,15 @@
 
 **Consequences:** Fixed by deleting the duplicate block (file: 992 → 972 lines). No test currently guards against this regressing. Consider it whenever `dashboard.js` grows a new "add setup code at the end of the file" edit — check `grep -c "DOMContentLoaded" dashboard.js` returns `1` before shipping.
 
-## CSRF protection: double-submit cookie token (proposed, not yet implemented)
+## CSRF protection: double-submit cookie token
 
-**Decision:** Issue a non-HttpOnly `csrf_token` cookie alongside `access_token`/`refresh_token` at login/refresh. Every mutating admin request must echo it in an `X-CSRF-Token` header; the backend compares header vs. cookie and rejects (403) on mismatch/absence.
+**Decision:** Issue a `csrf_token` cookie alongside `access_token`/`refresh_token` at login/refresh. Every mutating admin request must echo it in an `X-CSRF-Token` header; the backend compares header vs. cookie and rejects (403) on mismatch/absence.
 
 **Reason:** Admin cookies use `SameSite=None` in production (required — frontend/Vercel and backend/Railway are different origins), which disables the browser-native CSRF mitigation. `SameSite=None` + credentialed CORS with a fixed origin allowlist reduces but doesn't eliminate CSRF (XSS on any allowed origin, subdomain takeover, misconfigured proxy could still forge a request). Double-submit is the standard fallback when `SameSite` can't be relied on.
 
-**Consequences:** One more cookie + header on every admin mutating request; `admin-api.js` must read `csrf_token` via `document.cookie` (must stay non-HttpOnly) and attach it manually. GET routes unaffected. Not yet implemented — tracked in TODO.md Security follow-up.
+**Consequences:** One more cookie + header on every admin mutating request. GET routes unaffected.
+
+**Update 2026-09-05:** implemented (`verify_csrf` in `deps.py`). The same pattern was extended to the visitor chat's one mutating endpoint via a separate `chat_csrf_token`/`X-Chat-CSRF-Token` pair (kept distinct so an admin session and a visitor chat session open in the same browser never collide on cookie name). Both chat cookies ended up `httpOnly` — the frontend never reads them via `document.cookie` (impossible anyway, cross-origin); the CSRF value is instead handed to the widget once in the conversation-start response body, mirroring how `access_token` itself is never exposed to JS.
 
 ## Chat warning text: scoped exception to the no-innerHTML rule
 

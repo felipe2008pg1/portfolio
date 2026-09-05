@@ -46,13 +46,13 @@ Experience is now implemented as a first-class content type. The model contains 
 
 The service provides public published listing, authenticated full listing, create, update, get-by-id, and delete operations. Ordering is `display_order`, then `id`.
 
-No dedicated migration for `experiences` was found. The current project convention is startup `Base.metadata.create_all()`, which creates missing tables but does not modify existing schemas.
+`experiences.logo_url` and every table/column added since are now covered by the Alembic baseline migration — new schema changes go through `alembic revision --autogenerate` + `alembic upgrade head`, not manual `ALTER TABLE`/`create_all()`.
 
 ## Database
 
 Known tables include `admin_users`, `projects`, `skills`, `experiences`, `contact_messages`, `refresh_tokens`, and `mfa_backup_codes`.
 
-Schema changes are not managed through active Alembic migrations. Existing one-off migrations and `Base.metadata.create_all()` remain the project convention.
+Schema changes are managed through Alembic (`backend/alembic/`), stamped to the current baseline in both local and production databases. `Base.metadata.create_all()` still runs on startup as a harmless no-op safety net for a totally fresh DB, but is no longer how schema changes are actually delivered.
 
 ## Security
 
