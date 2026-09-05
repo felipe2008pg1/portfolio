@@ -19,7 +19,6 @@ class Conversation(Base):
     # conversation. Lets add_visitor_message() enforce the cooldown AND the
     # CHAT_MAX_MESSAGES_PER_CONVERSATION cap in a single atomic UPDATE ...
     # WHERE, instead of a check-then-insert that's racy under concurrency.
-    message_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False, server_default="0")
     # Denormalized counter, atomically incremented alongside the
     # cooldown/status check in a single conditional UPDATE (see
     # chat_service.add_visitor_message) — eliminates the limit race condition.
