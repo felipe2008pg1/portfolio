@@ -175,7 +175,11 @@ def add_visitor_message(db: Session, conversation: Conversation, content: str) -
         )
         .returning(Conversation.id)
     )
-    claimed = db.execute(claim_stmt).first()
+    # synchronize_session=False: we don't need the ORM to keep `conversation`
+    # in sync in-place, and letting it try to re-evaluate the WHERE clause in
+    # Python chokes on the datetime comparison (raises inside SQLAlchemy's
+    # bulk_persistence evaluator instead of just running the SQL).
+    claimed = db.execute(claim_stmt, execution_options={"synchronize_session": False}).first()
 
     if claimed is None:
         db.rollback()
