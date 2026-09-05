@@ -92,7 +92,19 @@ Everything here — backend, frontend, security, deployment — was designed and
 - 🔗 **SSRF-hardened URL validation** on every user-supplied link field — blocks `localhost`, private, link-local, and reserved IP ranges before they're ever accepted.
 - 🕵️ **PII data minimization** — visitor IP addresses on contact messages and chat conversations are automatically purged after a configurable retention window.
 - 🚫 **No internal errors ever reach the client** — everything is logged server-side and returned as a safe, generic message.
+- 🔑 **TOTP secrets encrypted at rest** (Fernet) — a database leak alone doesn't hand over working MFA codes.
+- 🧾 **CSRF protection extends to the visitor chat** — a double-submit token, independent of the `HttpOnly` session cookie, is required on every message sent, closing the gap a cross-origin `SameSite=None` cookie would otherwise leave open.
+- ⚛️ **Race-condition-safe by design** — refresh-token rotation, TOTP/backup-code consumption, and chat cooldown/message-cap enforcement are all atomic, single-statement DB operations; concurrent requests can never double-spend the same one-time action.
+- 🌐 **Trusted-proxy IP resolution** — the client IP used for rate limiting and abuse blocking is derived from a fixed, configured number of trusted proxy hops, never taken verbatim from a client-controlled header.
 - 🔄 Ongoing dependency hygiene via Dependabot (with cooldown windows) and periodic manual security audits.
+
+---
+
+## 🧪 Testing & migrations
+
+- ✅ Automated **security and concurrency test suite** (pytest) — covers CSRF enforcement, TOTP/backup-code replay protection, and race conditions under concurrent load.
+- 🔍 **`pip-audit`** dependency vulnerability scanning in CI.
+- 🗃️ **Alembic**-managed database schema — every schema change is a reviewable, reversible migration.
 
 ---
 
@@ -121,12 +133,14 @@ No frontend framework. No build step. Pure HTML/CSS/JavaScript — fast, depende
 ```text
 portfolio/
 ├── backend/
-│   └── app/
-│       ├── api/routes/      # auth, contact, projects, skills, experiences
-│       ├── core/            # config, security, middleware, Turnstile, logging
-│       ├── models/          # SQLAlchemy models
-│       ├── schemas/         # Pydantic validation schemas
-│       └── services/        # business logic
+│   ├── alembic/             # versioned DB schema migrations
+│   ├── app/
+│   │   ├── api/routes/      # auth, contact, projects, skills, experiences, chat
+│   │   ├── core/            # config, security, middleware, Turnstile, logging
+│   │   ├── models/          # SQLAlchemy models
+│   │   ├── schemas/         # Pydantic validation schemas
+│   │   └── services/        # business logic
+│   └── tests/               # security & concurrency test suite (pytest)
 └── frontend/
     ├── index.html           # public site
     ├── 404.html
