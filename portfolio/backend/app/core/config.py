@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     PII_RETENTION_DAYS: int = 90
     TURNSTILE_SITE_KEY: str
     TURNSTILE_SECRET_KEY: str
-    MFA_ENCRYPTION_KEY: str
+    MFA_ENCRYPTION_KEY: str = "default_build_key_change_in_production"
 
     @field_validator("MFA_ENCRYPTION_KEY")
     @classmethod
