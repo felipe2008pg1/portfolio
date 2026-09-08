@@ -40,7 +40,10 @@ app.add_exception_handler(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    allow_origins=[
+            "https://portfoliofelipe2008pg1.vercel.app",
+            "http://localhost:3000",
+        ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Content-Type", "X-Visitor-Token", "X-CSRF-Token"],)
