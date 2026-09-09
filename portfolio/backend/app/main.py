@@ -45,8 +45,8 @@ app.add_middleware(
             "http://localhost:3000",
         ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allow_headers=["Content-Type", "X-Visitor-Token", "X-CSRF-Token"],)
+    allow_methods=["*"],
+    allow_headers=["*"],)
 
 app.add_middleware(SecurityHeadersMiddleware)
 
