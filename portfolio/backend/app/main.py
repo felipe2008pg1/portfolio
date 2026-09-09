@@ -39,22 +39,26 @@ app.add_exception_handler(
 )
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-            "https://portfoliofelipe2008pg1.vercel.app",
-            "http://localhost:3000",
-        ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],)
+    TrustedHostMiddleware,
+    allowed_hosts=settings.allowed_hosts_list,
+)
 
 app.add_middleware(SecurityHeadersMiddleware)
 
-# Added last so it wraps outermost and runs first: rejects requests with a
-# spoofed/invalid Host header (Host Header Injection) before CORS/routing.
+# CORSMiddleware added last so it wraps outermost and runs first: it
+# intercepts the preflight OPTIONS request before any other middleware, and
+# attaches Access-Control-Allow-Origin even to error responses (400/403/429/
+# 500) from downstream middleware/routes — otherwise real errors get masked
+# as opaque "CORS" failures in the browser.
 app.add_middleware(
-    TrustedHostMiddleware,
-    allowed_hosts=settings.allowed_hosts_list,
+    CORSMiddleware,
+    allow_origins=settings.cors_origins_list or [
+        "https://portfoliofelipe2008pg1.vercel.app",
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.exception_handler(StarletteHTTPException)
