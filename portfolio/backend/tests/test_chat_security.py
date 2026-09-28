@@ -29,7 +29,7 @@ def test_send_message_without_csrf_header_is_rejected(client, monkeypatch):
 def test_send_message_with_valid_csrf_header_succeeds(client, monkeypatch):
     _start_conversation(client, monkeypatch)
 
-    csrf = client.get("/api/chat/csrf-token").json()["csrf_token"]
+    csrf = client.get("/api/chat/conversations/me/csrf-token").json()["csrf_token"]
     resp = client.post(
         "/api/chat/conversations/me/messages",
         json={"content": "hello", "website": ""},
@@ -41,7 +41,7 @@ def test_send_message_with_valid_csrf_header_succeeds(client, monkeypatch):
 def test_send_message_with_wrong_csrf_value_is_rejected(client, monkeypatch):
     _start_conversation(client, monkeypatch)
 
-    client.get("/api/chat/csrf-token").json()["csrf_token"]
+    client.get("/api/chat/conversations/me/csrf-token").json()["csrf_token"]
     resp = client.post(
         "/api/chat/conversations/me/messages",
         json={"content": "hello", "website": ""},
@@ -63,7 +63,7 @@ def test_csrf_token_cookie_is_not_httponly_but_visitor_token_is(client, monkeypa
 
 def test_cooldown_blocks_second_message_sent_immediately(client, monkeypatch):
     _start_conversation(client, monkeypatch)
-    csrf = client.get("/api/chat/csrf-token").json()["csrf_token"]
+    csrf = client.get("/api/chat/conversations/me/csrf-token").json()["csrf_token"]
     headers = {"X-Chat-CSRF-Token": csrf}
 
     first = client.post(
@@ -80,7 +80,7 @@ def test_cooldown_blocks_second_message_sent_immediately(client, monkeypatch):
 def test_message_cap_is_enforced(client, monkeypatch):
     settings = get_settings()
     _start_conversation(client, monkeypatch)
-    csrf = client.get("/api/chat/csrf-token").json()["csrf_token"]
+    csrf = client.get("/api/chat/conversations/me/csrf-token").json()["csrf_token"]
     headers = {"X-Chat-CSRF-Token": csrf}
 
     from app.db.session import SessionLocal
@@ -92,7 +92,7 @@ def test_message_cap_is_enforced(client, monkeypatch):
             db, client.cookies.get("visitor_token")
         )
         from datetime import datetime, timedelta, timezone
-        conversation.message_count = settings.CHAT_MAX_MESSAGES_PER_CONVERSATION - 1
+        conversation.visitor_message_count = settings.CHAT_MAX_MESSAGES_PER_CONVERSATION - 1
         conversation.last_visitor_message_at = datetime.now(timezone.utc) - timedelta(hours=1)
         db.commit()
     finally:

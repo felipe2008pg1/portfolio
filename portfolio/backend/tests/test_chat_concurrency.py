@@ -60,7 +60,7 @@ def test_cooldown_cannot_be_bypassed_by_concurrent_requests():
 
     db = SessionLocal()
     try:
-        assert db.get(Conversation, conversation_id).message_count == 1
+        assert db.get(Conversation, conversation_id).visitor_message_count == 1
     finally:
         db.close()
 
@@ -74,7 +74,7 @@ def test_message_cap_cannot_be_exceeded_by_concurrent_requests():
         conversation = db.get(Conversation, conversation_id)
         from app.core.config import get_settings
         settings = get_settings()
-        conversation.message_count = settings.CHAT_MAX_MESSAGES_PER_CONVERSATION - 1
+        conversation.visitor_message_count = settings.CHAT_MAX_MESSAGES_PER_CONVERSATION - 1
         conversation.last_visitor_message_at = datetime.now(timezone.utc) - timedelta(hours=1)
         db.commit()
     finally:
@@ -99,6 +99,6 @@ def test_message_cap_cannot_be_exceeded_by_concurrent_requests():
     try:
         settings = get_settings()
         conv = db.get(Conversation, conversation_id)
-        assert conv.message_count == settings.CHAT_MAX_MESSAGES_PER_CONVERSATION
+        assert conv.visitor_message_count == settings.CHAT_MAX_MESSAGES_PER_CONVERSATION
     finally:
         db.close()
