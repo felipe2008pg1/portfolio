@@ -1,14 +1,8 @@
 {
-  "builds": [
+  "rewrites": [
     {
-      "src": "main.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "main.py"
+      "source": "/api/:path*",
+      "destination": "https://portfolio-production-7a1b.up.railway.app/api/:path*"
     }
   ]
 }
