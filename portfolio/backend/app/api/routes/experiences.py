@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
-
 from app.api.deps import get_current_admin, get_db, verify_csrf
 from app.core.config import get_settings
+from app.core.limiter import limiter
 from app.schemas.experience import (
     ExperienceCreate,
     ExperienceOut,
@@ -18,7 +16,6 @@ router = APIRouter(
     tags=["Experiences"],
 )
 settings = get_settings()
-limiter = Limiter(key_func=get_remote_address)
 
 
 @router.get("", response_model=list[ExperienceOut])

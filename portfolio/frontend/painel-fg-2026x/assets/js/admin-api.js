@@ -29,7 +29,9 @@ async function adminRequest(path, options = {}, isRetry = false) {
     credentials: "include",
   });
 
-  if (response.status === 401 && !isRetry && path !== "/api/auth/login" && path !== "/api/auth/refresh") {
+  const NO_REFRESH_PATHS = ["/api/auth/login", "/api/auth/mfa/verify", "/api/auth/refresh"];
+
+  if (response.status === 401 && !isRetry && !NO_REFRESH_PATHS.includes(path)) {
     try {
       await adminRequest("/api/auth/refresh", { method: "POST" }, true);
       cachedCsrfToken = null;

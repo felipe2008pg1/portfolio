@@ -4,13 +4,13 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from app import models  # noqa: F401 (registers models in Base.metadata)
 from app.api.routes import auth, chat, contact, experiences, projects, skills
 from app.core.config import get_settings
+from app.core.limiter import limiter
 from app.core.logging import configure_logging
 from app.core.middleware import SecurityHeadersMiddleware
 from app.db.base import Base
@@ -21,8 +21,6 @@ settings = get_settings()
 configure_logging(settings.ENVIRONMENT)
 
 logger = logging.getLogger(__name__)
-
-limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
     title="Felipe Gonzalez — Portfolio API",

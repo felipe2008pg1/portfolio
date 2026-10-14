@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 import secrets
 
 from app.api.deps import get_db, get_current_admin, verify_csrf, CSRF_COOKIE_NAME
 from app.core.config import get_settings
+from app.core.ip import get_client_ip
+from app.core.limiter import limiter
 from app.core.security import create_access_token, create_mfa_pending_token, decode_mfa_pending_token
 from app.core.turnstile import verify_turnstile_token
 from app.schemas.auth import (
@@ -31,7 +31,6 @@ from app.services.auth_service import (
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
-limiter = Limiter(key_func=get_remote_address)
 
 
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
@@ -73,7 +72,7 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
 @router.post("/login", response_model=LoginResponse)
 @limiter.limit(settings.RATE_LIMIT_LOGIN)
 async def login(request: Request, response: Response, payload: LoginRequest, db: Session = Depends(get_db)):
-    client_ip = get_remote_address(request)
+    client_ip = get_client_ip(request)
 
     if not await verify_turnstile_token(payload.turnstile_token, client_ip):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Security check failed.")
@@ -108,7 +107,7 @@ def mfa_verify(
     payload: MfaVerifyRequest,
     db: Session = Depends(get_db),
 ):
-    client_ip = get_remote_address(request)
+    client_ip = get_client_ip(request)
     username = decode_mfa_pending_token(payload.mfa_token)
 
     if not username:

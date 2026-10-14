@@ -1,6 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 from app.api.deps import get_current_admin, get_db, verify_csrf
 from app.core.config import get_settings
@@ -9,7 +7,6 @@ from app.services import skill_service
 
 router = APIRouter(prefix="/api/skills", tags=["skills"])
 settings = get_settings()
-limiter = Limiter(key_func=get_remote_address)
 
 @router.get("", response_model=list[SkillOut])
 def list_skills(db: Session = Depends(get_db)):

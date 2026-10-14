@@ -1,12 +1,11 @@
 import secrets
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 from app.api.deps import get_current_admin, get_db, verify_csrf
 from app.core.ip import get_client_ip
 from app.core.config import get_settings
+from app.core.limiter import limiter
 from app.core.logging import security_logger
 from app.core.turnstile import verify_turnstile_token
 from app.schemas.chat import (
@@ -23,7 +22,6 @@ from app.services import chat_service
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 settings = get_settings()
-limiter = Limiter(key_func=get_remote_address)
 
 VISITOR_TOKEN_COOKIE = "visitor_token"
 CHAT_CSRF_COOKIE = "chat_csrf_token"
