@@ -3,8 +3,11 @@ from sqlalchemy.orm import Session
 from app.models.skill import Skill
 from app.schemas.skill import SkillCreate, SkillUpdate
 
+# Hard cap so a runaway table can never be loaded into memory in one request.
+MAX_LIST_ROWS = 200
+
 def list_skills(db: Session) -> list[Skill]:
-    stmt = select(Skill).order_by(Skill.category, Skill.display_order, Skill.id)
+    stmt = select(Skill).order_by(Skill.category, Skill.display_order, Skill.id).limit(MAX_LIST_ROWS)
     return list(db.scalars(stmt).all())
 
 def get_skill(db: Session, skill_id: int) -> Skill | None:

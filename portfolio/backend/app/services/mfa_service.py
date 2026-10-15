@@ -1,7 +1,6 @@
 import base64
 import io
 from datetime import datetime, timezone
-import qrcode
 from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session
 from app.core.security import (
@@ -18,6 +17,8 @@ from app.models.admin_user import AdminUser
 from app.models.mfa_backup_code import MfaBackupCode
 
 def _generate_qr_base64(data: str) -> str:
+    # Lazy import: qrcode pulls in Pillow and is only needed during MFA setup.
+    import qrcode
     img = qrcode.make(data)
     buf = io.BytesIO()
     img.save(buf, format="PNG")

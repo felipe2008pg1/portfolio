@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
-from app.api.deps import get_current_admin, get_db, verify_csrf
+from app.api.deps import get_current_admin, get_db, public_cache, verify_csrf
 from app.core.config import get_settings
 from app.core.limiter import limiter
 from app.schemas.experience import (
@@ -18,7 +18,7 @@ router = APIRouter(
 settings = get_settings()
 
 
-@router.get("", response_model=list[ExperienceOut])
+@router.get("", response_model=list[ExperienceOut], dependencies=[Depends(public_cache)])
 def list_public_experiences(
     db: Session = Depends(get_db),
 ):

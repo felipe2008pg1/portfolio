@@ -12,10 +12,24 @@ if settings.DATABASE_URL.startswith("sqlite"):
     # Session (via the get_db dependency), which is never shared between threads.
     connect_args = {"check_same_thread": False}
 
+pool_args = {}
+
+if not settings.DATABASE_URL.startswith("sqlite"):
+    # Small footprint for a single-worker deployment on Neon's pooled endpoint:
+    # the default (5 + 10 overflow) can hold up to 15 server-side connections.
+    # pool_recycle drops connections before Neon/pgbouncer idles them out.
+    pool_args = {
+        "pool_size": 3,
+        "max_overflow": 2,
+        "pool_timeout": 10,
+        "pool_recycle": 300,
+    }
+
 engine = create_engine(
     settings.DATABASE_URL,
     connect_args=connect_args,
     pool_pre_ping=True,
+    **pool_args,
 )
 
 @event.listens_for(Engine, "connect")

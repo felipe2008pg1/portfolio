@@ -1,7 +1,7 @@
 import secrets
 from typing import Generator
 from fastapi import Depends
-from fastapi import HTTPException, Request, WebSocket, status
+from fastapi import HTTPException, Request, Response, WebSocket, status
 from app.core.security import decode_access_token
 from app.db.session import SessionLocal
 
@@ -11,6 +11,16 @@ def get_db() -> Generator:
         yield db
     finally:
         db.close()
+
+PUBLIC_CACHE_CONTROL = "public, max-age=30, s-maxage=60, stale-while-revalidate=300"
+
+
+def public_cache(response: Response) -> None:
+    """Lets browsers and the Vercel edge reuse public, cookie-less list
+    responses briefly instead of hitting the API/DB on every page view.
+    Admin edits show up within ~1 minute."""
+    response.headers["Cache-Control"] = PUBLIC_CACHE_CONTROL
+
 
 def get_current_admin(request: Request) -> str:
     """

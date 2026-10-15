@@ -27,5 +27,6 @@ class Conversation(Base):
     messages: Mapped[list["ChatMessage"]] = relationship(
         back_populates="conversation",
         cascade="all, delete-orphan",
+        passive_deletes=True,
         order_by="ChatMessage.id",
     )

@@ -1,6 +1,6 @@
 import secrets
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy.orm import Session
 from app.api.deps import get_current_admin, get_db, verify_csrf
 from app.core.ip import get_client_ip
@@ -176,13 +176,15 @@ async def send_message(
 @limiter.limit(settings.RATE_LIMIT_ADMIN)
 def admin_list_conversations(
     request: Request,
-    limit: int = 50,
-    offset: int = 0,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     admin: str = Depends(get_current_admin),
 ):
     conversations = chat_service.list_conversations(db, limit=limit, offset=offset)
-    blocked_ips = chat_service.list_blocked_ip_addresses(db)
+    blocked_ips = chat_service.list_blocked_ip_addresses(
+        db, (conversation.ip_address for conversation in conversations)
+    )
     result = []
     for conversation in conversations:
         item = ConversationOut.model_validate(conversation)

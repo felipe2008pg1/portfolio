@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import secrets
+from typing import Iterable
 from sqlalchemy import select, or_, update
 from sqlalchemy.orm import Session
 from app.core.config import get_settings
@@ -27,8 +28,17 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def list_blocked_ip_addresses(db: Session) -> set[str]:
-    return set(db.execute(select(BlockedIp.ip_address)).scalars())
+def list_blocked_ip_addresses(db: Session, ip_addresses: Iterable[str | None]) -> set[str]:
+    """Returns which of `ip_addresses` are blocked, querying only those values
+    instead of loading the whole blocklist."""
+    candidates = {ip for ip in ip_addresses if ip}
+    if not candidates:
+        return set()
+    return set(
+        db.execute(
+            select(BlockedIp.ip_address).where(BlockedIp.ip_address.in_(candidates))
+        ).scalars()
+    )
 
 
 def is_ip_blocked(db: Session, ip_address: str | None) -> bool:

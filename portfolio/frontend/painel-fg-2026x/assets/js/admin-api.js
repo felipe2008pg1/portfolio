@@ -88,7 +88,7 @@ const adminApi = {
   updateProject: (id, payload) => adminRequest(`/api/projects/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   deleteProject: (id) => adminRequest(`/api/projects/${id}`, { method: "DELETE" }),
 
-  getSkills: () => adminRequest("/api/skills"),
+  getSkills: () => adminRequest("/api/skills/admin"),
   createSkill: (payload) => adminRequest("/api/skills", { method: "POST", body: JSON.stringify(payload) }),
   updateSkill: (id, payload) => adminRequest(`/api/skills/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   deleteSkill: (id) => adminRequest(`/api/skills/${id}`, { method: "DELETE" }),

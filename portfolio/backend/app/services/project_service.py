@@ -3,12 +3,15 @@ from sqlalchemy.orm import Session
 from app.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectUpdate
 
+# Hard cap so a runaway table can never be loaded into memory in one request.
+MAX_LIST_ROWS = 200
+
 def list_published_projects(db: Session) -> list[Project]:
-    stmt = select(Project).where(Project.is_published.is_(True)).order_by(Project.display_order, Project.id)
+    stmt = select(Project).where(Project.is_published.is_(True)).order_by(Project.display_order, Project.id).limit(MAX_LIST_ROWS)
     return list(db.scalars(stmt).all())
 
 def list_all_projects(db: Session) -> list[Project]:
-    stmt = select(Project).order_by(Project.display_order, Project.id)
+    stmt = select(Project).order_by(Project.display_order, Project.id).limit(MAX_LIST_ROWS)
     return list(db.scalars(stmt).all())
 
 def get_project(db: Session, project_id: int) -> Project | None:

@@ -88,26 +88,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Subtle 3D tilt on project cards
   if (window.matchMedia("(hover: hover)").matches) {
-    document.addEventListener("mousemove", (event) => {
-      const card = event.target.closest(".project-card");
-      document.querySelectorAll(".project-card").forEach((c) => {
-        if (c !== card) c.style.transform = "";
-      });
+    let activeCard = null;
+    let tiltFrame = null;
+    let lastMove = null;
+
+    const applyTilt = () => {
+      tiltFrame = null;
+      const { target, clientX, clientY } = lastMove;
+      const card = target.closest ? target.closest(".project-card") : null;
+
+      if (activeCard && activeCard !== card) activeCard.style.transform = "";
+      activeCard = card;
       if (!card) return;
 
       const rect = card.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      const rotateX = ((y - centerY) / centerY) * -4;
-      const rotateY = ((x - centerX) / centerX) * 4;
+      const rotateX = ((clientY - rect.top - centerY) / centerY) * -4;
+      const rotateY = ((clientX - rect.left - centerX) / centerX) * 4;
       card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
-    });
+    };
+
+    // At most one layout read + style write per frame, only on the hovered card.
+    document.addEventListener("mousemove", (event) => {
+      lastMove = { target: event.target, clientX: event.clientX, clientY: event.clientY };
+      if (tiltFrame === null) tiltFrame = requestAnimationFrame(applyTilt);
+    }, { passive: true });
 
     document.addEventListener("mouseleave", (event) => {
       if (event.target.classList && event.target.classList.contains("project-card")) {
         event.target.style.transform = "";
+        if (activeCard === event.target) activeCard = null;
       }
     }, true);
   }

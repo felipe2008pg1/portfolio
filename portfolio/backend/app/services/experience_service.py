@@ -3,11 +3,15 @@ from sqlalchemy.orm import Session
 from app.models.experience import Experience
 from app.schemas.experience import ExperienceCreate, ExperienceUpdate
 
+# Hard cap so a runaway table can never be loaded into memory in one request.
+MAX_LIST_ROWS = 200
+
 def list_published_experiences(db: Session) -> list[Experience]:
     statement = (
         select(Experience)
         .where(Experience.is_published.is_(True))
         .order_by(Experience.display_order, Experience.id)
+        .limit(MAX_LIST_ROWS)
     )
 
     return list(db.scalars(statement).all())
@@ -16,7 +20,7 @@ def list_all_experiences(db: Session) -> list[Experience]:
     statement = select(Experience).order_by(
         Experience.display_order,
         Experience.id,
-    )
+    ).limit(MAX_LIST_ROWS)
 
     return list(db.scalars(statement).all())
 

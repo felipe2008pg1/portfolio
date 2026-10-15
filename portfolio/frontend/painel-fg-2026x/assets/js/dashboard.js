@@ -769,8 +769,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadExperiences();
   updateMfaStat();
   loadChatConversations();
-  setInterval(loadChatConversations, 6000);
-  chatPollTimer = setInterval(pollActiveChatConversation, 5000);
+  // Skip background polling while the tab is hidden.
+  setInterval(() => { if (!document.hidden) loadChatConversations(); }, 6000);
+  chatPollTimer = setInterval(() => { if (!document.hidden) pollActiveChatConversation(); }, 5000);
 });
 
 // ===== CHAT =====

@@ -114,7 +114,7 @@
   }
 
   function poll(messagesEl) {
-    if (!hasConversation) return;
+    if (!hasConversation || document.hidden) return;
     chatRequest("/api/chat/conversations/me/messages?after_id=" + lastMessageId)
       .then(function (messages) {
         messages.forEach(function (message) {
