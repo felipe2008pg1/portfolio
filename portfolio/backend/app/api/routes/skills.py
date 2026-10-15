@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from app.api.deps import get_current_admin, get_db, verify_csrf
 from app.core.config import get_settings
+from app.core.limiter import limiter
 from app.schemas.skill import SkillCreate, SkillOut, SkillUpdate
 from app.services import skill_service
 

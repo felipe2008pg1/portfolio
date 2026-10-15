@@ -1,6 +1,6 @@
 from functools import lru_cache
 from typing import List
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -75,6 +75,24 @@ class Settings(BaseSettings):
                 "WHATSAPP_NUMBER must contain only digits (country code + area code + number)."
             )
         return v
+
+    @model_validator(mode="after")
+    def validate_production_secrets(self) -> "Settings":
+        if not self.is_production:
+            return self
+        problems: list[str] = []
+        pwd = self.ADMIN_PASSWORD
+        if len(pwd) < 12 or pwd.upper().startswith("CHANGE_ME") or "placeholder" in pwd.lower():
+            problems.append("ADMIN_PASSWORD is weak or a placeholder (min 12 chars)")
+        if self.ADMIN_USERNAME.upper().startswith("CHANGE_ME"):
+            problems.append("ADMIN_USERNAME is a placeholder")
+        if not self.cors_origins_list or "*" in self.cors_origins_list:
+            problems.append("CORS_ALLOWED_ORIGINS must be an explicit, non-wildcard list")
+        if self.DATABASE_URL.startswith("sqlite"):
+            problems.append("DATABASE_URL must not be SQLite in production")
+        if problems:
+            raise ValueError("Unsafe production configuration: " + "; ".join(problems))
+        return self
 
     @property
     def cors_origins_list(self) -> List[str]:
