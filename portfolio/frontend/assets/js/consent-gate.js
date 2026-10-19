@@ -1,7 +1,7 @@
 (function () {
   "use strict";
   var STORAGE_KEY = "terms_accepted_at_v1";
-  var CONSENT_DURATION_MS = 2 * 60 * 1000; // re-ask after this long — bump to e.g. 30 days in production
+  var CONSENT_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // re-ask after 30 days
 
   function hasValidConsent() {
     var storedAt = Number(localStorage.getItem(STORAGE_KEY));

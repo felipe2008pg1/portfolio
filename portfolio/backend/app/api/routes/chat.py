@@ -2,7 +2,13 @@ import secrets
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy.orm import Session
-from app.api.deps import get_current_admin, get_db, verify_csrf
+from app.api.deps import (
+    CHAT_CSRF_COOKIE_NAME as CHAT_CSRF_COOKIE,
+    get_current_admin,
+    get_db,
+    verify_chat_csrf,
+    verify_csrf,
+)
 from app.core.ip import get_client_ip
 from app.core.config import get_settings
 from app.core.limiter import limiter
@@ -24,37 +30,13 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 settings = get_settings()
 
 VISITOR_TOKEN_COOKIE = "visitor_token"
-CHAT_CSRF_COOKIE = "chat_csrf_token"
-CHAT_CSRF_HEADER = "X-Chat-CSRF-Token"
 
 
-def _set_visitor_cookies(response: Response, raw_token: str) -> None:
-    # httpOnly: an XSS elsewhere on the site can't read/exfiltrate this —
-    # it's the actual bearer credential for the anonymous chat session.
+def _set_cookie(response: Response, key: str, value: str, *, httponly: bool) -> None:
     response.set_cookie(
-        key=VISITOR_TOKEN_COOKIE,
-        value=raw_token,
-        httponly=True,
-        secure=settings.is_production,
-        samesite="none" if settings.is_production else "lax",
-        max_age=60 * 60 * 24 * 30,
-        path="/api/chat",
-    )
-    # SameSite=None (required cross-origin, frontend/backend live on
-    # different domains) means the browser attaches visitor_token even on
-    # cross-site requests — a forged <form>/fetch from another origin can
-    # trigger a POST here. This second cookie is the CSRF compensating
-    # control (double-submit): non-httpOnly so it CAN be handed to the
-    # widget (via GET /csrf-token, since cross-origin JS can't read a
-    # cookie set by a different domain directly), but a cross-site
-    # attacker page can never read it, so it can't be echoed back in the
-    # X-Chat-CSRF-Token header. Kept separate (different name/path) from
-    # the admin panel's csrf_token cookie so the two never collide in a
-    # browser that has both an admin and a visitor session open.
-    response.set_cookie(
-        key=CHAT_CSRF_COOKIE,
-        value=secrets.token_urlsafe(32),
-        httponly=False,
+        key=key,
+        value=value,
+        httponly=httponly,
         secure=settings.is_production,
         samesite="none" if settings.is_production else "lax",
         max_age=60 * 60 * 24 * 30,
@@ -62,27 +44,17 @@ def _set_visitor_cookies(response: Response, raw_token: str) -> None:
     )
 
 
-def verify_chat_csrf(request: Request) -> None:
-    cookie_token = request.cookies.get(CHAT_CSRF_COOKIE)
-    header_token = request.headers.get(CHAT_CSRF_HEADER)
-
-    if not cookie_token or not header_token or not secrets.compare_digest(cookie_token, header_token):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Missing or invalid CSRF token.",
-        )
+def _set_visitor_cookie(response: Response, raw_token: str) -> None:
+    # httpOnly: it is the bearer credential of the anonymous chat session, so
+    # an XSS elsewhere on the site must not be able to read it.
+    _set_cookie(response, VISITOR_TOKEN_COOKIE, raw_token, httponly=True)
 
 
 def _set_chat_csrf_cookie(response: Response, raw_token: str) -> None:
-    response.set_cookie(
-        key=CHAT_CSRF_COOKIE,
-        value=raw_token,
-        httponly=False,
-        secure=settings.is_production,
-        samesite="none" if settings.is_production else "lax",
-        max_age=60 * 60 * 24 * 30,
-        path="/api/chat",
-    )
+    # Double-submit CSRF companion to visitor_token (SameSite=None in
+    # production). Not httpOnly on purpose; see deps.verify_chat_csrf. Kept
+    # separate (name/path) from the admin csrf_token cookie.
+    _set_cookie(response, CHAT_CSRF_COOKIE, raw_token, httponly=False)
 
 def _require_conversation_by_token(db: Session, token: str | None):
     if not token:
@@ -113,7 +85,7 @@ async def start_conversation(request: Request, response: Response, payload: Conv
     except chat_service.IpBlockedError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This conversation is no longer open.")
     security_logger.info("chat_conversation_created id=%s ip=%s", conversation.id, client_ip)
-    _set_visitor_cookies(response, raw_token)
+    _set_visitor_cookie(response, raw_token)
     csrf_token = secrets.token_urlsafe(32)
     _set_chat_csrf_cookie(response, csrf_token)
     return ConversationCreateResponse(conversation_status=conversation.status, csrf_token=csrf_token)

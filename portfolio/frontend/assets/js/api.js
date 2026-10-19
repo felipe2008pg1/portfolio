@@ -30,6 +30,16 @@
 }
 
 
+// Shared by the render-*.js scripts (loaded after this one).
+function isSafeHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (_) {
+    return false;
+  }
+}
+
 const api = {
   getSkills: () =>
     apiRequest("/api/skills"),

@@ -1,7 +1,11 @@
 import secrets
 from typing import Generator
 from fastapi import Depends
+<<<<<<< HEAD
 from fastapi import HTTPException, Request, Response, WebSocket, status
+=======
+from fastapi import HTTPException, Request, status, Response
+>>>>>>> 0e2b282 (Mainstance 2/2 completed.)
 from app.core.security import decode_access_token
 from app.db.session import SessionLocal
 
@@ -79,16 +83,3 @@ def verify_chat_csrf(request: Request) -> None:
     can trigger the cookie to be sent but cannot read its value.
     """
     _verify_double_submit(request, CHAT_CSRF_COOKIE_NAME, CHAT_CSRF_HEADER_NAME)
-
-
-def get_current_admin_ws(websocket: WebSocket) -> str | None:
-    """Same cookie-based check as get_current_admin, adapted for the
-    WebSocket handshake (no Request object available). Returns None
-    instead of raising — caller is responsible for closing the socket.
-    """
-    token = websocket.cookies.get("access_token")
-
-    if not token:
-        return None
-
-    return decode_access_token(token)

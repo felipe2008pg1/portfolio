@@ -1,6 +1,10 @@
 from functools import lru_cache
 from typing import List
+<<<<<<< HEAD
 from pydantic import Field, field_validator, model_validator
+=======
+from pydantic import field_validator
+>>>>>>> 0e2b282 (Mainstance 2/2 completed.)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):

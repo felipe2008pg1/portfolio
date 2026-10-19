@@ -31,15 +31,6 @@ function buildExperienceEmptyState(text) {
   return wrap;
 }
 
-function isSafeExperienceUrl(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch (_) {
-    return false;
-  }
-}
-
 function buildExperienceItem(experience) {
   const item = document.createElement("div");
   item.className = "experience-item";
@@ -47,7 +38,7 @@ function buildExperienceItem(experience) {
   const visual = document.createElement("div");
   visual.className = "experience-item-visual";
 
-  if (experience.logo_url && isSafeExperienceUrl(experience.logo_url)) {
+  if (experience.logo_url && isSafeHttpUrl(experience.logo_url)) {
     const logo = document.createElement("img");
     logo.className = "experience-item-logo";
     logo.src = experience.logo_url;
@@ -100,7 +91,7 @@ function buildExperienceItem(experience) {
   body.appendChild(role);
   body.appendChild(desc);
 
-  if (experience.company_url && isSafeExperienceUrl(experience.company_url)) {
+  if (experience.company_url && isSafeHttpUrl(experience.company_url)) {
     const link = document.createElement("a");
     link.className = "btn btn-outline btn-sm experience-item-link";
     link.href = experience.company_url;

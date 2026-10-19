@@ -4,10 +4,11 @@ from typing import Iterable
 from sqlalchemy import select, or_, update
 from sqlalchemy.orm import Session
 from app.core.config import get_settings
-from app.core.security import hash_opaque_token, ensure_aware_utc
+from app.core.security import hash_opaque_token
 from app.models.conversation import Conversation
 from app.models.chat_message import ChatMessage
 from app.models.blocked_ip import BlockedIp
+from typing import Iterable
 
 settings = get_settings()
 
@@ -141,12 +142,7 @@ def _raise_add_visitor_message_error(db: Session, conversation_id: int) -> None:
     if fresh.visitor_message_count >= settings.CHAT_MAX_MESSAGES_PER_CONVERSATION:
         raise ConversationClosedError()
 
-    now = _now()
-    last = ensure_aware_utc(fresh.last_visitor_message_at)
-    cooldown = timedelta(seconds=settings.CHAT_MESSAGE_COOLDOWN_SECONDS)
-    if last is not None and (now - last) < cooldown:
-        raise CooldownError()
-
+    # The only remaining cause of a failed claim is the per-visitor cooldown.
     raise CooldownError()
 
 

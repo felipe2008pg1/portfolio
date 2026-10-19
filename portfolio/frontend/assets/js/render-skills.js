@@ -58,12 +58,12 @@ function renderSkillsTable() {
   }
 
   if (cachedSkills === "error") {
-    container.appendChild(buildEmptyState(i18n.t("skills.error")));
+    container.appendChild(buildSkillsEmptyState(i18n.t("skills.error")));
     return;
   }
 
   if (cachedSkills.length === 0) {
-    container.appendChild(buildEmptyState(i18n.t("skills.empty")));
+    container.appendChild(buildSkillsEmptyState(i18n.t("skills.empty")));
     return;
   }
 
