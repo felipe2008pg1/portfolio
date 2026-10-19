@@ -1,11 +1,7 @@
 import secrets
 from typing import Generator
 from fastapi import Depends
-<<<<<<< HEAD
-from fastapi import HTTPException, Request, Response, WebSocket, status
-=======
-from fastapi import HTTPException, Request, status, Response
->>>>>>> 0e2b282 (Mainstance 2/2 completed.)
+from fastapi import HTTPException, Request, Response, status
 from app.core.security import decode_access_token
 from app.db.session import SessionLocal
 

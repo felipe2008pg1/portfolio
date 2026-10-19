@@ -25,7 +25,7 @@ function buildSkillsSkeleton() {
   return wrap;
 }
 
-function buildEmptyState(text) {
+function buildSkillsEmptyState(text) {
   const wrap = document.createElement("div");
   wrap.className = "empty-state";
 
