@@ -79,11 +79,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const hero = document.querySelector(".hero");
   const crosshair = document.getElementById("heroCrosshair");
   if (hero && crosshair && window.matchMedia("(hover: hover)").matches) {
+    let heroRect = null;
+    const invalidateHeroRect = () => { heroRect = null; };
+    window.addEventListener("scroll", invalidateHeroRect, { passive: true });
+    window.addEventListener("resize", invalidateHeroRect, { passive: true });
+
     hero.addEventListener("mousemove", (event) => {
-      const rect = hero.getBoundingClientRect();
-      crosshair.style.left = `${event.clientX - rect.left - 12}px`;
-      crosshair.style.top = `${event.clientY - rect.top - 12}px`;
-    });
+      if (heroRect === null) heroRect = hero.getBoundingClientRect();
+      crosshair.style.transform =
+        `translate3d(${event.clientX - heroRect.left - 12}px, ${event.clientY - heroRect.top - 12}px, 0)`;
+    }, { passive: true });
   }
 
   // Subtle 3D tilt on project cards
@@ -139,25 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   })();
-
-  // Custom cursor (desktop only)
-  const cursorDot = document.getElementById("cursorDot");
-  if (cursorDot && window.matchMedia("(hover: hover)").matches) {
-    document.addEventListener("mousemove", (event) => {
-      cursorDot.style.left = `${event.clientX}px`;
-      cursorDot.style.top = `${event.clientY}px`;
-      cursorDot.classList.add("is-active");
-    });
-
-    document.addEventListener("mouseleave", () => {
-      cursorDot.classList.remove("is-active");
-    });
-
-    const interactiveSelector = "a, button, input, textarea, [role='button']";
-    document.addEventListener("mouseover", (event) => {
-      cursorDot.classList.toggle("is-pointer", Boolean(event.target.closest(interactiveSelector)));
-    });
-  }
 
   // Typing effect on the system-panel values (runs once on load)
   const panelValues = document.querySelectorAll(".system-panel-value");

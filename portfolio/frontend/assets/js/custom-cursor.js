@@ -1,27 +1,50 @@
 document.addEventListener("DOMContentLoaded", () => {
   const cursorDot = document.getElementById("cursorDot");
 
-  if (!cursorDot || !window.matchMedia("(hover: hover)").matches) {
+  if (
+    !cursorDot ||
+    !window.matchMedia("(hover: hover)").matches ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
     return;
   }
-
-  document.addEventListener("mousemove", (event) => {
-    cursorDot.style.left = `${event.clientX}px`;
-    cursorDot.style.top = `${event.clientY}px`;
-    cursorDot.classList.add("is-active");
-  });
-
-  document.addEventListener("mouseleave", () => {
-    cursorDot.classList.remove("is-active");
-  });
 
   const interactiveSelector =
     "a, button, input, textarea, select, [role='button']";
 
-  document.addEventListener("mouseover", (event) => {
-    cursorDot.classList.toggle(
-      "is-pointer",
-      Boolean(event.target.closest(interactiveSelector))
-    );
+    let isActive = false;
+    let isPointer = false;
+
+  document.addEventListener(
+    "mousemove",
+    (event) => {
+      cursorDot.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
+
+      if (!isActive) {
+        isActive = true;
+        cursorDot.classList.add("is-active");
+      }
+    },
+    { passive: true }
+  );
+
+  document.documentElement.addEventListener("mouseleave", () => {
+    isActive = false;
+    cursorDot.classList.remove("is-active");
   });
+
+  document.addEventListener(
+    "mouseover",
+    (event) => {
+      const next = Boolean(
+        event.target instanceof Element &&
+          event.target.closest(interactiveSelector)
+      );
+      if (next !== isPointer) {
+        isPointer = next;
+        cursorDot.classList.toggle("is-pointer", next);
+      }
+    },
+    { passive: true }
+  );
 });

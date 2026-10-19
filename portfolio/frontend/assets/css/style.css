@@ -1602,6 +1602,9 @@ h3 {
 /* ===== Crosshair that follows the mouse on the hero ===== */
 .hero-crosshair {
   position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
   width: 24px;
   height: 24px;
   pointer-events: none;
@@ -2054,65 +2057,36 @@ h3 {
 }
 
 /* ===== Custom cursor (desktop only) ===== */
-/* Hides the native OS cursor only when the custom cursor-dot is actually
-   active (pointer device + no reduced-motion preference) — mirrors the JS
-   condition in main.js (`hover: hover`) and the .cursor-dot display rule
-   below, so touch devices / reduced-motion users always keep a real cursor. */
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-
-  html,
-  *,
-  *::before,
-  *::after {
-    cursor: none !important;
+/* Native CSS cursor: drawn by the OS, no JS, zero input latency. Applied only
+   for pointer devices without a reduced-motion preference. */
+   :root {
+    --cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%23FF6B35' stroke-opacity='.5'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23FF6B35'/%3E%3C/svg%3E") 16 16, auto;
+    --cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%23FF6B35' stroke-opacity='.9'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23FF6B35'/%3E%3C/svg%3E") 16 16, pointer;
   }
-}
-
-.cursor-dot {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  pointer-events: none;
-  z-index: 1001;
-  opacity: 0;
-  transform: translate(-50%, -50%);
-  transition: opacity var(--transition-fast), transform 120ms ease-out;
-}
-
-.cursor-dot::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--color-accent);
-  border-radius: 50%;
-  opacity: 0.5;
-  transform: translate(-50%, -50%);
-  transition: width 150ms ease-out, height 150ms ease-out, opacity 150ms ease-out;
-}
-
-.cursor-dot.is-active {
-  opacity: 1;
-}
-
-.cursor-dot.is-pointer::after {
-  width: 40px;
-  height: 40px;
-  opacity: 0.9;
-}
-
-@media (hover: none),
-(prefers-reduced-motion: reduce) {
-  .cursor-dot {
-    display: none;
+  
+  [data-theme="dark"] {
+    --cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%23FF7A4A' stroke-opacity='.5'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23FF7A4A'/%3E%3C/svg%3E") 16 16, auto;
+    --cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='16' cy='16' r='15' fill='none' stroke='%23FF7A4A' stroke-opacity='.9'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23FF7A4A'/%3E%3C/svg%3E") 16 16, pointer;
   }
-}
+  
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    html,
+    * {
+      cursor: var(--cursor-default) !important;
+    }
+  
+    a,
+    a *,
+    button,
+    button *,
+    input,
+    textarea,
+    select,
+    [role="button"],
+    [role="button"] * {
+      cursor: var(--cursor-pointer) !important;
+    }
+  }
 
 /* ===== Typing effect caret on system-panel values ===== */
 .system-panel-value.is-typing::after {
@@ -2146,40 +2120,6 @@ body.fade-init.is-loaded {
 @media (prefers-reduced-motion: reduce) {
   body.fade-init.is-loaded {
     transition: none;
-  }
-}
-
-/* Custom cursor */
-.cursor-dot {
-  position: fixed;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  pointer-events: none;
-  z-index: 99999;
-  opacity: 0;
-  transform: translate(-50%, -50%);
-  transition:
-    width 0.15s ease,
-    height 0.15s ease,
-    opacity 0.15s ease,
-    transform 0.15s ease;
-}
-
-.cursor-dot.is-active {
-  opacity: 1;
-}
-
-.cursor-dot.is-pointer {
-  width: 14px;
-  height: 14px;
-}
-
-@media (hover: none),
-(pointer: coarse) {
-  .cursor-dot {
-    display: none;
   }
 }
 
