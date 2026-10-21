@@ -39,8 +39,6 @@
 
 ---
 
----
-
 ## 🛠️ Latest update — Hardening, performance & cleanup - 21/10/2026.
 
 > A full audit pass over the codebase: six parts, covering bug fixes, measurable performance gains, and dead-code removal. Benchmarks use the same workload before and after (300 conversations, 6,000 messages, 2,000 blocked IPs).
