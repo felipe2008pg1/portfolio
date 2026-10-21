@@ -39,6 +39,45 @@
 
 ---
 
+---
+
+## 🛠️ Latest update — Hardening, performance & cleanup - 21/10/2026.
+
+> A full audit pass over the codebase: six parts, covering bug fixes, measurable performance gains, and dead-code removal. Benchmarks use the same workload before and after (300 conversations, 6,000 messages, 2,000 blocked IPs).
+
+### 🐛 Bugs fixed
+
+| | |
+|---|---|
+| 🌐 | **Single, trusted client-IP resolver** — login, contact, and admin rate limits used an IP the client could forge via `X-Forwarded-For`, allowing limit bypass and fake IPs in logs. Now one limiter computes the IP using trusted proxies only, and `--forwarded-allow-ips='*'` was removed from the `Procfile`. |
+| 🔑 | **MFA flow** — a wrong code used to redirect back to login, so users never saw "invalid code". The error now shows on screen and the MFA flow is preserved. |
+| 🧾 | **Chat CSRF token** — the chat did not return `csrf_token` when starting a conversation, so the widget used a stale token or requested a new one. The token is now returned in the response. |
+| 🍪 | **Duplicate cookies** — chat sent 3 `Set-Cookie` headers on start, with CSRF set twice. Now exactly one `Set-Cookie` per cookie. |
+| 🎨 | **Skills empty state** — showed the projects icon (same-named function defined in two files). Each section now uses its own icon. |
+| 🔗 | **URL validator** — a weaker copy in projects overrode the shared one. Now only the shared validator is used. |
+
+### ⚡ Performance
+
+| Metric | Before | After |
+|---|---|---|
+| `GET /admin/conversations` (dashboard, every 6 s) | 6.4–8.6 ms | 4.0–4.8 ms **(−40%)** |
+| Delete conversation | 4 queries, 5.1–5.9 ms | 2 queries, 2.8–3.3 ms **(−45%)** |
+| Memory at startup | 86.0 MB | 81.5 MB |
+| Project images (3 projects) | 1,013 KB | 115 KB **(−89%)** |
+| Public JS | 83.2 KB | 79.1 KB |
+| Polling with tab hidden (dashboard / chat) | 22 / 15 per minute | **0** |
+| API calls on reload within 30 s | 3 | **0** (browser cache) |
+| Unbounded listings | unlimited | max 200 rows |
+| Possible connections to Neon | up to 15 | up to 5 |
+
+> Public endpoints didn't get faster server-side (~3 ms before and after) — the gain comes from caching.
+
+### 🧹 Cleanup
+
+- 🗑️ **Removed:** `models/chat.py` (broken copy of the schemas), 5 one-off migration scripts already covered by Alembic, `get_current_admin_ws`, `ChatCsrfTokenResponse`, the duplicated `verify_chat_csrf` function, 216 dead lines from `api.js`, and unused imports.
+
+---
+
 ## 🧭 What this is
 
 This repository is the engine behind my personal portfolio — and it's built to do more than sit still and look nice. It's a small, real, production-grade **product**:
